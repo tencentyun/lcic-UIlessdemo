@@ -1,95 +1,110 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+import Image from "next/image";
+import styles from "./page.module.css";
+import { Avatar } from "../../components/video-call/avatar";
+import { Board } from "../../components/whiteboard/board";
+import { useEffect, useState } from "react";
+import Script from "next/script";
+import { AppHeader } from "./components/header/header";
+// import { AppHeader } from "./components/header/header";
+
+// type
+// :
+// "main"
+// url
+// :
+// "webrtc://29734.liveplay.myqcloud.com/live/1400313729_326322678_tic_push_user_326322678_168497_main?txSecret=644ab9465ed91dd7f6cfe1a5fc35a1b7&txTime=654B9520"
+// user_id
+// :
+// "tic_push_user_326322678_168497"
+type MemberStream = {
+  type: string;
+  user_id: string;
+  url: string;
+};
 
 export default function Home() {
+  let [members, setMembers] = useState<MemberStream[] | null>(null);
+  let [myId, setMyId] = useState<string | null>(null);
+  let [isPublished, setIsPublished] = useState<boolean>(false);
+  let [trtcClient, setTrtcClient] = useState<any>(null);
+  let whenReady = (tcic: any) => {
+    console.log("tcic ready", tcic);
+    let teachers = tcic.getMemberByRoleType(1);
+    setMyId(tcic.userId);
+    console.log("teachers", teachers);
+    setMembers(teachers);
+    if (teachers && teachers.length > 0) {
+      let teacher = teachers[0];
+      let trtcClient = new TCIC_SPY.createTrtcClient(tcic);
+      setTrtcClient(trtcClient);
+      trtcClient.enterRoom().then(() => {
+        trtcClient.wantedView({
+          view: `${teacher.user_id}`,
+          userId: teacher.user_id,
+        });
+        trtcClient.localPreview({
+          view: `${tcic.userId}`,
+        });
+      });
+    }
+    console.log("tcic:", tcic);
+  };
+  let publishHandler = () => {
+    setIsPublished(true);
+    if (trtcClient) {
+      trtcClient.localPublish();
+    }
+  };
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <>
+      <AppHeader whenReady={whenReady}></AppHeader>
+      <main className={`flex-shrink-0 ${styles.main}`}>
+        <div className="container">
+          {/* <div>
+            <Avatar></Avatar>
+          </div> */}
+
+          <div className="row">
+            <div className="col">
+              {members ? (
+                members.map((member) => (
+                  <div
+                    key={member.user_id}
+                    className={styles["stream-view"]}
+                    id={`${member.user_id}`}
+                  ></div>
+                ))
+              ) : (
+                <div>请加入课堂</div>
+              )}
+            </div>
+
+            <div className="col">
+              {myId ? (
+                <>
+                  <div id={myId}></div>
+                  {!isPublished && (
+                    <button
+                      type="button"
+                      onClick={publishHandler}
+                      className="btn btn-primary"
+                    >
+                      推流
+                    </button>
+                  )}
+                </>
+              ) : (
+                <></>
+              )}
+            </div>
+
+            {/* <div>
+            <Board></Board>
+          </div> */}
+          </div>
         </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+      </main>
+    </>
+  );
 }
