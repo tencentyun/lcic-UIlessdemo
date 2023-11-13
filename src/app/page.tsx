@@ -28,6 +28,10 @@ export default function Home() {
   let [myId, setMyId] = useState<string | null>(null);
   let [isPublished, setIsPublished] = useState<boolean>(false);
   let [trtcClient, setTrtcClient] = useState<any>(null);
+  let [mediaToggle, setMediaToggle] = useState({
+    video: true,
+    audio: true,
+  });
   let whenReady = (tcic: any) => {
     console.log("tcic ready", tcic);
     let teachers = tcic.getMemberByRoleType(1);
@@ -54,6 +58,48 @@ export default function Home() {
     setIsPublished(true);
     if (trtcClient) {
       trtcClient.localPublish();
+    }
+  };
+  let togglePublishMedia = (opts: { multimedia: ("video" | "audio")[] }) => {
+    if (trtcClient) {
+      if (opts.multimedia.includes("video")) {
+        if (mediaToggle.video) {
+          trtcClient.pausePublish({
+            target: opts.multimedia,
+          });
+          setMediaToggle({
+            ...mediaToggle,
+            video: false,
+          });
+        } else {
+          trtcClient.resumePublish({
+            target: opts.multimedia,
+          });
+          setMediaToggle({
+            ...mediaToggle,
+            video: true,
+          });
+        }
+      }
+      if (opts.multimedia.includes("audio")) {
+        if (mediaToggle.audio) {
+          trtcClient.pausePublish({
+            target: opts.multimedia,
+          });
+          setMediaToggle({
+            ...mediaToggle,
+            audio: false,
+          });
+        } else {
+          trtcClient.resumePublish({
+            target: opts.multimedia,
+          });
+          setMediaToggle({
+            ...mediaToggle,
+            audio: true,
+          });
+        }
+      }
     }
   };
   return (
@@ -84,7 +130,7 @@ export default function Home() {
               {myId ? (
                 <>
                   <div id={myId}></div>
-                  {!isPublished && (
+                  {!isPublished ? (
                     <button
                       type="button"
                       onClick={publishHandler}
@@ -92,6 +138,31 @@ export default function Home() {
                     >
                       推流
                     </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          togglePublishMedia({
+                            multimedia: ["audio"],
+                          });
+                        }}
+                        className="btn btn-primary"
+                      >
+                        {"关闭音频"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          togglePublishMedia({
+                            multimedia: ["video"],
+                          })
+                        }
+                        className="btn btn-primary"
+                      >
+                        关闭视频
+                      </button>
+                    </>
                   )}
                 </>
               ) : (
