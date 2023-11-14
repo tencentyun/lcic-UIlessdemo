@@ -2,7 +2,7 @@
 import styles from "./page.module.css";
 import { useEffect, useState } from "react";
 import Script from "next/script";
-import { AppHeader } from "./class/components/header/header";
+import { AppHeader } from "./components/header/header";
 // import { AppHeader } from "./components/header/header";
 
 // type
@@ -115,26 +115,87 @@ export default function Home() {
   };
   return (
     <>
-      {/* <AppHeader whenReady={whenReady}></AppHeader> */}
+      <AppHeader whenReady={whenReady}></AppHeader>
       <main className={`${styles.main} `}>
         <div className="container-lg">
+          {/* <div>
+            <Avatar></Avatar>
+          </div> */}
+
           <div className="row">
             <div className="col">
-              <h1 className={`${styles["demo-title"]}`}>LCIC-demo</h1>
-              <div className={`${styles["inputWrap"]}`}>
-                <input
-                  className="form-control me-2"
-                  type="search"
-                  placeholder="输入课堂号"
-                  aria-label="Search"
-                />
-                <button
-                  className={`btn btn-lg btn-primary ${styles["login-btn"]}`}
-                >
-                  进入
-                </button>
-              </div>
+              {members ? (
+                members.map((member) => {
+                  return (
+                    <div className={styles["stream-wrap"]} key={member.user_id}>
+                      {streamType.map((type) => {
+                        console.log(`${member.user_id}_${type}`);
+                        return (
+                          <div
+                            key={`${member.user_id}_${type}`}
+                            className={styles["stream-view"]}
+                            id={`${member.user_id}_${type}`}
+                          ></div>
+                        );
+                      })}
+                    </div>
+                  );
+                })
+              ) : (
+                <div>请加入课堂</div>
+              )}
             </div>
+
+            {/**
+             * 本地流
+             */
+            /* <div className="col">
+              {myId ? (
+                <>
+                  <div id={myId}></div>
+                  {!isPublished ? (
+                    <button
+                      type="button"
+                      onClick={publishHandler}
+                      className="btn btn-primary"
+                    >
+                      推流
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          togglePublishMedia({
+                            multimedia: ["audio"],
+                          });
+                        }}
+                        className="btn btn-primary"
+                      >
+                        {mediaToggle.audio ? "关闭音频" : "开启音频"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          togglePublishMedia({
+                            multimedia: ["video"],
+                          })
+                        }
+                        className="btn btn-primary"
+                      >
+                        {mediaToggle.video ? "关闭视频" : "开启视频"}
+                      </button>
+                    </>
+                  )}
+                </>
+              ) : (
+                <></>
+              )}
+            </div> */}
+
+            {/* <div>
+            <Board></Board>
+          </div> */}
           </div>
         </div>
       </main>
