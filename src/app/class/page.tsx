@@ -20,12 +20,25 @@ type MemberStream = {
   url: string;
 };
 
-export default function Home() {
+/**
+ *
+ * @param Props
+ *  searchParams从查询参数中获取
+ * @returns
+ */
+export default function Home(Props: {
+  params: any;
+  searchParams: {
+    cid: string;
+    token: string;
+    uid: string;
+  };
+}) {
   let [members, setMembers] = useState<MemberStream[] | null>(null);
-  let [myId, setMyId] = useState<string | null>(null);
-  let [enterRoomClass, setEnterRoomClass] = useState<string | null>(null);
+  let [start, setStart] = useState(false);
   let [isPublished, setIsPublished] = useState<boolean>(false);
   let [trtcClient, setTrtcClient] = useState<any>(null);
+
   let [mediaToggle, setMediaToggle] = useState({
     video: true,
     audio: true,
@@ -36,33 +49,37 @@ export default function Home() {
    * main为主流 ， auxiliary为辅流,电商场景，没有辅流
    */
   const streamType = ["main"];
+  let videoStart = () => {
+    if (trtcClient) {
+      setStart(true);
+      if (members && members.length > 0) {
+        let teacher = members[0];
+        trtcClient.enterRoom().then(() => {
+          streamType.forEach((type) => {
+            trtcClient.wantedView({
+              view: `${teacher.user_id}_${type}`,
+              type,
+              userId: teacher.user_id,
+            });
+          });
+
+          /**
+           * 本地预览
+           */
+          // trtcClient.localPreview({
+          //   view: `${tcic.userId}`,
+          // });
+        });
+      }
+    }
+  };
   let whenReady = (tcic: any) => {
     console.log("tcic ready", tcic);
     let teachers = tcic.getMemberByRoleType(1);
-    setMyId(tcic.userId);
-    console.log("teachers", teachers);
+    let trtcClient = new TCIC_SPY.createTrtcClient(tcic);
+    setTrtcClient(trtcClient);
+    // console.log("teachers", teachers);
     setMembers(teachers);
-    if (teachers && teachers.length > 0) {
-      let teacher = teachers[0];
-      let trtcClient = new TCIC_SPY.createTrtcClient(tcic);
-      setTrtcClient(trtcClient);
-      trtcClient.enterRoom().then(() => {
-        streamType.forEach((type) => {
-          trtcClient.wantedView({
-            view: `${teacher.user_id}_${type}`,
-            type,
-            userId: teacher.user_id,
-          });
-        });
-
-        /**
-         * 本地预览
-         */
-        // trtcClient.localPreview({
-        //   view: `${tcic.userId}`,
-        // });
-      });
-    }
     console.log("tcic:", tcic);
   };
   let publishHandler = () => {
@@ -115,7 +132,12 @@ export default function Home() {
   };
   return (
     <>
-      <AppHeader whenReady={whenReady}></AppHeader>
+      <AppHeader
+        whenReady={whenReady}
+        cid={Props.searchParams.cid}
+        uid={Props.searchParams.uid}
+        token={Props.searchParams.token}
+      ></AppHeader>
       <main className={`${styles.main} `}>
         <div className="container-lg">
           {/* <div>
@@ -124,7 +146,7 @@ export default function Home() {
 
           <div className="row">
             <div className="col">
-              {members ? (
+              {start && members ? (
                 members.map((member) => {
                   return (
                     <div className={styles["stream-wrap"]} key={member.user_id}>
@@ -142,7 +164,23 @@ export default function Home() {
                   );
                 })
               ) : (
-                <div>请加入课堂</div>
+                <div className={styles["stream-wrap"]}>
+                  {start ? (
+                    <div
+                      className="spinner-grow text-primary"
+                      style={{ width: "3rem", height: "3rem" }}
+                      role="status"
+                    >
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  ) : (
+                    <div>
+                      <button className="btn btn-primary" onClick={videoStart}>
+                        开始
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
