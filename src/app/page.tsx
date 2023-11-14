@@ -3,6 +3,8 @@ import styles from "./page.module.css";
 import { useEffect, useState } from "react";
 import Script from "next/script";
 import { AppHeader } from "./class/components/header/header";
+import { Demo } from "./demo";
+
 // import { AppHeader } from "./components/header/header";
 
 // type
@@ -21,6 +23,7 @@ type MemberStream = {
 };
 
 export default function Home() {
+  let [classId, setClassId] = useState("");
   let [members, setMembers] = useState<MemberStream[] | null>(null);
   let [myId, setMyId] = useState<string | null>(null);
   let [enterRoomClass, setEnterRoomClass] = useState<string | null>(null);
@@ -113,6 +116,20 @@ export default function Home() {
       }
     }
   };
+  let changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!/^\d+$/.test(e.target.value)) {
+      setClassId("");
+      return;
+    }
+    setClassId(e.target.value);
+  };
+
+  let enterRoomHandler = async () => {
+    let demoInfo = new Demo();
+    let userInfo = await demoInfo.developInit(classId);
+    console.log("enter room", userInfo);
+    window.location.href = `${window.location.href}/class?cid=${classId}&uid=${userInfo.UserId}&token=${userInfo.Token}`;
+  };
   return (
     <>
       {/* <AppHeader whenReady={whenReady}></AppHeader> */}
@@ -127,9 +144,12 @@ export default function Home() {
                   type="search"
                   placeholder="输入课堂号"
                   aria-label="Search"
+                  value={classId}
+                  onChange={changeHandler}
                 />
                 <button
                   className={`btn btn-lg btn-primary ${styles["login-btn"]}`}
+                  onClick={enterRoomHandler}
                 >
                   进入
                 </button>
