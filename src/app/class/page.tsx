@@ -3,6 +3,9 @@ import styles from "./page.module.css";
 import { useEffect, useState } from "react";
 import Script from "next/script";
 import { AppHeader } from "./components/header/header";
+import { Loading } from "./components/loading/loading";
+import { Footer } from "./components/footer/footer";
+import { MemberList } from "./components/member-list/member-list";
 // import { AppHeader } from "./components/header/header";
 
 // type
@@ -38,7 +41,7 @@ export default function Home(Props: {
   let [start, setStart] = useState(false);
   let [isPublished, setIsPublished] = useState<boolean>(false);
   let [trtcClient, setTrtcClient] = useState<any>(null);
-
+  let [memberListVisible, setMemberListVisible] = useState<boolean>(false);
   let [mediaToggle, setMediaToggle] = useState({
     video: true,
     audio: true,
@@ -137,6 +140,11 @@ export default function Home(Props: {
         cid={Props.searchParams.cid}
         uid={Props.searchParams.uid}
         token={Props.searchParams.token}
+        clickHandler={{
+          memberCounter: () => {
+            setMemberListVisible(true);
+          },
+        }}
       ></AppHeader>
       <main className={`${styles.main} `}>
         <div className="container-lg">
@@ -166,13 +174,7 @@ export default function Home(Props: {
               ) : (
                 <div className={styles["stream-wrap"]}>
                   {start ? (
-                    <div
-                      className="spinner-grow text-primary"
-                      style={{ width: "3rem", height: "3rem" }}
-                      role="status"
-                    >
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
+                    <Loading></Loading>
                   ) : (
                     <div>
                       <button className="btn btn-primary" onClick={videoStart}>
@@ -236,6 +238,13 @@ export default function Home(Props: {
           </div> */}
           </div>
         </div>
+        <MemberList
+          visible={memberListVisible}
+          onHide={() => {
+            setMemberListVisible(false);
+          }}
+        ></MemberList>
+        <Footer></Footer>
       </main>
     </>
   );

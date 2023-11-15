@@ -1,7 +1,9 @@
 "use client";
 import Script from "next/script";
 import cssModule from "./style.module.css";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { Loading } from "../loading/loading";
+import { BootContext } from "../../../../../contexts/boot.context";
 
 // type
 // :
@@ -37,11 +39,15 @@ export function AppHeader(Props: {
   uid: string;
   token: string;
   cid: string;
+  clickHandler?: {
+    quit?: () => void;
+    memberCounter?: () => void;
+  };
 }) {
-  let [logining, setLoginging] = useState(false);
+  let { dispatch } = useContext(BootContext);
+  let [tcicInfo, setTcicInfo] = useState<any>(null);
   let [loginUser, setLoginUser] = useState<any>(null);
   let tcicScriptLoaded = async () => {
-    setLoginging(true);
     let global = window as any;
     console.log("useEffect TCIC", global.TCIC_SPY);
     let tcic: any = await initTcic({
@@ -49,8 +55,14 @@ export function AppHeader(Props: {
       classId: parseInt(Props.cid, 10),
       token: Props.token,
     });
+    dispatch({
+      type: "setTcic",
+      arg: tcic,
+    });
 
     setLoginUser(tcic.myInfo());
+    console.log("tcic:", tcic);
+    setTcicInfo(tcic);
     Props.whenReady && Props.whenReady(tcic);
   };
 
@@ -70,6 +82,8 @@ export function AppHeader(Props: {
     });
   };
 
+  let quitHandler = () => {};
+
   return (
     <header>
       <Script
@@ -78,9 +92,33 @@ export function AppHeader(Props: {
       ></Script>
       <nav className="navbar navbar-expand-md navbar-dark fixed-top">
         <div className="container-fluid">
-          <a className="navbar-brand" href="#">
-            {loginUser ? loginUser.detail.user_name : "游客"}
-          </a>
+          {loginUser ? (
+            <>
+              <a className={`navbar-brand ${cssModule["user-name"]}`} href="#">
+                {loginUser.detail.user_name}
+              </a>
+              <div>
+                <span
+                  className={cssModule["member-counter"]}
+                  onClick={() => {
+                    Props.clickHandler?.memberCounter?.();
+                  }}
+                >
+                  {tcicInfo.memberInfo.online_number}人
+                </span>
+                <button
+                  className={`btn ${cssModule["quit-btn"]}`}
+                  onClick={() => {
+                    Props.clickHandler?.quit?.();
+                  }}
+                ></button>
+              </div>
+            </>
+          ) : (
+            <>
+              <Loading size={"small"}></Loading>
+            </>
+          )}
           {/* <button
             className="navbar-toggler collapsed"
             type="button"
