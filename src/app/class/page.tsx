@@ -1,7 +1,6 @@
 "use client";
 import styles from "./page.module.css";
 import { useEffect, useState } from "react";
-import Script from "next/script";
 import { AppHeader } from "./components/header/header";
 import { Loading } from "./components/loading/loading";
 import { Footer } from "./components/footer/footer";
@@ -9,6 +8,7 @@ import { MemberList } from "./components/member-list/member-list";
 import { InfoPanel } from "./components/info-panel/info-panel";
 import { Chat } from "./components/chat/chat";
 import { Settings } from "./components/settings/settings";
+import { useVisible } from "../../../hooks/visible";
 // import { AppHeader } from "./components/header/header";
 
 // type
@@ -44,8 +44,8 @@ export default function Home(Props: {
   let [start, setStart] = useState(false);
   let [isPublished, setIsPublished] = useState<boolean>(false);
   let [trtcClient, setTrtcClient] = useState<any>(null);
-  let [memberListVisible, setMemberListVisible] = useState<boolean>(false);
-  let [roomInfoVisible, setRoomInfoVisible] = useState<boolean>(false);
+  let [memberListVisible, memberListShow, memberListHide] = useVisible();
+  let [roomInfoVisible, roomInfoShow, roomInfoHide] = useVisible();
   let [mediaToggle, setMediaToggle] = useState({
     video: true,
     audio: true,
@@ -146,15 +146,15 @@ export default function Home(Props: {
         token={Props.searchParams.token}
         clickHandler={{
           memberCounter: () => {
-            setMemberListVisible(true);
+            memberListShow();
           },
           name: () => {
-            setRoomInfoVisible(true);
+            roomInfoShow();
           },
         }}
       ></AppHeader>
       <main className={`${styles.main} `}>
-        <div className={`container-lg ${styles["video-wrap"]}`}>
+        <div className={`container-lg`}>
           <div className="row">
             <div className="col">
               {start && members ? (
@@ -243,20 +243,15 @@ export default function Home(Props: {
         </div>
         <MemberList
           visible={memberListVisible}
-          onHide={() => {
-            setMemberListVisible(false);
-          }}
+          onHide={memberListHide}
         ></MemberList>
-        <InfoPanel
-          visible={roomInfoVisible}
-          onHide={() => setRoomInfoVisible(false)}
-        ></InfoPanel>
+        <InfoPanel visible={roomInfoVisible} onHide={roomInfoHide}></InfoPanel>
         <Footer>
           <div className="row">
-            <div className="col">
+            <div className="col-8">
               <Chat></Chat>
             </div>
-            <div className="col">
+            <div className="col-4">
               <Settings></Settings>
             </div>
           </div>

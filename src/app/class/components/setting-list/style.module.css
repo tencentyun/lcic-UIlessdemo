@@ -1,0 +1,18 @@
+.bg {
+  background-color: #1b1e26;
+  /* min-height: 70vh !important; */
+  border-radius: 20px 20px 0px 0px;
+}
+.header {
+  color: #fff;
+  width: 100%;
+  font-size: 12px;
+  color: #969fb4;
+}
+
+.title {
+  text-align: center;
+  font-size: 18px;
+  color: #dee7fc;
+  text-align: center;
+}

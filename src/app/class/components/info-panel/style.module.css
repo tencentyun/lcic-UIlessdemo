@@ -30,6 +30,7 @@
   width: 20px;
   height: 20px;
   background-image: url("/img/class/share.svg");
+  background-repeat: no-repeat;
 }
 
 .copy-btn {
