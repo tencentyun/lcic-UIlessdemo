@@ -25,9 +25,10 @@ export function SettingList(Props: {
         Props.onHide && Props.onHide(evt);
       }}
     >
-      <>
-        <div className={styles["foot-cover"]}></div>
-      </>
+      <ul className={`${styles["setting-list"]}`}>
+        <li>全员禁言</li>
+        <li>语言选择</li>
+      </ul>
     </MyOffCanvas>
   );
 }

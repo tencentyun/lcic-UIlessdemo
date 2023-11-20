@@ -12,7 +12,7 @@
   text-align: center;
 }
 .bg {
-  background-color: #1b1e26;
+  background-color: var(---offset-bg-dark);
   min-height: 70vh !important;
   border-radius: 20px 20px 0px 0px;
 }

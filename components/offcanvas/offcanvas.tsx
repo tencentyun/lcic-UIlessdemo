@@ -18,7 +18,7 @@ export function MyOffCanvas(Props: {
   let [direction, setDirection] = useState<"bottom" | "start">("start");
   useEffect(() => {
     setMounted(true);
-    console.log("globalBoot:", globalBoot, targetEL);
+    // console.log("globalBoot:", globalBoot, targetEL);
     let offcanvas = bootstrapItem;
     // /**
     //  *  初始化对象
