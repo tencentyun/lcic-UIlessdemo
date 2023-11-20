@@ -6,6 +6,9 @@ import { AppHeader } from "./components/header/header";
 import { Loading } from "./components/loading/loading";
 import { Footer } from "./components/footer/footer";
 import { MemberList } from "./components/member-list/member-list";
+import { InfoPanel } from "./components/info-panel/info-panel";
+import { Chat } from "./components/chat/chat";
+import { Settings } from "./components/settings/settings";
 // import { AppHeader } from "./components/header/header";
 
 // type
@@ -42,6 +45,7 @@ export default function Home(Props: {
   let [isPublished, setIsPublished] = useState<boolean>(false);
   let [trtcClient, setTrtcClient] = useState<any>(null);
   let [memberListVisible, setMemberListVisible] = useState<boolean>(false);
+  let [roomInfoVisible, setRoomInfoVisible] = useState<boolean>(false);
   let [mediaToggle, setMediaToggle] = useState({
     video: true,
     audio: true,
@@ -144,14 +148,13 @@ export default function Home(Props: {
           memberCounter: () => {
             setMemberListVisible(true);
           },
+          name: () => {
+            setRoomInfoVisible(true);
+          },
         }}
       ></AppHeader>
       <main className={`${styles.main} `}>
-        <div className="container-lg">
-          {/* <div>
-            <Avatar></Avatar>
-          </div> */}
-
+        <div className={`container-lg ${styles["video-wrap"]}`}>
           <div className="row">
             <div className="col">
               {start && members ? (
@@ -244,7 +247,20 @@ export default function Home(Props: {
             setMemberListVisible(false);
           }}
         ></MemberList>
-        <Footer></Footer>
+        <InfoPanel
+          visible={roomInfoVisible}
+          onHide={() => setRoomInfoVisible(false)}
+        ></InfoPanel>
+        <Footer>
+          <div className="row">
+            <div className="col">
+              <Chat></Chat>
+            </div>
+            <div className="col">
+              <Settings></Settings>
+            </div>
+          </div>
+        </Footer>
       </main>
     </>
   );

@@ -1,0 +1,66 @@
+.chat-input {
+  /* background-color: #000; */
+  border-radius: 20px;
+  /* padding: 10px; */
+  /* font-size: 14px; */
+  color: #fff;
+  border: 1px solid #4f586b;
+  border: 1px solid #4f586b;
+  background-color: #0000004d;
+  backdrop-filter: blur(5px);
+  padding-left: 40px;
+}
+
+.chat-input::-webkit-input-placeholder {
+  color: #d5e0f29a;
+}
+
+.chat-input::-moz-placeholder,
+.chat-input::-ms-input-placeholder,
+.chat-input::-ms-input-placeholder {
+  color: #d5e0f29a;
+}
+.chat-input:focus {
+  background-color: #0000004d;
+  backdrop-filter: blur(10px);
+  color: #fff;
+}
+.emoji {
+  background-image: url(/img/class/ic_emoji.svg);
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  z-index: 2;
+  left: 3px;
+  top: 4px;
+  background-size: contain;
+}
+
+.wrap {
+  position: relative;
+}
+
+.message-list {
+  position: absolute;
+  bottom: 50px;
+  max-height: 40vh;
+  overflow: scroll;
+  mask-type: alpha;
+  mask-image: linear-gradient(to bottom, transparent 5%, black 20%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 20%);
+  -ms-mask-image: linear-gradient(to bottom, transparent 5%, black 20%);
+  -o-mask-image: linear-gradient(to bottom, transparent 5%, black 20%);
+}
+
+.message {
+  background-color: #00000094;
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 15px;
+  color: #d5e0f2;
+  margin-top: 10px;
+}
+
+.message .nick {
+  color: #80bef6;
+}

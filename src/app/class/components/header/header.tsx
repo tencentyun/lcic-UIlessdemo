@@ -41,6 +41,7 @@ export function AppHeader(Props: {
   cid: string;
   clickHandler?: {
     quit?: () => void;
+    name?: () => void;
     memberCounter?: () => void;
   };
 }) {
@@ -82,8 +83,6 @@ export function AppHeader(Props: {
     });
   };
 
-  let quitHandler = () => {};
-
   return (
     <header>
       <Script
@@ -94,9 +93,14 @@ export function AppHeader(Props: {
         <div className="container-fluid">
           {loginUser ? (
             <>
-              <a className={`navbar-brand ${cssModule["user-name"]}`} href="#">
+              <div
+                className={`navbar-brand ${cssModule["user-name"]}`}
+                onClick={() => {
+                  Props.clickHandler?.name?.();
+                }}
+              >
                 {loginUser.detail.user_name}
-              </a>
+              </div>
               <div>
                 <span
                   className={cssModule["member-counter"]}

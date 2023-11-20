@@ -8,13 +8,14 @@ export function MyOffCanvas(Props: {
   header?: any;
   visible: boolean;
   classList?: string;
-  direction?: "top" | "bottom" | "start" | "end";
+  // direction?: "top" | "bottom" | "start" | "end";
   onHide?: (event: any) => void;
 }) {
   let { state: globalBoot } = useContext(BootContext);
   let targetEL = useRef<any>(null);
   let [bootstrapItem, setBootstrapItem] = useState<any>(null);
   let [mounted, setMounted] = useState(false);
+  let [direction, setDirection] = useState<"bottom" | "start">("start");
   useEffect(() => {
     setMounted(true);
     console.log("globalBoot:", globalBoot, targetEL);
@@ -39,13 +40,18 @@ export function MyOffCanvas(Props: {
         offcanvas.hide();
       }
     }
+    /**
+     * 响应式交互优化，小屏幕从下方出，大屏幕从左边出
+     * 浏览器相关行为要在effect里实现，避免服务端渲染报错b
+     */
+    if (window && window.innerWidth < 800) {
+      setDirection("bottom");
+    }
   }, [Props.visible, globalBoot]);
   let BaseItem = (
     <div
       ref={targetEL}
-      className={`offcanvas offcanvas-${Props.direction || "bottom"} ${
-        Props.classList
-      }`}
+      className={`offcanvas offcanvas-${direction} ${Props.classList}`}
       aria-labelledby="offcanvasExampleLabel"
     >
       <div className="offcanvas-header">
