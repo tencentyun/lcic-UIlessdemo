@@ -10,7 +10,10 @@ import { createContext, useEffect, useReducer } from "react";
  */
 export function contextFactory<
   S,
-  T extends Record<string, (state: S, action: { type: any; arg?: any }) => S>
+  T extends Record<
+    string,
+    (state: S, action: { type: any; arg?: any; state: S }) => S
+  >
 >(actions: T, defaultVal?: S) {
   const Context = createContext<{
     state: S;

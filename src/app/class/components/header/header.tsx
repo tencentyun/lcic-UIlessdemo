@@ -45,20 +45,24 @@ export function AppHeader(Props: {
     memberCounter?: () => void;
   };
 }) {
-  let { dispatch } = useContext(BootContext);
+  let { state, dispatch } = useContext(BootContext);
   let [tcicInfo, setTcicInfo] = useState<any>(null);
   let [loginUser, setLoginUser] = useState<any>(null);
   let tcicScriptLoaded = async () => {
     let global = window as any;
     console.log("useEffect TCIC", global.TCIC_SPY);
+    state.sdk = global.TCIC_SPY;
+
     let tcic: any = await initTcic({
       userId: Props.uid,
       classId: parseInt(Props.cid, 10),
       token: Props.token,
     });
+    state.tcic = tcic;
+
     dispatch({
-      type: "setTcic",
-      arg: tcic,
+      type: "merge",
+      arg: state,
     });
 
     setLoginUser(tcic.myInfo());

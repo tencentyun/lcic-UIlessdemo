@@ -50,6 +50,7 @@
   -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 20%);
   -ms-mask-image: linear-gradient(to bottom, transparent 5%, black 20%);
   -o-mask-image: linear-gradient(to bottom, transparent 5%, black 20%);
+  padding-top: 10px;
 }
 
 .message {
@@ -63,4 +64,35 @@
 
 .message .nick {
   color: #80bef6;
+}
+
+.new-tips {
+  /* display: none; */
+  position: absolute;
+  bottom: 50px;
+  z-index: 3;
+  background-color: #fff;
+  border-radius: 20px;
+  left: 0px;
+  color: #f24d43;
+  font-size: 12px;
+  padding: 3px 10px;
+}
+
+.down-icon {
+  background-image: url(/img/class/down_tips.svg);
+  background-repeat: no-repeat;
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  background-size: contain;
+  vertical-align: text-bottom;
+  background-position: center center;
+  margin-left: 2px;
+}
+.new-show {
+  display: block;
+}
+.new-hide {
+  display: none;
 }

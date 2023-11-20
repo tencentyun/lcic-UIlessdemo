@@ -1,23 +1,30 @@
+import { debugFatory } from "@/app/lib";
 import { contextFactory } from "./context-util";
+let debug = debugFatory("boot_Context");
 
 /**
  * boot为全局bootstrap对象
  */
 let contextObj = contextFactory(
   {
-    setBoot: (state, action) => {
-      state.boot = action.arg;
-      return { ...state };
-    },
-    setTcic: (state, action) => {
-      console.log("state in setTCIC", state);
-      state.tcic = action.arg;
-      return { ...state };
+    merge: (state, action) => {
+      let result: any = { ...state };
+      /**
+       * 合并所有初始值
+       */
+      ["boot", "tcic", "sdk"].forEach((key) => {
+        if (!result[key]) {
+          result[key] = action.arg[key];
+        }
+      });
+      debug("update: result", result);
+      return result;
     },
   },
   {
     boot: null as any,
     tcic: null as any,
+    sdk: null as any,
   }
 );
 

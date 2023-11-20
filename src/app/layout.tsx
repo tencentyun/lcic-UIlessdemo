@@ -27,6 +27,7 @@ export default function RootLayout({
         state={{
           boot: globalBoot,
           tcic: null,
+          sdk: null,
         }}
       >
         <Script
