@@ -3,7 +3,7 @@ import styles from "./style.module.css";
 import { BootContext } from "../../../../../contexts/boot.context";
 import { debugFatory } from "@/app/lib";
 import { Loading } from "../loading/loading";
-import { EmojiPanel } from "./emoji";
+import { EmojiPanel, emojiList } from "./emoji";
 import { useVisible } from "../../../../../hooks/visible";
 let debug = debugFatory("Chat");
 /**
@@ -54,6 +54,7 @@ export interface MessageBody {
     Text: string;
   };
 }
+let fake_counter = 0;
 /**
  * @interface ChatProps
  */
@@ -68,6 +69,31 @@ export function Chat(Props: { children?: any }) {
   let [newmsgcounter, setMsgCounter] = useState(0);
   let [emojiVisible, emojiShow, emojiHide] = useVisible();
   let [timReady, setTimReady] = useState(false);
+
+  function createMyMsg(msg: string): MessageData {
+    // hostInfo.detail.user_name
+    let myInfo = state.tcic?.myInfo();
+    return {
+      ID: `faked_${++fake_counter}`,
+      Operator_Account: myInfo.detail.user_id,
+      From_Account: myInfo.detail.user_id,
+      GroupId: state.tcic?.classInfo.class_info.room_info.room_id,
+      CallbackCommand: "Group.CallbackAfterSendMsg",
+      NickName: myInfo.detail.user_name,
+      Type: "AVChatRoom",
+      MsgTime: Date.now(),
+      MsgSeq: fake_counter,
+      CloudCustomData: "",
+      MsgBody: [
+        {
+          MsgType: "TIMTextElem",
+          MsgContent: {
+            Text: msg,
+          },
+        },
+      ],
+    };
+  }
   /**
    * 获取历史消息
    */
@@ -87,7 +113,6 @@ export function Chat(Props: { children?: any }) {
         });
         target.on("groupMsgReceived", (msg: any) => {
           debug("groupMsgReceived groupMsgReceived:", msg);
-
           let newMsg: MessageData = {
             ID: msg.ID,
             GroupId: msg.to,
@@ -119,15 +144,18 @@ export function Chat(Props: { children?: any }) {
     }
   }, [state.tim]);
 
-  //   <div className={`${styles["message"]}`}>
-  //   <span className={`${styles["nick"]}`}>李子明：</span>
-  //   话字字什么梗，话字字什么梗话字字什么梗，话字字什么梗话字字什么梗，话字字什么梗
-  // </div>
   let renderHistoryMsg = msgList.map((item: MessageData, index) => {
     return (
       <div key={item.ID} className={`${styles["message"]}`}>
         <span className={`${styles["nick"]}`}>{item.NickName}：</span>
         {item.MsgBody.map((msg) => {
+          let target = emojiList.find(
+            (emoji) => emoji.text === msg.MsgContent.Text
+          );
+          if (target) {
+            debug("target.val!.icon:", target.val!.icon);
+            return <div key={item.ID} className={target.val!.img}></div>;
+          }
           return msg.MsgContent.Text;
         })}
       </div>
@@ -190,7 +218,12 @@ export function Chat(Props: { children?: any }) {
           )}
         </div>
         {Props.children}
-        <div className={`${styles["emoji"]}`} onClick={emojiShow}></div>
+        <div
+          className={`${styles["emoji"]}`}
+          onClick={() => {
+            inited && emojiShow();
+          }}
+        ></div>
         <div
           className={`${styles["new-tips"]} ${
             showNewMsgTips && newmsgcounter
@@ -211,7 +244,15 @@ export function Chat(Props: { children?: any }) {
         visible={emojiVisible}
         onHide={emojiHide}
         onClicked={(arg) => {
-          debug("arg:", arg);
+          if (state.tim) {
+            let msgObj = createMyMsg(arg.text);
+            setMsgList((preList) => {
+              let newList = preList.concat();
+              newList.push(msgObj);
+              return [...newList];
+            });
+            state.tim.sendRoomMsg(arg.text);
+          }
           emojiHide();
         }}
       ></EmojiPanel>

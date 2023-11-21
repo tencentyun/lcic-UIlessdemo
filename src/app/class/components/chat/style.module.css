@@ -50,7 +50,7 @@
   -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 20%);
   -ms-mask-image: linear-gradient(to bottom, transparent 5%, black 20%);
   -o-mask-image: linear-gradient(to bottom, transparent 5%, black 20%);
-  padding-top: 10px;
+  padding-top: 40px;
 }
 
 .message {
@@ -123,6 +123,7 @@
   background-size: 500%;
   background-position: -18px -15px;
 }
+
 .emoji-bg {
   background-color: var(---offset-bg-dark);
   border-radius: 40px 40px 0px 0px;
@@ -137,4 +138,28 @@
 }
 .emoji-ic4 {
   background-position: -300px -15px;
+}
+
+.emoji-img1,
+.emoji-img2,
+.emoji-img3,
+.emoji-img4 {
+  background-image: url(/img/class/ic_emoji_all.svg);
+  display: inline-block;
+  height: 20px;
+  width: 20px;
+  display: inline-block;
+  background-size: 700%;
+  background-position: -10px -9px;
+  background-repeat: no-repeat;
+  vertical-align: sub;
+}
+.emoji-img2 {
+  background-position: -42px -9px;
+}
+.emoji-img3 {
+  background-position: -75px -9px;
+}
+.emoji-img4 {
+  background-position: -108px -9px;
 }

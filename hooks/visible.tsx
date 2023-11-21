@@ -7,7 +7,7 @@ export function useVisible() {
     setVisible(true);
   }
   function hide() {
-    console.log("hide useVisible");
+    // console.log("hide useVisible");
     setVisible(false);
   }
   return [visieble, show, hide] as const;

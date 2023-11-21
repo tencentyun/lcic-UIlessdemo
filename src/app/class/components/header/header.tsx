@@ -18,20 +18,7 @@ let debug = debugFatory("Header");
 // user_id
 // :
 // "tic_push_user_326322678_168497"
-type MemberStream = {
-  type: string;
-  user_id: string;
-  url: string;
-};
 
-type MyInfo = {
-  userId: string;
-  classId: string;
-  roleName: "student" | "teacher";
-  detail: {
-    user_name: string;
-  };
-};
 /**
  *
  * @param Props uid 用户ID
@@ -75,7 +62,6 @@ export function AppHeader(Props: {
     return new Promise((resolve) => {
       tcic.init({
         ready: () => {
-          console.log("myInfo:", tcic.myInfo());
           resolve(tcic);
         },
       });
