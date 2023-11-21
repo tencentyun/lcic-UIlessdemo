@@ -1,10 +1,14 @@
 "use client";
+/**
+ * 全局对象注册
+ */
 import Script from "next/script";
 import cssModule from "./style.module.css";
 import { useContext, useEffect, useState } from "react";
 import { Loading } from "../loading/loading";
 import { BootContext } from "../../../../../contexts/boot.context";
-
+import { debugFatory } from "@/app/lib";
+let debug = debugFatory("Header");
 // type
 // :
 // "main"
@@ -39,44 +43,35 @@ export function AppHeader(Props: {
   uid: string;
   token: string;
   cid: string;
-  clickHandler?: {
-    quit?: () => void;
-    name?: () => void;
-    memberCounter?: () => void;
-  };
+  children?: any;
 }) {
   let { state, dispatch } = useContext(BootContext);
-  let [tcicInfo, setTcicInfo] = useState<any>(null);
-  let [loginUser, setLoginUser] = useState<any>(null);
   let tcicScriptLoaded = async () => {
     let global = window as any;
-    console.log("useEffect TCIC", global.TCIC_SPY);
     state.sdk = global.TCIC_SPY;
-
+    debug("debug loaed!");
     let tcic: any = await initTcic({
+      sdk: state.sdk,
       userId: Props.uid,
       classId: parseInt(Props.cid, 10),
       token: Props.token,
     });
     state.tcic = tcic;
-
+    state.tim = state.sdk.createTimClient(state.tcic);
     dispatch({
       type: "merge",
       arg: state,
     });
-
-    setLoginUser(tcic.myInfo());
-    console.log("tcic:", tcic);
-    setTcicInfo(tcic);
     Props.whenReady && Props.whenReady(tcic);
   };
 
   let initTcic = (param: {
+    sdk: any;
     userId: string;
     token: string;
     classId: number;
   }) => {
-    let tcic = TCIC_SPY.create(param);
+    let tcic = param.sdk.create(param);
     return new Promise((resolve) => {
       tcic.init({
         ready: () => {
@@ -93,77 +88,7 @@ export function AppHeader(Props: {
         src="http://localhost:9010/watch_sdk/dist/tcic_watch_sdk.1.0.0.js"
         onLoad={tcicScriptLoaded}
       ></Script>
-      <nav className="navbar navbar-expand-md navbar-dark fixed-top">
-        <div className="container-fluid">
-          {loginUser ? (
-            <>
-              <div
-                className={`navbar-brand ${cssModule["user-name"]}`}
-                onClick={() => {
-                  Props.clickHandler?.name?.();
-                }}
-              >
-                {loginUser.detail.user_name}
-              </div>
-              <div>
-                <span
-                  className={cssModule["member-counter"]}
-                  onClick={() => {
-                    Props.clickHandler?.memberCounter?.();
-                  }}
-                >
-                  {tcicInfo.memberInfo.online_number}人
-                </span>
-                <button
-                  className={`btn ${cssModule["quit-btn"]}`}
-                  onClick={() => {
-                    Props.clickHandler?.quit?.();
-                  }}
-                ></button>
-              </div>
-            </>
-          ) : (
-            <>
-              <Loading size={"small"}></Loading>
-            </>
-          )}
-          {/* <button
-            className="navbar-toggler collapsed"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarCollapse"
-            aria-controls="navbarCollapse"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="navbar-collapse collapse" id="navbarCollapse">
-            <ul className="navbar-nav me-auto mb-2 mb-md-0">
-              {loginUser ? (
-                <>
-                  <li className="nav-item">
-                    <a className="nav-link active" aria-current="page" href="#">
-                      消息
-                    </a>
-                  </li>
-                </>
-              ) : (
-                <></>
-              )}
-            </ul>
-            {loginUser ? (
-              <div className={`d-flex ${cssModule["class-id"]}`}>
-                {`classID:${loginUser.classId} userId:${loginUser.userId}`}
-              </div>
-            ) : logining ? (
-              <div className={`d-flex ${cssModule["class-id"]}`}>登陆中..</div>
-            ) : (
-              <></>
-            )}
-          </div> */}
-        </div>
-      </nav>
+      {Props.children}
     </header>
   );
 }

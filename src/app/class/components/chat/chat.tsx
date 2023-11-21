@@ -3,6 +3,8 @@ import styles from "./style.module.css";
 import { BootContext } from "../../../../../contexts/boot.context";
 import { debugFatory } from "@/app/lib";
 import { Loading } from "../loading/loading";
+import { EmojiPanel } from "./emoji";
+import { useVisible } from "../../../../../hooks/visible";
 let debug = debugFatory("Chat");
 /**
  * {
@@ -55,84 +57,67 @@ export interface MessageBody {
 /**
  * @interface ChatProps
  */
-export function Chat(Props: {}) {
+export function Chat() {
   let { state } = useContext(BootContext);
   /**
    * 判断是否初始化成功
    */
   let [inited, setInited] = useState(false);
-  let [timObj, setTimObj] = useState<any>(null);
   let [msgList, setMsgList] = useState<MessageData[]>([]);
   let listEl = useRef<HTMLDivElement>(null);
   let [newmsgcounter, setMsgCounter] = useState(0);
-
+  let [emojiVisible, emojiShow, emojiHide] = useVisible();
+  let [timReady, setTimReady] = useState(false);
   /**
    * 获取历史消息
    */
   useEffect(() => {
-    debug("state: efected", state);
-    let target: any = null;
-    if (state.sdk && state.tcic && !timObj) {
-      target = state.sdk.createTimClient(state.tcic);
-      debug("timObj:", target);
-      target.getHistoryList().then((data: MessageData[]) => {
-        data.reverse();
-        data.forEach((item, index) => {
-          item.ID = `${item.Operator_Account}_${index}}`;
-        });
-        setMsgList(data);
-        setInited(true);
-      });
-
-      target.on("groupMsgReceived", (msg: any) => {
-        debug("groupMsgReceived groupMsgReceived:", msg);
-
-        let newMsg: MessageData = {
-          ID: msg.ID,
-          GroupId: msg.to,
-          CallbackCommand: "Group.CallbackAfterSendMsg",
-          From_Account: msg.from,
-          Operator_Account: msg.from,
-          NickName: msg.nick,
-          Type: msg.type,
-          MsgTime: msg.time,
-          MsgSeq: msg.seq,
-          CloudCustomData: msg.cloudCustomData,
-          MsgBody: [
-            {
-              MsgType: msg.data.type,
-              MsgContent: {
-                Text: msg.data.content.text,
-              },
-            },
-          ], //已经包装过一次，
-        };
-        setMsgList((preList) => {
-          let newList = preList.concat();
-          newList.push(newMsg);
-          return [...newList];
-        });
-        setMsgCounter((prevCounter) => prevCounter + 1);
-      });
+    // debug("state: efected", state);
+    if (state.tim) {
+      let target = state.tim;
       target.whenReady(() => {
-        debug("IM ready");
-        setTimObj(target);
-        // target.tim.on(target.EVENT.MESSAGE_RECEIVED, (msg: any) => {
-        //   debug("MESSAGE_RECEIVED msg: >>>>--->>", msg);
-        //   msg.data.forEach((item: any) => {
-        //     debug("messsG getElements: foreach", item.getElements());
-        //   });
-        //   debug("messsG getElements:", msg.data);
-        // });
+        setTimReady(true);
+        target.getHistoryList().then((data: MessageData[]) => {
+          data.reverse();
+          data.forEach((item, index) => {
+            item.ID = `${item.Operator_Account}_${index}}`;
+          });
+          setMsgList(data);
+          setInited(true);
+        });
+        target.on("groupMsgReceived", (msg: any) => {
+          debug("groupMsgReceived groupMsgReceived:", msg);
+
+          let newMsg: MessageData = {
+            ID: msg.ID,
+            GroupId: msg.to,
+            CallbackCommand: "Group.CallbackAfterSendMsg",
+            From_Account: msg.from,
+            Operator_Account: msg.from,
+            NickName: msg.nick,
+            Type: msg.type,
+            MsgTime: msg.time,
+            MsgSeq: msg.seq,
+            CloudCustomData: msg.cloudCustomData,
+            MsgBody: [
+              {
+                MsgType: msg.data.type,
+                MsgContent: {
+                  Text: msg.data.content.text,
+                },
+              },
+            ], //已经包装过一次，
+          };
+          setMsgList((preList) => {
+            let newList = preList.concat();
+            newList.push(newMsg);
+            return [...newList];
+          });
+          setMsgCounter((prevCounter) => prevCounter + 1);
+        });
       });
     }
-    return () => {
-      if (target) {
-        target.off("groupMsgReceived");
-        target.destroy();
-      }
-    };
-  }, [state, Props]);
+  }, [state.tim]);
 
   //   <div className={`${styles["message"]}`}>
   //   <span className={`${styles["nick"]}`}>李子明：</span>
@@ -149,19 +134,17 @@ export function Chat(Props: {}) {
     );
   });
 
-  debug("changed---");
-
   /**
    * 每条消息的最小高度
    */
   const singleHeight = 54;
   let showNewMsgTips = false;
   if (listEl.current) {
-    debug(
-      "listEl.current",
-      listEl.current.scrollTop,
-      listEl.current.scrollHeight
-    );
+    // debug(
+    //   "listEl.current",
+    //   listEl.current.scrollTop,
+    //   listEl.current.scrollHeight
+    // );
     listEl.current.clientHeight;
     /**
      * 如果滚动高度接近底部，则表示用户已经看完所有消息，
@@ -190,37 +173,40 @@ export function Chat(Props: {}) {
   };
 
   return (
-    <div className={`${styles["wrap"]}`}>
-      <div ref={listEl} className={`${styles["message-list"]}`}>
-        {inited ? (
-          /**
-           * 消息列表保持滚动最小高度
-           * 为后续做无限滚动准备
-           * todo: 性能优化，无限滚动
-           */
-          <div style={{ minHeight: `${msgList.length * singleHeight}px` }}>
-            {renderHistoryMsg}
-          </div>
-        ) : (
-          <Loading></Loading>
-        )}
+    <>
+      <div className={`${styles["wrap"]}`}>
+        <div ref={listEl} className={`${styles["message-list"]}`}>
+          {inited ? (
+            /**
+             * 消息列表保持滚动最小高度
+             * 为后续做无限滚动准备
+             * todo: 性能优化，无限滚动
+             */
+            <div style={{ minHeight: `${msgList.length * singleHeight}px` }}>
+              {renderHistoryMsg}
+            </div>
+          ) : (
+            <Loading></Loading>
+          )}
+        </div>
+        <div className={`${styles["emoji"]}`} onClick={emojiShow}></div>
+        <div
+          className={`${styles["new-tips"]} ${
+            showNewMsgTips && newmsgcounter
+              ? styles["new-show"]
+              : styles["new-hide"]
+          }`}
+          onClick={jumpToNewMsg}
+        >
+          有{newmsgcounter}条新消息<i className={`${styles["down-icon"]}`}></i>
+        </div>
+        <input
+          type="text"
+          className={`form-control ${styles["chat-input"]}`}
+          placeholder="聊聊吧～"
+        />
       </div>
-      <div className={`${styles["emoji"]}`}></div>
-      <div
-        className={`${styles["new-tips"]} ${
-          showNewMsgTips && newmsgcounter
-            ? styles["new-show"]
-            : styles["new-hide"]
-        }`}
-        onClick={jumpToNewMsg}
-      >
-        有{newmsgcounter}条新消息<i className={`${styles["down-icon"]}`}></i>
-      </div>
-      <input
-        type="text"
-        className={`form-control ${styles["chat-input"]}`}
-        placeholder="聊聊吧～"
-      />
-    </div>
+      <EmojiPanel visible={emojiVisible} onHide={emojiHide}></EmojiPanel>
+    </>
   );
 }

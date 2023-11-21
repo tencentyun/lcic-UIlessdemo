@@ -28,6 +28,7 @@ export default function RootLayout({
           boot: globalBoot,
           tcic: null,
           sdk: null,
+          tim: null,
         }}
       >
         <Script

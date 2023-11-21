@@ -12,7 +12,7 @@ let contextObj = contextFactory(
       /**
        * 合并所有初始值
        */
-      ["boot", "tcic", "sdk"].forEach((key) => {
+      ["boot", "tcic", "sdk", "tim"].forEach((key) => {
         if (!result[key]) {
           result[key] = action.arg[key];
         }
@@ -25,6 +25,7 @@ let contextObj = contextFactory(
     boot: null as any,
     tcic: null as any,
     sdk: null as any,
+    tim: null as any,
   }
 );
 

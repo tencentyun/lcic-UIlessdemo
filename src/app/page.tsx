@@ -1,7 +1,8 @@
 "use client";
 import styles from "./page.module.css";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Demo } from "./demo";
+import { BootContext } from "../../contexts/boot.context";
 
 // import { AppHeader } from "./components/header/header";
 
@@ -14,15 +15,9 @@ import { Demo } from "./demo";
 // user_id
 // :
 // "tic_push_user_326322678_168497"
-type MemberStream = {
-  type: string;
-  user_id: string;
-  url: string;
-};
 
 export default function Home() {
   let [classId, setClassId] = useState("");
-
   let changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!/^\d+$/.test(e.target.value)) {
       setClassId("");

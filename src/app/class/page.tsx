@@ -1,6 +1,6 @@
 "use client";
 import styles from "./page.module.css";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AppHeader } from "./components/header/header";
 import { Loading } from "./components/loading/loading";
 import { Footer } from "./components/footer/footer";
@@ -9,6 +9,9 @@ import { InfoPanel } from "./components/info-panel/info-panel";
 import { Chat } from "./components/chat/chat";
 import { Settings } from "./components/settings/settings";
 import { useVisible } from "../../../hooks/visible";
+import { BootContext } from "../../../contexts/boot.context";
+import { debugFatory } from "../lib";
+import { InfoNav } from "./components/nav/info-nav";
 // import { AppHeader } from "./components/header/header";
 
 // type
@@ -26,6 +29,16 @@ type MemberStream = {
   url: string;
 };
 
+type MyInfo = {
+  userId: string;
+  classId: string;
+  roleName: "student" | "teacher";
+  detail: {
+    user_name: string;
+  };
+};
+
+let debug = debugFatory("HomePage");
 /**
  *
  * @param Props
@@ -42,6 +55,8 @@ export default function Home(Props: {
 }) {
   let [members, setMembers] = useState<MemberStream[] | null>(null);
   let [start, setStart] = useState(false);
+  let [onlineNumber, setOnlineNumber] = useState(0);
+  let [name, setName] = useState("");
   let [isPublished, setIsPublished] = useState<boolean>(false);
   let [trtcClient, setTrtcClient] = useState<any>(null);
   let [memberListVisible, memberListShow, memberListHide] = useVisible();
@@ -50,7 +65,59 @@ export default function Home(Props: {
     video: true,
     audio: true,
   });
+  let { state } = useContext(BootContext);
 
+  useEffect(() => {
+    if (state.tcic) {
+      debug("state.tcic", state.tcic);
+      let hostInfo = state.tcic.hostInfo();
+      debug("hostInfo:", hostInfo);
+      /**
+       * 获取房主信息
+       */
+      setName(hostInfo.detail.user_name);
+      setOnlineNumber(state.tcic.memberInfo.online_number);
+    }
+  }, [state.tcic]);
+
+  useEffect(() => {
+    debug("state.tim:", state.tim);
+    if (state.tim) {
+      state.tim.on("saasadminMsgReceived", (payload: any, data: any) => {
+        debug("saasadminMsgReceived:", payload);
+        let msgTypeMap: any = {
+          /**
+           * 事件控制？
+           */
+          event: () => {
+            /**
+             * 动作行为
+             */
+            let eventActionMap: any = {
+              member_quit: () => {},
+              member_online: () => {},
+            };
+            eventActionMap[payload.data.action] &&
+              eventActionMap[payload.data.action]();
+          },
+          /**
+           * 房间控制？
+           */
+          control: () => {},
+          /**
+           * 权限更新
+           */
+          "v1/permissions": () => {},
+          /**
+           * 房间信息同步
+           */
+          "v1/sync": () => {},
+        };
+
+        msgTypeMap[payload.type] && msgTypeMap[payload.type]();
+      });
+    }
+  }, [state.tim]);
   /**
    *  获取流类型
    * main为主流 ， auxiliary为辅流,电商场景，没有辅流
@@ -137,6 +204,7 @@ export default function Home(Props: {
       }
     }
   };
+
   return (
     <>
       <AppHeader
@@ -144,15 +212,26 @@ export default function Home(Props: {
         cid={Props.searchParams.cid}
         uid={Props.searchParams.uid}
         token={Props.searchParams.token}
-        clickHandler={{
-          memberCounter: () => {
-            memberListShow();
-          },
-          name: () => {
-            roomInfoShow();
-          },
-        }}
-      ></AppHeader>
+      >
+        {state.tcic ? (
+          <InfoNav
+            user_name={name}
+            online_number={`${onlineNumber}`}
+            clickHandler={{
+              memberCounter: () => {
+                memberListShow();
+              },
+              name: () => {
+                roomInfoShow();
+              },
+            }}
+          ></InfoNav>
+        ) : (
+          <div className="navbar navbar-expand-md navbar-dark fixed-top">
+            <Loading size="small"></Loading>
+          </div>
+        )}
+      </AppHeader>
       <main className={`${styles.main} `}>
         <div className={`container-lg`}>
           <div className="row">

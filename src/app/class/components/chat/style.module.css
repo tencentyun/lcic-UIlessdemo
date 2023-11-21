@@ -79,6 +79,17 @@
   padding: 3px 10px;
 }
 
+.msg-tips {
+  position: absolute;
+  bottom: 50px;
+  z-index: 3;
+  transform: translate3d(-300px, 0px, 0px);
+  transition: transform 0.4s;
+}
+.msg-tips-show {
+  transform: translate3d(0px, 0px, 0px);
+}
+
 .down-icon {
   background-image: url(/img/class/down_tips.svg);
   background-repeat: no-repeat;
