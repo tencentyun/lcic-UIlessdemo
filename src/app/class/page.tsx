@@ -12,6 +12,9 @@ import { useVisible } from "../../../hooks/visible";
 import { BootContext } from "../../../contexts/boot.context";
 import { debugFatory } from "../lib";
 import { InfoNav } from "./components/nav/info-nav";
+import { Tips } from "./components/chat/tips";
+import { createPortal, render } from "react-dom";
+
 // import { AppHeader } from "./components/header/header";
 
 // type
@@ -61,6 +64,7 @@ export default function Home(Props: {
   let [trtcClient, setTrtcClient] = useState<any>(null);
   let [memberListVisible, memberListShow, memberListHide] = useVisible();
   let [roomInfoVisible, roomInfoShow, roomInfoHide] = useVisible();
+  let [tipsArray, setTipsArray] = useState<any[]>([]);
   let [mediaToggle, setMediaToggle] = useState({
     video: true,
     audio: true,
@@ -69,7 +73,6 @@ export default function Home(Props: {
 
   useEffect(() => {
     if (state.tcic) {
-      debug("state.tcic", state.tcic);
       let hostInfo = state.tcic.hostInfo();
       debug("hostInfo:", hostInfo);
       /**
@@ -94,8 +97,31 @@ export default function Home(Props: {
              * 动作行为
              */
             let eventActionMap: any = {
-              member_quit: () => {},
-              member_online: () => {},
+              member_quit: () => {
+                debug("member_quit:", payload);
+              },
+              member_online: () => {
+                debug("member_online", payload);
+                let result = payload.data.data.map(
+                  (
+                    item: { avatar: string; nickname: string; user_id: string },
+                    index: any
+                  ) => {
+                    return (
+                      <Tips
+                        key={`${item.user_id}_${index}_${new Date().getTime()}`}
+                        styles={{
+                          bottom: `${350 + index * 54}px`,
+                        }}
+                      >{`${item.nickname}来了`}</Tips>
+                    );
+                  }
+                );
+                setTipsArray((preList) => {
+                  let pre = preList.concat();
+                  return [...pre, ...result];
+                });
+              },
             };
             eventActionMap[payload.data.action] &&
               eventActionMap[payload.data.action]();
@@ -111,7 +137,13 @@ export default function Home(Props: {
           /**
            * 房间信息同步
            */
-          "v1/sync": () => {},
+          "v1/sync": () => {
+            debug("v1/sync:", payload);
+            /**
+             * 更新在线人数
+             */
+            setOnlineNumber(payload.data.online_number);
+          },
         };
 
         msgTypeMap[payload.type] && msgTypeMap[payload.type]();
@@ -148,13 +180,11 @@ export default function Home(Props: {
     }
   };
   let whenReady = (tcic: any) => {
-    console.log("tcic ready", tcic);
     let teachers = tcic.getMemberByRoleType(1);
     let trtcClient = new TCIC_SPY.createTrtcClient(tcic);
     setTrtcClient(trtcClient);
     // console.log("teachers", teachers);
     setMembers(teachers);
-    console.log("tcic:", tcic);
   };
   let publishHandler = () => {
     setIsPublished(true);
@@ -228,7 +258,7 @@ export default function Home(Props: {
           ></InfoNav>
         ) : (
           <div className="navbar navbar-expand-md navbar-dark fixed-top">
-            <Loading size="small"></Loading>
+            {/* <Loading size="small"></Loading> */}
           </div>
         )}
       </AppHeader>
@@ -241,7 +271,6 @@ export default function Home(Props: {
                   return (
                     <div className={styles["stream-wrap"]} key={member.user_id}>
                       {streamType.map((type) => {
-                        console.log(`${member.user_id}_${type}`);
                         return (
                           <div
                             key={`${member.user_id}_${type}`}
@@ -260,7 +289,7 @@ export default function Home(Props: {
                   ) : (
                     <div>
                       <button className="btn btn-primary" onClick={videoStart}>
-                        开始
+                        进入
                       </button>
                     </div>
                   )}
@@ -328,7 +357,7 @@ export default function Home(Props: {
         <Footer>
           <div className="row">
             <div className="col-8">
-              <Chat></Chat>
+              <Chat>{tipsArray.map((item) => item)}</Chat>
             </div>
             <div className="col-4">
               <Settings></Settings>

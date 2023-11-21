@@ -2,6 +2,9 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { BootContext } from "../../contexts/boot.context";
+import { debugFatory } from "@/app/lib";
+
+let debug = debugFatory("OffCanvas");
 
 export function MyOffCanvas(Props: {
   children?: any;
@@ -18,12 +21,12 @@ export function MyOffCanvas(Props: {
   let [direction, setDirection] = useState<"bottom" | "start">("start");
   useEffect(() => {
     setMounted(true);
-    // console.log("globalBoot:", globalBoot, targetEL);
     let offcanvas = bootstrapItem;
     // /**
     //  *  初始化对象
     //  */
     if (globalBoot.boot && targetEL.current) {
+      debug("init offcanvas");
       offcanvas = new globalBoot.boot.Offcanvas(targetEL.current);
       targetEL.current.addEventListener("hidden.bs.offcanvas", (event: any) => {
         Props.onHide && Props.onHide(event);
@@ -33,13 +36,6 @@ export function MyOffCanvas(Props: {
         offcanvas.show();
       }
     }
-    if (offcanvas) {
-      if (Props.visible) {
-        offcanvas.show();
-      } else {
-        offcanvas.hide();
-      }
-    }
     /**
      * 响应式交互优化，小屏幕从下方出，大屏幕从左边出
      * 浏览器相关行为要在effect里实现，避免服务端渲染报错b
@@ -47,7 +43,16 @@ export function MyOffCanvas(Props: {
     if (window && window.innerWidth < 800) {
       setDirection("bottom");
     }
-  }, [Props.visible, globalBoot]);
+  }, [globalBoot.boot]);
+
+  if (bootstrapItem) {
+    if (Props.visible) {
+      bootstrapItem.show();
+    } else {
+      bootstrapItem.hide();
+    }
+  }
+
   let BaseItem = (
     <div
       ref={targetEL}

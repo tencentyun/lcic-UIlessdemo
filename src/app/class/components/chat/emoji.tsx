@@ -1,45 +1,63 @@
 import { MyOffCanvas } from "../../../../../components/offcanvas/offcanvas";
-import { useVisible } from "../../../../../hooks/visible";
-
+import styles from "./style.module.css";
 type EmojiItem = TCIC.Common.Item<{
   icon: string;
 }>;
-export function EmojiPanel(Props: { visible: boolean; onHide: any }) {
+export function EmojiPanel(Props: {
+  visible: boolean;
+  onHide: any;
+  onClicked: (data: EmojiItem) => void;
+}) {
   let emojiList: EmojiItem[] = [
     {
       id: "1",
       text: "[鼓掌]",
       val: {
-        icon: "1",
+        icon: `${styles[`emoji-ic1`]}`,
       },
     },
     {
       id: "2",
       text: "[强]",
       val: {
-        icon: "1",
+        icon: `${styles[`emoji-ic2`]}`,
       },
     },
     {
       id: "3",
       text: "[玫瑰]",
       val: {
-        icon: "1",
+        icon: `${styles[`emoji-ic3`]}`,
       },
     },
     {
-      id: "3",
+      id: "4",
       text: "[爱心]",
       val: {
-        icon: "1",
+        icon: `${styles[`emoji-ic4`]}`,
       },
     },
   ];
   return (
-    <MyOffCanvas header={"表情"} visible={Props.visible} onHide={Props.onHide}>
+    <MyOffCanvas
+      classList={`${styles["emoji-bg"]}`}
+      header={<></>}
+      visible={Props.visible}
+      onHide={Props.onHide}
+    >
       <div className="container">
-        <div className="row">
-          <div className="col"></div>
+        <div className="row  row-cols-2">
+          {emojiList.map((item) => (
+            <div
+              onClick={() => {
+                Props.onClicked && Props.onClicked(item);
+              }}
+              className={`col ${styles["emoji-wrap"]}`}
+              key={item.id}
+            >
+              <div className={`${item.val?.icon}`}></div>
+            </div>
+          ))}
         </div>
       </div>
     </MyOffCanvas>

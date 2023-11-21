@@ -57,7 +57,7 @@ export interface MessageBody {
 /**
  * @interface ChatProps
  */
-export function Chat() {
+export function Chat(Props: { children?: any }) {
   let { state } = useContext(BootContext);
   /**
    * 判断是否初始化成功
@@ -189,6 +189,7 @@ export function Chat() {
             <Loading></Loading>
           )}
         </div>
+        {Props.children}
         <div className={`${styles["emoji"]}`} onClick={emojiShow}></div>
         <div
           className={`${styles["new-tips"]} ${
@@ -206,7 +207,14 @@ export function Chat() {
           placeholder="聊聊吧～"
         />
       </div>
-      <EmojiPanel visible={emojiVisible} onHide={emojiHide}></EmojiPanel>
+      <EmojiPanel
+        visible={emojiVisible}
+        onHide={emojiHide}
+        onClicked={(arg) => {
+          debug("arg:", arg);
+          emojiHide();
+        }}
+      ></EmojiPanel>
     </>
   );
 }

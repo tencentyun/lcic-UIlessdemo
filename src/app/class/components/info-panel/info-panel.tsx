@@ -3,6 +3,7 @@ import { MyOffCanvas } from "../../../../../components/offcanvas/offcanvas";
 import styles from "./style.module.css";
 import { BootContext } from "../../../../../contexts/boot.context";
 import { Loading } from "../loading/loading";
+import { debugFatory } from "@/app/lib";
 
 /**
  * 给数字串补充空格，每三位一个空格
@@ -19,6 +20,7 @@ function addPadding(num: number) {
   }
   return result;
 }
+let debug = debugFatory("InfoPanel");
 
 /**
  * 房间信息面板
@@ -28,7 +30,7 @@ function addPadding(num: number) {
  */
 export function InfoPanel(Props: { visible: boolean; onHide: () => void }) {
   let { state } = useContext(BootContext);
-  useEffect(() => {});
+  debug("info panel ");
   return (
     <MyOffCanvas
       classList={styles["bg"]}

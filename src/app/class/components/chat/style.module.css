@@ -107,3 +107,34 @@
 .new-hide {
   display: none;
 }
+
+.emoji-wrap {
+  text-align: center;
+}
+.emoji-ic1,
+.emoji-ic2,
+.emoji-ic3,
+.emoji-ic4 {
+  background-image: url(/img/class/ic_emoji_all.svg);
+  height: 80px;
+  width: 80px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-size: 500%;
+  background-position: -18px -15px;
+}
+.emoji-bg {
+  background-color: var(---offset-bg-dark);
+  border-radius: 40px 40px 0px 0px;
+}
+
+.emoji-ic2 {
+  background-position: -110px -15px;
+}
+
+.emoji-ic3 {
+  background-position: -205px -15px;
+}
+.emoji-ic4 {
+  background-position: -300px -15px;
+}
