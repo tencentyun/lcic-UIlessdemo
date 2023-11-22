@@ -84,7 +84,6 @@ export default function Home(Props: {
   }, [state.tcic]);
 
   useEffect(() => {
-    debug("state.tim:", state.tim);
     if (state.tim) {
       state.tim.on("saasadminMsgReceived", (payload: any, data: any) => {
         debug("saasadminMsgReceived:", payload);
@@ -354,16 +353,20 @@ export default function Home(Props: {
           onHide={memberListHide}
         ></MemberList>
         <InfoPanel visible={roomInfoVisible} onHide={roomInfoHide}></InfoPanel>
-        <Footer>
-          <div className="row">
-            <div className="col-8">
-              <Chat>{tipsArray.map((item) => item)}</Chat>
+        {start ? (
+          <Footer>
+            <div className="row">
+              <div className="col-8">
+                <Chat>{tipsArray.map((item) => item)}</Chat>
+              </div>
+              <div className="col-4">
+                <Settings></Settings>
+              </div>
             </div>
-            <div className="col-4">
-              <Settings></Settings>
-            </div>
-          </div>
-        </Footer>
+          </Footer>
+        ) : (
+          <></>
+        )}
       </main>
     </>
   );

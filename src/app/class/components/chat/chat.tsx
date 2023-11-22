@@ -149,11 +149,13 @@ export function Chat(Props: { children?: any }) {
       <div key={item.ID} className={`${styles["message"]}`}>
         <span className={`${styles["nick"]}`}>{item.NickName}：</span>
         {item.MsgBody.map((msg) => {
+          /**
+           * 检查是否表情
+           */
           let target = emojiList.find(
             (emoji) => emoji.text === msg.MsgContent.Text
           );
           if (target) {
-            debug("target.val!.icon:", target.val!.icon);
             return <div key={item.ID} className={target.val!.img}></div>;
           }
           return msg.MsgContent.Text;
