@@ -32,3 +32,19 @@
   background-image: linear-gradient(#ffffff00, #000000eb);
   left: 0px;
 }
+
+.kickout-icon {
+  background-image: url(/img/class/kickout.svg);
+  background-repeat: no-repeat;
+  width: 15px;
+  height: 15px;
+  margin-right: 5px;
+  transform: translateY(3px);
+}
+/* kickout.svg */
+
+.member-loading {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 10px;
+}

@@ -69,7 +69,8 @@ export function Chat(Props: { children?: any }) {
   let [newmsgcounter, setMsgCounter] = useState(0);
   let [emojiVisible, emojiShow, emojiHide] = useVisible();
   let [timReady, setTimReady] = useState(false);
-
+  let [chatInput, setChatInput] = useState("");
+  const MAX_MSG = 200;
   function createMyMsg(msg: string): MessageData {
     // hostInfo.detail.user_name
     let myInfo = state.tcic?.myInfo();
@@ -94,12 +95,26 @@ export function Chat(Props: { children?: any }) {
       ],
     };
   }
+
+  function msgChangedHandler(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.value.length >= MAX_MSG) {
+      e.target.value = e.target.value.slice(0, MAX_MSG);
+    }
+    setChatInput(e.target.value);
+  }
   /**
    * 获取历史消息
    */
   useEffect(() => {
-    // debug("state: efected", state);
-    if (state.tim) {
+    debug("state: efected", state, timReady);
+    if (state.tim && !timReady) {
+      debug("state: efected into", state, timReady);
+      /**
+       * 不知道为什么会触发两次efect
+       * 临时处理，防止重复调用
+       * todo: 优化
+       */
+      timReady = true;
       let target = state.tim;
       target.whenReady(() => {
         setTimReady(true);
@@ -238,8 +253,11 @@ export function Chat(Props: { children?: any }) {
         </div>
         <input
           type="text"
+          maxLength={MAX_MSG}
           className={`form-control ${styles["chat-input"]}`}
           placeholder="聊聊吧～"
+          onChange={msgChangedHandler}
+          value={chatInput}
         />
       </div>
       <EmojiPanel

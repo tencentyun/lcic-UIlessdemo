@@ -22,10 +22,12 @@ export function MyOffCanvas(Props: {
   useEffect(() => {
     setMounted(true);
     let offcanvas = bootstrapItem;
-    // /**
-    //  *  初始化对象
-    //  */
-    if (globalBoot.boot && targetEL.current) {
+    /**
+     * 初始化对象
+     * 这里的问题是只会在boot设置好后执行一次，
+     * 而 targetEL.current 可以根据条件变化出现或消失
+     */
+    if (globalBoot.boot && targetEL.current && !bootstrapItem) {
       debug("init offcanvas");
       offcanvas = new globalBoot.boot.Offcanvas(targetEL.current);
       targetEL.current.addEventListener("hidden.bs.offcanvas", (event: any) => {
@@ -43,7 +45,7 @@ export function MyOffCanvas(Props: {
     if (window && window.innerWidth < 800) {
       setDirection("bottom");
     }
-  }, [globalBoot.boot]);
+  }, [globalBoot.boot, Props.visible]);
 
   if (bootstrapItem) {
     if (Props.visible) {

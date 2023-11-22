@@ -45,6 +45,7 @@ export function AppHeader(Props: {
     });
     state.tcic = tcic;
     state.tim = state.sdk.createTimClient(state.tcic);
+    debug("AppHeader tcic: merged");
     dispatch({
       type: "merge",
       arg: state,

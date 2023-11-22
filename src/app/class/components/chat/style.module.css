@@ -51,6 +51,7 @@
   -ms-mask-image: linear-gradient(to bottom, transparent 5%, black 20%);
   -o-mask-image: linear-gradient(to bottom, transparent 5%, black 20%);
   padding-top: 40px;
+  width: 100%;
 }
 
 .message {
