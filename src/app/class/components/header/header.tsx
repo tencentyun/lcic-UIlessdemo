@@ -140,7 +140,7 @@ export function AppHeader(Props: {
   return (
     <header>
       <Script
-        src="http://localhost:9010/watch_sdk/dist/tcic_watch_sdk.1.0.0.js"
+        src={process.env.NEXT_PUBLIC_SDK_URL}
         onLoad={tcicScriptLoaded}
       ></Script>
       {Props.children}

@@ -29,14 +29,14 @@
 .share-btn {
   width: 20px;
   height: 20px;
-  background-image: url("/img/class/share.svg");
+  background-image: url("img/share.svg");
   background-repeat: no-repeat;
 }
 
 .copy-btn {
   width: 16px;
   height: 16px;
-  background-image: url("/img/class/copy.svg");
+  background-image: url("img/copy.svg");
   display: inline-block;
   vertical-align: sub;
   margin: 0px 5px;

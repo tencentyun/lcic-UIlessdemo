@@ -35,10 +35,7 @@ export default function RootLayout({
           hostInfo: null,
         }}
       >
-        <Script
-          src="/boot/bootstrap.bundle.min.js"
-          onLoad={bootOnload}
-        ></Script>
+        <Script src="boot/bootstrap.bundle.min.js" onLoad={bootOnload}></Script>
         <body className={"d-flex flex-column h-100"}>
           <ModalProvider>{children}</ModalProvider>
         </body>

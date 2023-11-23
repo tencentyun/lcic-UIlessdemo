@@ -24,7 +24,7 @@
 
 .quit-btn {
   background-repeat: no-repeat;
-  background-image: url(/img/leave.svg);
+  background-image: url(../nav/img/leave.svg);
   background-size: contain;
   width: 23px;
   height: 23px;

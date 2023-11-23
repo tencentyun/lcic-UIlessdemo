@@ -15,7 +15,7 @@
 }
 
 .setting-icon {
-  background-image: url("/img/class/setting.svg");
+  background-image: url("img/setting.svg");
   background-size: contain;
   background-repeat: no-repeat;
   width: 13px;
@@ -23,7 +23,7 @@
   display: inline-block;
 }
 .share-icon {
-  background-image: url("/img/class/share.svg");
+  background-image: url("../info-panel/img/share.svg");
   background-size: contain;
   background-repeat: no-repeat;
   width: 13px;

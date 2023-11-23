@@ -26,6 +26,7 @@ import { Tips } from "./components/chat/tips";
 import { Hoster } from "./hoster";
 import { Audience } from "./audience";
 import { ModalContext } from "../../../contexts/modal.context";
+import { useRouter } from "next/navigation";
 
 // type
 // :
@@ -75,6 +76,7 @@ export default function Home(Props: {
     classState: TClassStatus.Not_Start,
     name: "",
   });
+  const router = useRouter();
 
   let { state } = useContext(BootContext);
   let [memberListInitData, setMemberListInitData] = useState<{
@@ -212,7 +214,7 @@ export default function Home(Props: {
                   content: "已结束",
                   onConfirm: () => {
                     hideModal();
-                    window.location.href = "/";
+                    router.push("/");
                   },
                 });
               },
@@ -258,7 +260,7 @@ export default function Home(Props: {
         content: <div>{err.data.error_msg}</div>,
         onConfirm: () => {
           hideModal();
-          window.location.href = "/";
+          router.push("/");
         },
         btn: {
           ok: "好的",
