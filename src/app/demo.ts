@@ -1,3 +1,5 @@
+"use client";
+
 const SDK_APPID_MAP = {
   prod: {
     ultimate: 3923193,
@@ -154,13 +156,15 @@ export class Demo {
     return result.Response;
   }
   private async demoRequest(path: string, opts: { param: any }) {
-    let res = await fetch(`${this._demoHost}${path}`, {
-      method: "POST",
-      headers: new Headers({
-        "Content-type": "application/json",
-      }),
-      body: JSON.stringify(opts.param),
-    });
-    return await res.json();
+    if (typeof window !== "undefined") {
+      let res = await fetch(`${this._demoHost}${path}`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(opts.param),
+      });
+      return await res.json();
+    }
   }
 }

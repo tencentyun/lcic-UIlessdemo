@@ -2,6 +2,8 @@
 import styles from "./page.module.css";
 import { useState } from "react";
 import { Demo } from "./demo";
+import { RoleName } from "./lib";
+import { useRouter } from "next/navigation";
 
 // import { AppHeader } from "./components/header/header";
 
@@ -15,17 +17,14 @@ import { Demo } from "./demo";
 // :
 // "tic_push_user_326322678_168497"
 
-const enum MenuType {
-  Audience = "0",
-  Owner = "1",
-}
 let getRandomName = (name: string) => {
   return `${name}_${Math.floor(Math.random() * 1000)}`;
 };
 
 export default function Home() {
   let [classId, setClassId] = useState("");
-  let [currentType, setCurrentType] = useState<any>(MenuType.Audience);
+  let router = useRouter();
+  let [currentType, setCurrentType] = useState<any>(RoleName.AUDIENCE);
   let [nick, setNick] = useState(getRandomName("Audience"));
   let [creatingRoom, setCreatingRoom] = useState(false);
   let changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,7 +56,9 @@ export default function Home() {
     let demoInfo = new Demo();
     let userInfo = await demoInfo.developInit(class_id, nick);
     console.log("enter room", userInfo);
-    window.location.href = `${window.location.href}/class?cid=${class_id}&uid=${userInfo.UserId}&token=${userInfo.Token}`;
+    router.push(
+      `/class?cid=${class_id}&uid=${userInfo.UserId}&token=${userInfo.Token}`
+    );
   };
 
   let enterRoomHandler = async () => {
@@ -71,14 +72,14 @@ export default function Home() {
     placeHolder: string;
   }>[] = [
     {
-      id: MenuType.Audience,
+      id: RoleName.AUDIENCE,
       text: "观众",
       val: {
         placeHolder: "输入房间号",
       },
     },
     {
-      id: MenuType.Owner,
+      id: RoleName.HOSTER,
       text: "房主",
       val: {
         placeHolder: "输入昵称",
@@ -111,7 +112,7 @@ export default function Home() {
                         if (creatingRoom) {
                           return;
                         }
-                        if (item.id === MenuType.Audience) {
+                        if (item.id === RoleName.AUDIENCE) {
                           setNick(getRandomName("Audience"));
                         } else {
                           setNick(getRandomName("Host"));
@@ -132,7 +133,7 @@ export default function Home() {
                   onChange={nickChangeHandler}
                 />
               </div>
-              {currentType === MenuType.Audience ? (
+              {currentType === RoleName.AUDIENCE ? (
                 <>
                   <div className="dropdown input-group mb-3">
                     <input
