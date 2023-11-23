@@ -14,7 +14,7 @@ import { Chat } from "./components/chat/chat";
 import { Settings } from "./components/settings/settings";
 import { useVisible } from "../../../hooks/visible";
 import { BootContext } from "../../../contexts/boot.context";
-import { debugFatory } from "../lib";
+import { MyInfo, RoleName, checkUserPermission, debugFatory } from "../lib";
 import { InfoNav } from "./components/nav/info-nav";
 import { Tips } from "./components/chat/tips";
 import { Hoster } from "./hoster";
@@ -37,18 +37,6 @@ export type MemberStream = {
   url: string;
 };
 
-type MyInfo = {
-  userId: string;
-  classId: string;
-  roleName: "student" | "teacher";
-  detail: {
-    user_name: string;
-  };
-};
-export const enum RoleName {
-  AUDIENCE,
-  HOSTER,
-}
 let debug = debugFatory("HomePage");
 /**
  *
@@ -84,9 +72,12 @@ export default function Home(Props: {
   let cid = Props.searchParams.cid;
   useEffect(() => {
     if (state.tcic) {
-      let hostInfo = state.tcic.hostInfo();
-      debug("hostInfo:", hostInfo);
-      setMyRole(hostInfo.detail.role);
+      let hostInfo: MyInfo | null = state.tcic.hostInfo();
+      let myInfo: MyInfo = state.tcic.myInfo();
+      let roomInfo: any = state.tcic.classInfo.class_info.room_info;
+      debug("hostInfo:", roomInfo);
+
+      setMyRole(myInfo.detail.role);
       /**
        * 先获取一次成员列表
        */
@@ -96,19 +87,22 @@ export default function Home(Props: {
           limit: 10,
         })
         .then((res: any) => {
-          setOnlineNumber(res.total - res.member_offline_number - 1); //减去host自己
+          let onlineNumber = hostInfo //房主可能不在线
+            ? res.total - res.member_offline_number - 1
+            : res.total - res.member_offline_number;
+          setOnlineNumber(onlineNumber); //减去host自己
           setMemberListInitData({
-            members: getValidMembers(res.members, [hostInfo.userId]),
-            onlineNumber: res.total - res.member_offline_number - 1, //减去host自己
+            members: getValidMembers(res.members, [hostInfo?.userId || ""]),
+            onlineNumber: onlineNumber,
             total: res.total,
             page: 0,
           });
         });
 
       /**
-       * 获取房主信息
+       * 获取房间信息
        */
-      setName(hostInfo.detail.user_name);
+      setName(roomInfo.name);
     }
   }, [state.tcic]);
 
@@ -240,6 +234,22 @@ export default function Home(Props: {
               name: () => {
                 roomInfoShow();
               },
+              quit: () => {
+                let canEndClass = false;
+                if (checkUserPermission(state.tcic.myInfo(), "endClass")) {
+                  canEndClass = true;
+                }
+                showModal({
+                  content: canEndClass ? "确定结束?" : "确定离开?",
+                  onConfirm: () => {
+                    hideModal();
+                    if (canEndClass) {
+                      state.tcic.endClass();
+                    }
+                    window.location.href = "/";
+                  },
+                });
+              },
             }}
           ></InfoNav>
         ) : (
@@ -304,7 +314,7 @@ export default function Home(Props: {
         <Footer>
           <div className="row">
             <div className="col-8">
-              {start ? <Chat>{tipsArray.map((item) => item)}</Chat> : <></>}
+              <Chat>{tipsArray.map((item) => item)}</Chat>
             </div>
             <div className="col-4">
               <Settings></Settings>

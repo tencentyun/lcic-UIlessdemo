@@ -19,7 +19,6 @@ export function MyModal(Props: {
   let [bootstrapItem, setBootstrapItem] = useState<any>(null);
   let targetEL = useRef<any>(null);
   let [mounted, setMounted] = useState(false);
-  debug("renderModal", mounted);
 
   useEffect(() => {
     setMounted(true);
@@ -39,6 +38,14 @@ export function MyModal(Props: {
       bootstrapItem.hide();
     }
   }
+
+  let cancleHandler = () => {
+    if (Props.onCancel) {
+      Props.onCancel();
+    } else {
+      bootstrapItem && bootstrapItem.hide();
+    }
+  };
 
   return mounted ? (
     <div className="modal" ref={targetEL}>
@@ -61,7 +68,7 @@ export function MyModal(Props: {
                   <button
                     type="button"
                     className="btn btn-secondary"
-                    onClick={Props.onCancel}
+                    onClick={cancleHandler}
                   >
                     {Props.btn.cancel}
                   </button>
@@ -85,7 +92,7 @@ export function MyModal(Props: {
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={Props.onCancel}
+                  onClick={cancleHandler}
                 >
                   取消
                 </button>

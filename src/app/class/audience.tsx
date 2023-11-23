@@ -10,9 +10,10 @@ export function Audience(Props: {
   token: string;
   start: boolean;
 }) {
-  let info = Props.tcic.hostInfo();
+  //   let info = Props.tcic.myInfo();
   let [start, setStart] = useState(false);
   const streamType = ["main"];
+  let roomInfo = Props.tcic.classInfo.class_info.room_info;
   let trtcClient = Props.client;
   let videoStart = () => {
     setStart(true);
@@ -22,17 +23,27 @@ export function Audience(Props: {
     trtcClient.enterRoom().then(() => {
       streamType.forEach((type) => {
         trtcClient.wantedView({
-          view: `${info.userId}`,
+          view: `${roomInfo.teacher_id}`,
           type,
-          userId: info.userId,
+          userId: roomInfo.teacher_id,
         });
       });
     });
   };
-  debug("info:", info);
+  if (Props.start) {
+    if (!start) {
+      videoStart();
+    }
+  }
+  //   else {
+  //     videPause();
+  //   }
   return (
     <div className={styles["stream-wrap"]}>
-      <div className={styles["stream-view"]} id={`${info.userId}`}></div>
+      <div
+        className={styles["stream-view"]}
+        id={`${roomInfo.teacher_id}`}
+      ></div>
       {Props.children}
       {/* <div className={styles["stream-wrap"]} key={member.user_id}><div></div> */}
     </div>

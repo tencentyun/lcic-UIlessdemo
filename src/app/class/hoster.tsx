@@ -23,7 +23,6 @@ export function Hoster(Props: {
   let info = Props.tcic.myInfo();
   let [isPublished, setPublished] = useState(false);
   useEffect(() => {
-    debug("Props.client;", Props.client);
     if (Props.client) {
       Props.client.localPreview({
         view: `${info.userId}`,
@@ -44,16 +43,15 @@ export function Hoster(Props: {
       });
       return;
     }
+    /**
+     * 判断是否已经开始上课
+     */
     let needStartClass = false;
-    // debug("Props.tcic:", Props.tcic);
     if (Props.tcic.classInfo.class_info.room_info.real_start_time === 0) {
       needStartClass = true;
     }
     if (needStartClass) {
-      await Props.tcic.startClass(
-        Props.tcic.classInfo.class_info.class_id,
-        Props.token
-      );
+      await Props.tcic.startClass();
     }
     Props.client.enterRoom().then(() => {
       Props.client.localPublish();

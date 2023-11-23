@@ -231,7 +231,7 @@ export function Chat(Props: { children?: any }) {
               {renderHistoryMsg}
             </div>
           ) : (
-            <Loading></Loading>
+            <></>
           )}
         </div>
         {Props.children}

@@ -2,7 +2,7 @@
 import { Dispatch, useContext, useEffect, useReducer, useState } from "react";
 import { MyOffCanvas } from "../../../../../components/offcanvas/offcanvas";
 import styles from "./style.module.css";
-import { debugFatory } from "@/app/lib";
+import { checkUserPermission, debugFatory } from "@/app/lib";
 import { Loading } from "../loading/loading";
 import { ModalContext } from "../../../../../contexts/modal.context";
 
@@ -101,15 +101,17 @@ export function MemberList(Props: {
   );
 
   let { showModal, hideModal } = useContext(ModalContext);
-  let [kickOutedUser, setKickOuted] = useState(new Set());
 
   let [loading, setLoading] = useState(false);
   let tcicObj = Props.tcic;
   if (!tcicObj) {
     return;
   }
-  let hostInfo: any = tcicObj.hostInfo();
-  debug("hostInfo:", Props.tcic);
+  let roomInfo: { teacher_id: string } =
+    Props.tcic.classInfo.class_info.room_info;
+  let hostInfo: { userId: string } | null = tcicObj.hostInfo();
+  let myInfo = tcicObj.myInfo();
+  debug("myInfo:", myInfo);
   // debug("Props.visible:", Props.visible);
 
   useEffect(() => {
@@ -122,10 +124,10 @@ export function MemberList(Props: {
         })
         .then((res: any) => {
           setLoading(false);
-          debug("res:", res);
+          let onlineMember = res.total - res.member_offline_number;
           let updateData = {
-            members: getValidMembers(res.members, [hostInfo.userId]),
-            onlineNumber: res.total - res.member_offline_number - 1, //减去host自己
+            members: getValidMembers(res.members, [roomInfo.teacher_id || ""]),
+            onlineNumber: hostInfo ? onlineMember - 1 : onlineMember, //减去host自己
             total: res.total,
           };
           Props.onUpdate && Props.onUpdate(updateData);
@@ -148,7 +150,10 @@ export function MemberList(Props: {
       onConfirm() {
         hideModal();
         let updateData = {
-          members: getValidMembers(state.members, [hostInfo.userId, udata.id]),
+          members: getValidMembers(state.members, [
+            roomInfo.teacher_id || "",
+            udata.id,
+          ]),
           onlineNumber: state.onlineNumber - 1, //减去刚踢的用户
           total: state.total - 1,
         };
@@ -170,19 +175,29 @@ export function MemberList(Props: {
     });
   };
 
+  let hasKickPermission = checkUserPermission(myInfo, "kickOut");
   let memberItem = function (data: Member) {
-    if (data.id === hostInfo.userId) {
+    if (data.id === roomInfo.teacher_id) {
       return;
     }
+    let text = data.text;
+    if (myInfo.userId === data.id) {
+      text = `${data.text}(我)`;
+    }
+
     return (
       <div className={`${styles["member"]}`} key={data.id}>
-        {data.text}
-        <i
-          className={`${styles["kickout-icon"]} float-end`}
-          onClick={() => {
-            kickoutUser(data);
-          }}
-        ></i>
+        {text}
+        {hasKickPermission ? (
+          <i
+            className={`${styles["kickout-icon"]} float-end`}
+            onClick={() => {
+              kickoutUser(data);
+            }}
+          ></i>
+        ) : (
+          <></>
+        )}
       </div>
     );
   };
@@ -206,7 +221,11 @@ export function MemberList(Props: {
                   <></>
                 )}
               </div>
-              <div className="col text-end">移出</div>
+              {hasKickPermission ? (
+                <div className="col text-end">移出</div>
+              ) : (
+                <></>
+              )}
             </div>
           </div>
         </div>

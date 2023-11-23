@@ -41,7 +41,6 @@ export let ModalProvider = function ModalProvider(Props: { children: any }) {
     visible: false,
   });
 
-  debug("ModalProvider", Props);
   function showModal(args: showModalParam) {
     setModalState({
       visible: true,
@@ -59,15 +58,9 @@ export let ModalProvider = function ModalProvider(Props: { children: any }) {
       {Props.children}
       <MyModal
         visible={modalState.visible || false}
-        onHide={() => {
-          modalState.onCancel && modalState.onCancel();
-        }}
-        onCancel={() => {
-          modalState.onCancel && modalState.onCancel();
-        }}
-        onConfirm={() => {
-          modalState.onConfirm && modalState.onConfirm();
-        }}
+        onHide={modalState.onCancel}
+        onCancel={modalState.onCancel}
+        onConfirm={modalState.onConfirm}
         btn={modalState.btn || undefined}
       >
         {modalState.content}

@@ -28,7 +28,6 @@ export function MyOffCanvas(Props: {
      * 而 targetEL.current 可以根据条件变化出现或消失
      */
     if (globalBoot.boot && targetEL.current && !bootstrapItem) {
-      debug("init offcanvas");
       offcanvas = new globalBoot.boot.Offcanvas(targetEL.current);
       targetEL.current.addEventListener("hidden.bs.offcanvas", (event: any) => {
         Props.onHide && Props.onHide(event);
