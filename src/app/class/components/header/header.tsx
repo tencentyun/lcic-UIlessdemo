@@ -7,7 +7,7 @@ import cssModule from "./style.module.css";
 import { cache, useContext, useEffect, useState } from "react";
 import { Loading } from "../loading/loading";
 import { BootContext } from "../../../../../contexts/boot.context";
-import { debugFatory } from "@/app/lib";
+import { RoleName, debugFatory } from "@/app/lib";
 let debug = debugFatory("Header");
 // type
 // :
@@ -46,12 +46,67 @@ export function AppHeader(Props: {
     });
     state.tcic = tcic;
     state.tim = state.sdk.createTimClient(state.tcic);
-    debug("AppHeader tcic: merged", tcic);
-    dispatch({
-      type: "merge",
-      arg: state,
-    });
-    Props.whenReady && Props.whenReady(tcic);
+    let roomInfo = tcic.classInfo.class_info.room_info;
+    tcic
+      .getUserInfoByIds([tcic.userId, roomInfo.teacher_id])
+      .then((res: any) => {
+        /**
+         * {
+    "error_code": 0,
+    "error_msg": "成功",
+    "request_id": "93266ab96bcbf5934b550197540b1c26",
+    "users": [
+        {
+            "user_id": "2YZPKmn5PNVoqrB5rekE2Je8yji",
+            "school_id": 3923193,
+            "nickname": "Audience_826",
+            "avatar": "",
+            "user_origin_id": ""
+        },
+        {
+            "user_id": "2Srao3bzGyRLWIVX6Wg6HhBv1Ao",
+            "school_id": 3923193,
+            "nickname": "teacher8316",
+            "avatar": "",
+            "user_origin_id": ""
+        }
+    ]
+}
+         */
+        if (res.error_code == 0) {
+          let [myinfo, hostInfo] = res.users;
+          state.myInfo = {
+            userId: myinfo.user_id,
+            roleName: "student",
+            classId: tcic.classId,
+            detail: {
+              role: RoleName.AUDIENCE,
+              ...myinfo,
+            },
+          };
+          state.hostInfo = {
+            userId: hostInfo.user_id,
+            roleName: "teacher",
+            classId: tcic.classId,
+            detail: {
+              role: RoleName.AUDIENCE,
+              ...hostInfo,
+            },
+          };
+          /**
+           * 注意这里时序，保证state更新时，所有信息都已经更新
+           * todo: 时序可以再优化，这里阻塞时间比较长
+           */
+          dispatch({
+            type: "merge",
+            arg: state,
+          });
+
+          debug("AppHeader tcic: merged", tcic);
+
+          Props.whenReady && Props.whenReady(tcic);
+        }
+      });
   };
 
   /**

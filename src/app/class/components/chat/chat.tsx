@@ -73,11 +73,14 @@ export function Chat(Props: { children?: any; isHost?: boolean }) {
   const MAX_MSG = 200;
   function createMyMsg(msg: string): MessageData {
     // hostInfo.detail.user_name
-    let myInfo = state.tcic?.myInfo();
+    let myInfo = state.myInfo;
+    if (!myInfo) {
+      throw new Error("myInfo is null");
+    }
     return {
       ID: `faked_${++fake_counter}`,
-      Operator_Account: myInfo.detail.user_id,
-      From_Account: myInfo.detail.user_id,
+      Operator_Account: myInfo.userId,
+      From_Account: myInfo.userId,
       GroupId: state.tcic?.classInfo.class_info.room_info.room_id,
       CallbackCommand: "Group.CallbackAfterSendMsg",
       NickName: myInfo.detail.user_name,

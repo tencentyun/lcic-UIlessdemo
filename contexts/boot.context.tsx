@@ -1,4 +1,4 @@
-import { debugFatory } from "@/app/lib";
+import { MyInfo, debugFatory } from "@/app/lib";
 import { contextFactory } from "./context-util";
 let debug = debugFatory("boot_Context");
 
@@ -9,14 +9,17 @@ let contextObj = contextFactory(
   {
     merge: (state, action) => {
       let result: any = { ...state };
+
+      let newObj = { ...action.arg };
+      for (let key in newObj) {
+        if (!newObj[key]) {
+          delete newObj[key];
+        }
+      }
       /**
        * 合并所有初始值
        */
-      ["boot", "tcic", "sdk", "tim"].forEach((key) => {
-        if (!result[key]) {
-          result[key] = action.arg[key];
-        }
-      });
+      result = { ...result, ...newObj };
       debug("update: result", result);
       return result;
     },
@@ -27,6 +30,8 @@ let contextObj = contextFactory(
       tcic: null as any,
       sdk: null as any,
       tim: null as any,
+      myInfo: null as MyInfo | null,
+      hostInfo: null as MyInfo | null,
     },
   }
 );

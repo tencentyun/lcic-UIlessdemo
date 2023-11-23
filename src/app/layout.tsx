@@ -31,6 +31,8 @@ export default function RootLayout({
           tcic: null,
           sdk: null,
           tim: null,
+          myInfo: null,
+          hostInfo: null,
         }}
       >
         <Script

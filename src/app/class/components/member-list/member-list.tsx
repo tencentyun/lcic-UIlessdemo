@@ -2,9 +2,10 @@
 import { Dispatch, useContext, useEffect, useReducer, useState } from "react";
 import { MyOffCanvas } from "../../../../../components/offcanvas/offcanvas";
 import styles from "./style.module.css";
-import { checkUserPermission, debugFatory } from "@/app/lib";
+import { MyInfo, checkUserPermission, debugFatory } from "@/app/lib";
 import { Loading } from "../loading/loading";
 import { ModalContext } from "../../../../../contexts/modal.context";
+import { BootContext } from "../../../../../contexts/boot.context";
 
 export type Member = TCIC.Common.Item<any>;
 
@@ -15,6 +16,8 @@ type MemberViewProps = {
   members: Member[];
   total: number;
   onlineNumber: number;
+  myInfo: MyInfo | null;
+  hostInfo: MyInfo | null;
 };
 export function getValidMembers(data: any, exceptIds: string[]) {
   return data
@@ -97,8 +100,12 @@ export function MemberList(Props: {
       members: Props.init.members,
       total: Props.init.total,
       onlineNumber: Props.init.onlineNumber,
+      myInfo: null,
+      hostInfo: null,
     } as MemberViewProps
   );
+
+  let { state: BootState } = useContext(BootContext);
 
   let { showModal, hideModal } = useContext(ModalContext);
 
@@ -109,10 +116,16 @@ export function MemberList(Props: {
   }
   let roomInfo: { teacher_id: string } =
     Props.tcic.classInfo.class_info.room_info;
-  let hostInfo: { userId: string } | null = tcicObj.hostInfo();
-  let myInfo = tcicObj.myInfo();
-  debug("myInfo:", myInfo);
   // debug("Props.visible:", Props.visible);
+  useEffect(() => {
+    dispatch({
+      type: "update",
+      arg: {
+        myInfo: BootState.myInfo,
+        hostInfo: BootState.hostInfo,
+      },
+    });
+  }, [BootState.myInfo]);
 
   useEffect(() => {
     if (Props.visible) {
@@ -127,7 +140,7 @@ export function MemberList(Props: {
           let onlineMember = res.total - res.member_offline_number;
           let updateData = {
             members: getValidMembers(res.members, [roomInfo.teacher_id || ""]),
-            onlineNumber: hostInfo ? onlineMember - 1 : onlineMember, //减去host自己
+            onlineNumber: state.hostInfo ? onlineMember - 1 : onlineMember, //减去host自己
             total: res.total,
           };
           Props.onUpdate && Props.onUpdate(updateData);
@@ -175,13 +188,15 @@ export function MemberList(Props: {
     });
   };
 
-  let hasKickPermission = checkUserPermission(myInfo, "kickOut");
+  let hasKickPermission = state.myInfo
+    ? checkUserPermission(state.myInfo, "kickOut")
+    : false;
   let memberItem = function (data: Member) {
     if (data.id === roomInfo.teacher_id) {
       return;
     }
     let text = data.text;
-    if (myInfo.userId === data.id) {
+    if (state.myInfo?.userId === data.id) {
       text = `${data.text}(我)`;
     }
 

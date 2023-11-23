@@ -87,10 +87,11 @@ export default function Home(Props: {
   let cid = Props.searchParams.cid;
   useEffect(() => {
     if (state.tcic) {
-      let hostInfo: MyInfo | null = state.tcic.hostInfo();
-      let myInfo: MyInfo = state.tcic.myInfo();
+      let hostInfo: MyInfo | null = state.hostInfo;
+      let myInfo: MyInfo = state.myInfo!;
       let roomInfo: any = state.tcic.classInfo.class_info.room_info;
-      debug("hostInfo:", roomInfo);
+      debug("roomInfo:", roomInfo);
+      debug("myInfo:", myInfo);
       /**
        * 主播则等待开播
        */
@@ -314,10 +315,15 @@ export default function Home(Props: {
           <InfoNav
             title={classInfo.name}
             online_number={`${onlineNumber}`}
-            showMark={{
-              isBegin: classInfo.classState === TClassStatus.Already_Start,
-              startTime: classInfo.startTime * 1000,
-            }}
+            showMark={
+              myRole === RoleName.HOSTER
+                ? {
+                    isBegin:
+                      classInfo.classState === TClassStatus.Already_Start,
+                    startTime: classInfo.startTime * 1000,
+                  }
+                : undefined
+            }
             clickHandler={{
               memberCounter: () => {
                 memberListShow();
