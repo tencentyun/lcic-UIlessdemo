@@ -24,6 +24,32 @@ export const enum RoleName {
   HOSTER,
 }
 
+/**
+ * 课堂状态
+ * @enum {number}
+ */
+export enum TClassStatus {
+  /**
+   * 未开始
+   */
+  Not_Start,
+
+  /**
+   * 已经开始
+   */
+  Already_Start,
+
+  /**
+   * 已经结束
+   */
+  Has_Ended,
+
+  /**
+   * 已过期
+   */
+  Has_Expired,
+}
+
 export type MyInfo = {
   userId: string;
   classId: string;

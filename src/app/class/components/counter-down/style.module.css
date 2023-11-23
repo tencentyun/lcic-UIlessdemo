@@ -1,0 +1,15 @@
+.counter-down {
+  position: fixed;
+  z-index: 3;
+  color: #fff;
+  top: 50%;
+  left: 50%;
+  font-size: 120px;
+  transform: translate(-50%, -50%);
+  background: #0000006b;
+  width: 150px;
+  /* height: 150px; */
+  text-align: center;
+  line-height: 150px;
+  border-radius: 50%;
+}

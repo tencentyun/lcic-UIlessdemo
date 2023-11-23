@@ -58,7 +58,7 @@ let fake_counter = 0;
 /**
  * @interface ChatProps
  */
-export function Chat(Props: { children?: any }) {
+export function Chat(Props: { children?: any; isHost?: boolean }) {
   let { state } = useContext(BootContext);
   /**
    * 判断是否初始化成功
@@ -220,7 +220,13 @@ export function Chat(Props: { children?: any }) {
   return (
     <>
       <div className={`${styles["wrap"]}`}>
-        <div ref={listEl} className={`${styles["message-list"]}`}>
+        <div
+          ref={listEl}
+          className={`${styles["message-list"]}`}
+          style={{
+            bottom: Props.isHost ? "-50px" : "50px",
+          }}
+        >
           {inited ? (
             /**
              * 消息列表保持滚动最小高度
@@ -235,12 +241,7 @@ export function Chat(Props: { children?: any }) {
           )}
         </div>
         {Props.children}
-        <div
-          className={`${styles["emoji"]}`}
-          onClick={() => {
-            inited && emojiShow();
-          }}
-        ></div>
+
         <div
           className={`${styles["new-tips"]} ${
             showNewMsgTips && newmsgcounter
@@ -251,14 +252,26 @@ export function Chat(Props: { children?: any }) {
         >
           有{newmsgcounter}条新消息<i className={`${styles["down-icon"]}`}></i>
         </div>
-        <input
-          type="text"
-          maxLength={MAX_MSG}
-          className={`form-control ${styles["chat-input"]}`}
-          placeholder="聊聊吧～"
-          onChange={msgChangedHandler}
-          value={chatInput}
-        />
+        {Props.isHost ? (
+          <></>
+        ) : (
+          <>
+            <div
+              className={`${styles["emoji"]}`}
+              onClick={() => {
+                inited && emojiShow();
+              }}
+            ></div>
+            <input
+              type="text"
+              maxLength={MAX_MSG}
+              className={`form-control ${styles["chat-input"]}`}
+              placeholder="聊聊吧～"
+              onChange={msgChangedHandler}
+              value={chatInput}
+            />
+          </>
+        )}
       </div>
       <EmojiPanel
         visible={emojiVisible}

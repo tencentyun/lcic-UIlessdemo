@@ -1,14 +1,8 @@
 import { debugFatory } from "@/app/lib";
 import { MyModal } from "../components/modal/modal";
-import { Context, createContext, useReducer, useState } from "react";
+import { createContext, useState } from "react";
+import { CounterDown } from "@/app/class/components/counter-down/counter-down";
 let debug = debugFatory("Modal_Context");
-
-type ModalState = {
-  visible?: boolean;
-  title?: string;
-  content?: string;
-  children?: any;
-};
 
 type showModalParam = {
   content?: any;
@@ -22,13 +16,12 @@ type showModalParam = {
   };
 };
 
-type ModalContextType = {
-  showModal: (args?: showModalParam) => void;
-};
+type showCounterDownParam = { counter: number; callback: any };
 
 let contextObj = createContext({
   showModal: (args: showModalParam) => {},
   hideModal: () => {},
+  showCounterDown: (arg: showCounterDownParam) => {},
 });
 
 /**
@@ -39,6 +32,9 @@ export let ModalContext = contextObj;
 export let ModalProvider = function ModalProvider(Props: { children: any }) {
   let [modalState, setModalState] = useState<showModalParam>({
     visible: false,
+  });
+  let [counterState, setCounterState] = useState({
+    value: 0,
   });
 
   function showModal(args: showModalParam) {
@@ -53,8 +49,24 @@ export let ModalProvider = function ModalProvider(Props: { children: any }) {
       visible: false,
     });
   }
+
+  function showCounterDown(arg: showCounterDownParam) {
+    let counter = arg.counter;
+    let counterDown = setInterval(() => {
+      if (counter <= 0) {
+        clearInterval(counterDown);
+        arg.callback && arg.callback();
+      }
+      setCounterState({
+        value: counter--,
+      });
+    }, 1000);
+    setCounterState({
+      value: counter--,
+    });
+  }
   return (
-    <contextObj.Provider value={{ showModal, hideModal }}>
+    <contextObj.Provider value={{ showModal, hideModal, showCounterDown }}>
       {Props.children}
       <MyModal
         visible={modalState.visible || false}
@@ -65,6 +77,7 @@ export let ModalProvider = function ModalProvider(Props: { children: any }) {
       >
         {modalState.content}
       </MyModal>
+      <CounterDown value={counterState.value}></CounterDown>
     </contextObj.Provider>
   );
 };

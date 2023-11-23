@@ -2,12 +2,12 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background-color: #1d2233;
+  background-color: #515563;
   align-items: center;
   min-height: 100vh;
   /* background-image: url("/img/demo/t1.png"); */
-  background-repeat: no-repeat;
-  background-size: cover;
+  /* background-repeat: repeat; */
+  /* background-size: ; */
 }
 
 .stream-view {
@@ -32,4 +32,8 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+}
+
+.beifore-begin {
+  color: #fff;
 }
