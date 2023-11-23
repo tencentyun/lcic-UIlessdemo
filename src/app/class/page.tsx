@@ -19,6 +19,7 @@ import { InfoNav } from "./components/nav/info-nav";
 import { Tips } from "./components/chat/tips";
 import { Hoster } from "./hoster";
 import { Audience } from "./audience";
+import { ModalContext } from "../../../contexts/modal.context";
 
 // type
 // :
@@ -64,6 +65,7 @@ export default function Home(Props: {
   };
 }) {
   let [start, setStart] = useState(false);
+  let { showModal, hideModal } = useContext(ModalContext);
   let [onlineNumber, setOnlineNumber] = useState(0);
   let [name, setName] = useState("");
   let [trtcClient, setTrtcClient] = useState<any>(null);
@@ -96,7 +98,7 @@ export default function Home(Props: {
         .then((res: any) => {
           setOnlineNumber(res.total - res.member_offline_number - 1); //减去host自己
           setMemberListInitData({
-            members: getValidMembers(res.members, hostInfo.userId),
+            members: getValidMembers(res.members, [hostInfo.userId]),
             onlineNumber: res.total - res.member_offline_number - 1, //减去host自己
             total: res.total,
             page: 0,
@@ -187,11 +189,32 @@ export default function Home(Props: {
     setTrtcClient(trtcClient);
   };
 
+  let whenError = (err: any) => {
+    if (err.data.error_code === 10301) {
+      // alert(err.data.error_msg);
+      showModal({
+        content: <div>{err.data.error_msg}</div>,
+        onConfirm: () => {
+          hideModal();
+          window.location.href = "/";
+        },
+        btn: {
+          ok: "好的",
+        },
+      });
+      debug("trtcClient:err", err.data);
+    }
+  };
   let startRover = start ? (
     <></>
   ) : (
     <div className={`${styles["ready-cover"]}`}>
-      <button className={`btn btn-primary `} onClick={() => setStart(true)}>
+      <button
+        className={`btn btn-primary `}
+        onClick={() => {
+          return setStart(true);
+        }}
+      >
         开始
       </button>
     </div>
@@ -201,6 +224,7 @@ export default function Home(Props: {
     <>
       <AppHeader
         whenReady={whenReady}
+        whenError={whenError}
         cid={Props.searchParams.cid}
         uid={Props.searchParams.uid}
         token={token}
@@ -264,6 +288,12 @@ export default function Home(Props: {
             tcic={state.tcic}
             classId={cid}
             init={memberListInitData}
+            onUpdate={(data) => {
+              /**
+               * 列表同步数据
+               */
+              setOnlineNumber(data.onlineNumber);
+            }}
           ></MemberList>
         ) : (
           <></>

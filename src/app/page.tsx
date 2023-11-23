@@ -1,8 +1,7 @@
 "use client";
 import styles from "./page.module.css";
-import { useContext, useEffect, useState } from "react";
+import { useState } from "react";
 import { Demo } from "./demo";
-import { BootContext } from "../../contexts/boot.context";
 
 // import { AppHeader } from "./components/header/header";
 

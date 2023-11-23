@@ -4,7 +4,7 @@
  */
 import Script from "next/script";
 import cssModule from "./style.module.css";
-import { useContext, useEffect, useState } from "react";
+import { cache, useContext, useEffect, useState } from "react";
 import { Loading } from "../loading/loading";
 import { BootContext } from "../../../../../contexts/boot.context";
 import { debugFatory } from "@/app/lib";
@@ -27,6 +27,7 @@ let debug = debugFatory("Header");
  */
 export function AppHeader(Props: {
   whenReady: any;
+  whenError: any;
   uid: string;
   token: string;
   cid: string;
@@ -45,7 +46,7 @@ export function AppHeader(Props: {
     });
     state.tcic = tcic;
     state.tim = state.sdk.createTimClient(state.tcic);
-    debug("AppHeader tcic: merged");
+    debug("AppHeader tcic: merged", tcic);
     dispatch({
       type: "merge",
       arg: state,
@@ -53,6 +54,11 @@ export function AppHeader(Props: {
     Props.whenReady && Props.whenReady(tcic);
   };
 
+  /**
+   * 如果初始化失败，就挂起阻塞后续逻辑执行,不抛出reject
+   * @param param
+   * @returns
+   */
   let initTcic = (param: {
     sdk: any;
     userId: string;
@@ -60,12 +66,19 @@ export function AppHeader(Props: {
     classId: number;
   }) => {
     let tcic = param.sdk.create(param);
-    return new Promise((resolve) => {
-      tcic.init({
-        ready: () => {
-          resolve(tcic);
-        },
-      });
+    return new Promise((resolve, reject) => {
+      tcic
+        .init({
+          ready: () => {
+            resolve(tcic);
+          },
+        })
+        .catch((err: any) => {
+          debug(err);
+          Props.whenError && Props.whenError(err);
+          // reject(err);
+          console.log("err:", err, err.data);
+        });
     });
   };
 

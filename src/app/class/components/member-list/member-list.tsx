@@ -4,6 +4,7 @@ import { MyOffCanvas } from "../../../../../components/offcanvas/offcanvas";
 import styles from "./style.module.css";
 import { debugFatory } from "@/app/lib";
 import { Loading } from "../loading/loading";
+import { ModalContext } from "../../../../../contexts/modal.context";
 
 export type Member = TCIC.Common.Item<any>;
 
@@ -15,14 +16,15 @@ type MemberViewProps = {
   total: number;
   onlineNumber: number;
 };
-export function getValidMembers(data: any, hostId: string) {
+export function getValidMembers(data: any, exceptIds: string[]) {
   return data
     .filter((item: any) => {
       /**
        * 不展示房主，并且只展示在线
        */
       return (
-        item.user_id !== hostId && item.current_state == TMemberStatus.Online
+        !exceptIds.includes(item.user_id) &&
+        item.current_state == TMemberStatus.Online
       );
     })
     .map((item: any) => {
@@ -75,6 +77,11 @@ export function MemberList(Props: {
   tcic: any;
   classId: string;
   visible: boolean;
+  onUpdate?: (data: {
+    members: Member[];
+    onlineNumber: number;
+    total: number;
+  }) => void;
   init: {
     members: Member[];
     onlineNumber: number;
@@ -93,11 +100,17 @@ export function MemberList(Props: {
     } as MemberViewProps
   );
 
+  let { showModal, hideModal } = useContext(ModalContext);
+  let [kickOutedUser, setKickOuted] = useState(new Set());
+
   let [loading, setLoading] = useState(false);
   let tcicObj = Props.tcic;
+  if (!tcicObj) {
+    return;
+  }
   let hostInfo: any = tcicObj.hostInfo();
-  debug("hostInfo:", hostInfo);
-  debug("Props.visible:", Props.visible);
+  debug("hostInfo:", Props.tcic);
+  // debug("Props.visible:", Props.visible);
 
   useEffect(() => {
     if (Props.visible) {
@@ -110,17 +123,52 @@ export function MemberList(Props: {
         .then((res: any) => {
           setLoading(false);
           debug("res:", res);
+          let updateData = {
+            members: getValidMembers(res.members, [hostInfo.userId]),
+            onlineNumber: res.total - res.member_offline_number - 1, //减去host自己
+            total: res.total,
+          };
+          Props.onUpdate && Props.onUpdate(updateData);
+
           dispatch({
             type: "update",
-            arg: {
-              members: getValidMembers(res.members, hostInfo.userId),
-              onlineNumber: res.total - res.member_offline_number - 1, //减去host自己
-              total: res.total,
-            },
+            arg: updateData,
           });
         });
     }
   }, [Props.visible]);
+
+  let kickoutUser = (udata: Member) => {
+    debug("userId", udata);
+    showModal({
+      content: `确定踢出用户${udata.text}？`,
+      onCancel: () => {
+        hideModal();
+      },
+      onConfirm() {
+        hideModal();
+        let updateData = {
+          members: getValidMembers(state.members, [hostInfo.userId, udata.id]),
+          onlineNumber: state.onlineNumber - 1, //减去刚踢的用户
+          total: state.total - 1,
+        };
+        Props.onUpdate && Props.onUpdate(updateData);
+        dispatch({
+          type: "update",
+          arg: updateData,
+        });
+        Props.tcic.memberAction({
+          classId: Props.classId,
+          userId: udata.id,
+          actionType: 18,
+          /**
+           * 参考用户行为, 18: 踢出,
+           * todo: 将类型引入到项目
+           **/
+        });
+      },
+    });
+  };
 
   let memberItem = function (data: Member) {
     if (data.id === hostInfo.userId) {
@@ -129,7 +177,12 @@ export function MemberList(Props: {
     return (
       <div className={`${styles["member"]}`} key={data.id}>
         {data.text}
-        <i className={`${styles["kickout-icon"]} float-end`}></i>
+        <i
+          className={`${styles["kickout-icon"]} float-end`}
+          onClick={() => {
+            kickoutUser(data);
+          }}
+        ></i>
       </div>
     );
   };

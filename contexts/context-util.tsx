@@ -14,11 +14,11 @@ export function contextFactory<
     string,
     (state: S, action: { type: any; arg?: any; state: S }) => S
   >
->(actions: T, defaultVal?: S) {
+>(actions: T, opts?: { defaultVal?: S; jsxEL?: any }) {
   const Context = createContext<{
     state: S;
     dispatch: React.Dispatch<{ type: keyof typeof actions; arg?: any }>;
-  }>(defaultVal as any);
+  }>(opts?.defaultVal as any);
   let myRducer = function (
     state: S,
     actionHandler: { type: keyof typeof actions; arg: any }
@@ -36,7 +36,10 @@ export function contextFactory<
   };
 
   let myProvider = function (props: { children: any; state: S }) {
-    const [state, dispatch]: [any, any] = useReducer<any>(myRducer, defaultVal);
+    const [state, dispatch]: [any, any] = useReducer<any>(
+      myRducer,
+      opts?.defaultVal
+    );
     useEffect(() => {
       if (props.state) {
         dispatch({
@@ -46,9 +49,11 @@ export function contextFactory<
       }
     }, [props]);
 
+    let JSXEL = opts?.jsxEL;
     return (
       <Context.Provider value={{ state: state, dispatch }}>
         {props.children}
+        {JSXEL ? <JSXEL data={state}></JSXEL> : undefined}
       </Context.Provider>
     );
   };

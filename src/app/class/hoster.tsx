@@ -17,6 +17,9 @@ export function Hoster(Props: {
   start: boolean;
 }) {
   // debug("tcic", Props.tcic);
+  if (!Props.tcic) {
+    return;
+  }
   let info = Props.tcic.myInfo();
   let [isPublished, setPublished] = useState(false);
   useEffect(() => {
@@ -24,6 +27,9 @@ export function Hoster(Props: {
     if (Props.client) {
       Props.client.localPreview({
         view: `${info.userId}`,
+        options: {
+          objectFit: "contain",
+        },
       });
     }
   }, [Props.client]);

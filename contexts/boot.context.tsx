@@ -22,10 +22,12 @@ let contextObj = contextFactory(
     },
   },
   {
-    boot: null as any,
-    tcic: null as any,
-    sdk: null as any,
-    tim: null as any,
+    defaultVal: {
+      boot: null as any,
+      tcic: null as any,
+      sdk: null as any,
+      tim: null as any,
+    },
   }
 );
 
