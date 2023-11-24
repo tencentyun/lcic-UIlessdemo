@@ -10,7 +10,6 @@ export function Audience(Props: {
   token: string;
   start: boolean;
 }) {
-  //   let info = Props.tcic.myInfo();
   let [start, setStart] = useState(false);
   const streamType = ["main"];
   let roomInfo = Props.tcic.classInfo.class_info.room_info;

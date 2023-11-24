@@ -130,15 +130,21 @@ export function Chat(Props: { children?: any; isHost?: boolean }) {
           setMsgList(data);
           setInited(true);
         });
-        target.on("groupMsgReceived", (msg: any) => {
+        target.on("groupMsgReceived",async (msg: any) => {
           debug("groupMsgReceived groupMsgReceived:", msg);
+          let userInfoArr = await state.tcic.getUserInfoByIds([msg.from]);
+          let userInfo = userInfoArr[0];
+          debug("groupMsgReceived userInfo:", userInfo);
+          /**
+           * 如果有没有直接报错
+           */
           let newMsg: MessageData = {
             ID: msg.ID,
             GroupId: msg.to,
             CallbackCommand: "Group.CallbackAfterSendMsg",
             From_Account: msg.from,
             Operator_Account: msg.from,
-            NickName: msg.nick,
+            NickName: userInfo.nickname,
             Type: msg.type,
             MsgTime: msg.time,
             MsgSeq: msg.seq,

@@ -53,7 +53,7 @@ export function AppHeader(Props: {
       ? [tcic.userId]
       : [tcic.userId, roomInfo.teacher_id];
 
-    tcic.getUserInfoByIds(requestIds).then((res: any) => {
+    tcic.getUserInfoByIds(requestIds).then((users: any) => {
       /**
          * {
     "error_code": 0,
@@ -77,8 +77,8 @@ export function AppHeader(Props: {
     ]
 }
          */
-      if (res.error_code == 0) {
-        let [myinfo, hostInfo] = res.users;
+        debug('users',users);
+        let [myinfo, hostInfo] = users;
         if (hostIsTeacher) {
           let myInfoResult: any = {
             userId: myinfo.user_id,
@@ -123,7 +123,7 @@ export function AppHeader(Props: {
         debug("AppHeader tcic: merged", tcic);
 
         Props.whenReady && Props.whenReady(tcic);
-      }
+  
     });
   };
 
