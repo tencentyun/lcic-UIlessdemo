@@ -26,7 +26,8 @@ import { Tips } from "./components/chat/tips";
 import { Hoster } from "./hoster";
 import { Audience } from "./audience";
 import { ModalContext } from "../../../contexts/modal.context";
-import { useRouter } from "next/navigation";
+import { useSearchParams,useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 
 // type
 // :
@@ -53,11 +54,6 @@ let debug = debugFatory("HomePage");
  */
 export default function Home(Props: {
   params: any;
-  searchParams: {
-    cid: string;
-    token: string;
-    uid: string;
-  };
 }) {
   /**
    * start为授权交互，表示客户本地推流是否开始
@@ -77,7 +73,14 @@ export default function Home(Props: {
     name: "",
   });
   const router = useRouter();
-
+  let searchParams = useSearchParams()
+  /**
+   *  {
+    cid: string;
+    token: string;
+    uid: string;
+  };
+   */
   let { state } = useContext(BootContext);
   let [memberListInitData, setMemberListInitData] = useState<{
     members: Member[];
@@ -85,8 +88,9 @@ export default function Home(Props: {
     page: number;
     total: number;
   } | null>(null);
-  let token = Props.searchParams.token;
-  let cid = Props.searchParams.cid;
+  let token = searchParams.get('token') as string;
+  let cid =  searchParams.get('cid') as string;
+  let uid =  searchParams.get('uid') as string;
   useEffect(() => {
     if (state.tcic) {
       let hostInfo: MyInfo | null = state.hostInfo;
@@ -313,8 +317,8 @@ export default function Home(Props: {
       <AppHeader
         whenReady={whenReady}
         whenError={whenError}
-        cid={Props.searchParams.cid}
-        uid={Props.searchParams.uid}
+        cid={cid}
+        uid={uid}
         token={token}
       >
         {state.tcic ? (
