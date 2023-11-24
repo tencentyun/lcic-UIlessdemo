@@ -38,23 +38,21 @@ export function InfoNav(Props: {
 }) {
   let [timer, setTime] = useState<any>(null);
   let [duration, setDuration] = useState("00:00:00");
-  if (Props.showMark) {
-    useEffect(() => {
-      if (!timer && Props.showMark?.startTime) {
-        setTime(
-          setInterval(() => {
-            let now = new Date().getTime();
-            let startTime = Props.showMark!.startTime;
-            // debug("now - startTime:", now, startTime);
-            setDuration(formatIncrementalTime(now - startTime));
-          }, 1000)
-        );
-      }
-      return () => {
-        clearTimeout(timer);
-      };
-    }, [Props.showMark?.startTime]);
-  }
+  useEffect(() => {
+    if (!timer && Props.showMark?.startTime) {
+      setTime(
+        setInterval(() => {
+          let now = new Date().getTime();
+          let startTime = Props.showMark!.startTime;
+          // debug("now - startTime:", now, startTime);
+          setDuration(formatIncrementalTime(now - startTime));
+        }, 1000)
+      );
+    }
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [Props]);
 
   return (
     <nav className="navbar navbar-expand-md navbar-dark fixed-top">

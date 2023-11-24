@@ -214,7 +214,11 @@ export default function Home(Props: {
                   content: "已结束",
                   onConfirm: () => {
                     hideModal();
-                    router.push("/");
+                    /**
+                     * 这里要看为啥basepath不生效
+                     *  push / 没进入到base
+                     */
+                    router.push(`/${process.env.NEXT_PUBLIC_BASE_PATH}}`);
                   },
                 });
               },

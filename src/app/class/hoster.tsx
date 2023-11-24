@@ -17,9 +17,7 @@ export function Hoster(Props: {
   start: boolean;
 }) {
   // debug("tcic", Props.tcic);
-  if (!Props.tcic) {
-    return;
-  }
+
   let info = Props.tcic.myInfo();
   let [isPublished, setPublished] = useState(false);
   useEffect(() => {
@@ -32,6 +30,9 @@ export function Hoster(Props: {
       });
     }
   }, [Props.client]);
+  if (!Props.tcic) {
+    return;
+  }
   let videoPublish = async () => {
     setPublished(true);
     if (isPublished) {

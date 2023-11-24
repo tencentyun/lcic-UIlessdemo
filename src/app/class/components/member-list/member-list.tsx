@@ -110,13 +110,6 @@ export function MemberList(Props: {
   let { showModal, hideModal } = useContext(ModalContext);
 
   let [loading, setLoading] = useState(false);
-  let tcicObj = Props.tcic;
-  if (!tcicObj) {
-    return;
-  }
-  let roomInfo: { teacher_id: string } =
-    Props.tcic.classInfo.class_info.room_info;
-  // debug("Props.visible:", Props.visible);
   useEffect(() => {
     dispatch({
       type: "update",
@@ -126,6 +119,10 @@ export function MemberList(Props: {
       },
     });
   }, [BootState.myInfo]);
+  let tcicObj = Props.tcic;
+  let roomInfo: { teacher_id: string } =
+    Props.tcic.classInfo.class_info.room_info;
+  // debug("Props.visible:", Props.visible);
 
   useEffect(() => {
     if (Props.visible) {
@@ -152,6 +149,10 @@ export function MemberList(Props: {
         });
     }
   }, [Props.visible]);
+
+  if (!tcicObj) {
+    return;
+  }
 
   let kickoutUser = (udata: Member) => {
     debug("userId", udata);

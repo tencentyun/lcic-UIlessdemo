@@ -44,13 +44,17 @@ export function AppHeader(Props: {
       classId: parseInt(Props.cid, 10),
       token: Props.token,
     });
+    debug("inited");
     state.tcic = tcic;
     state.tim = state.sdk.createTimClient(state.tcic);
     let roomInfo = tcic.classInfo.class_info.room_info;
-    tcic
-      .getUserInfoByIds([tcic.userId, roomInfo.teacher_id])
-      .then((res: any) => {
-        /**
+    let hostIsTeacher = tcic.userId === roomInfo.teacher_id;
+    let requestIds = hostIsTeacher
+      ? [tcic.userId]
+      : [tcic.userId, roomInfo.teacher_id];
+
+    tcic.getUserInfoByIds(requestIds).then((res: any) => {
+      /**
          * {
     "error_code": 0,
     "error_msg": "成功",
@@ -73,8 +77,21 @@ export function AppHeader(Props: {
     ]
 }
          */
-        if (res.error_code == 0) {
-          let [myinfo, hostInfo] = res.users;
+      if (res.error_code == 0) {
+        let [myinfo, hostInfo] = res.users;
+        if (hostIsTeacher) {
+          let myInfoResult: any = {
+            userId: myinfo.user_id,
+            roleName: "teacher",
+            classId: tcic.classId,
+            detail: {
+              role: RoleName.HOSTER,
+              ...myinfo,
+            },
+          };
+          state.myInfo = myInfoResult;
+          state.hostInfo = myInfoResult;
+        } else {
           state.myInfo = {
             userId: myinfo.user_id,
             roleName: "student",
@@ -93,20 +110,21 @@ export function AppHeader(Props: {
               ...hostInfo,
             },
           };
-          /**
-           * 注意这里时序，保证state更新时，所有信息都已经更新
-           * todo: 时序可以再优化，这里阻塞时间比较长
-           */
-          dispatch({
-            type: "merge",
-            arg: state,
-          });
-
-          debug("AppHeader tcic: merged", tcic);
-
-          Props.whenReady && Props.whenReady(tcic);
         }
-      });
+        /**
+         * 注意这里时序，保证state更新时，所有信息都已经更新
+         * todo: 时序可以再优化，这里阻塞时间比较长
+         */
+        dispatch({
+          type: "merge",
+          arg: state,
+        });
+
+        debug("AppHeader tcic: merged", tcic);
+
+        Props.whenReady && Props.whenReady(tcic);
+      }
+    });
   };
 
   /**
