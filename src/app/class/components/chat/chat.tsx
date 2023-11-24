@@ -77,13 +77,14 @@ export function Chat(Props: { children?: any; isHost?: boolean }) {
     if (!myInfo) {
       throw new Error("myInfo is null");
     }
+    debug('myInfo: createMyMsg',myInfo)
     return {
       ID: `faked_${++fake_counter}`,
       Operator_Account: myInfo.userId,
       From_Account: myInfo.userId,
       GroupId: state.tcic?.classInfo.class_info.room_info.room_id,
       CallbackCommand: "Group.CallbackAfterSendMsg",
-      NickName: myInfo.detail.user_name,
+      NickName: myInfo.detail.nickname,
       Type: "AVChatRoom",
       MsgTime: Date.now(),
       MsgSeq: fake_counter,
@@ -220,6 +221,21 @@ export function Chat(Props: { children?: any; isHost?: boolean }) {
     }
   };
 
+  let sendMsg = () => {
+    // chatInput
+    if (!/^\s+$/.test(chatInput)) {
+      let msgObj = createMyMsg(chatInput); 
+      setMsgList((preList) => {
+        let newList = preList.concat();
+        newList.push(msgObj);
+        return [...newList];
+      });
+
+      state.tim.sendRoomMsg(chatInput);
+      setChatInput("");
+    }
+  };
+
   return (
     <>
       <div className={`${styles["wrap"]}`}>
@@ -273,6 +289,12 @@ export function Chat(Props: { children?: any; isHost?: boolean }) {
               onChange={msgChangedHandler}
               value={chatInput}
             />
+            <div
+              className={`btn btn-primary  btn-sm ${styles["sendBtn"]}`}
+              onClick={sendMsg}
+            >
+              发送
+            </div>
           </>
         )}
       </div>

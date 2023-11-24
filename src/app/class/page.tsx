@@ -27,6 +27,8 @@ import { Hoster } from "./hoster";
 import { Audience } from "./audience";
 import { ModalContext } from "../../../contexts/modal.context";
 import { useSearchParams,useRouter } from "next/navigation";
+// import VConsole from 'vconsole';
+
 // import { useRouter } from "next/navigation";
 
 // type
@@ -92,6 +94,8 @@ export default function Home(Props: {
   let cid =  searchParams.get('cid') as string;
   let uid =  searchParams.get('uid') as string;
   useEffect(() => {
+    // const vConsole = new VConsole();
+    // debug(vConsole);
     if (state.tcic) {
       let hostInfo: MyInfo | null = state.hostInfo;
       let myInfo: MyInfo = state.myInfo!;

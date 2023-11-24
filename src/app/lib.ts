@@ -55,8 +55,8 @@ export type MyInfo = {
   classId: string;
   roleName: "student" | "teacher";
   detail: {
-    user_name: string;
     role: RoleName;
+    nickname:string;
   };
 };
 /**
