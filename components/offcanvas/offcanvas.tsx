@@ -1,10 +1,10 @@
-"use client";
-import { useContext, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { BootContext } from "../../contexts/boot.context";
-import { debugFatory } from "@/app/lib";
+'use client';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { BootContext } from '../../contexts/boot.context';
+import { debugFatory } from '@/app/lib';
 
-let debug = debugFatory("OffCanvas");
+let debug = debugFatory('OffCanvas');
 
 export function MyOffCanvas(Props: {
   children?: any;
@@ -18,7 +18,7 @@ export function MyOffCanvas(Props: {
   let targetEL = useRef<any>(null);
   let [bootstrapItem, setBootstrapItem] = useState<any>(null);
   let [mounted, setMounted] = useState(false);
-  let [direction, setDirection] = useState<"bottom" | "start">("start");
+  let [direction, setDirection] = useState<'bottom' | 'start'>('start');
   useEffect(() => {
     setMounted(true);
     let offcanvas = bootstrapItem;
@@ -29,7 +29,7 @@ export function MyOffCanvas(Props: {
      */
     if (globalBoot.boot && targetEL.current && !bootstrapItem) {
       offcanvas = new globalBoot.boot.Offcanvas(targetEL.current);
-      targetEL.current.addEventListener("hidden.bs.offcanvas", (event: any) => {
+      targetEL.current.addEventListener('hidden.bs.offcanvas', (event: any) => {
         Props.onHide && Props.onHide(event);
       });
       setBootstrapItem(offcanvas);
@@ -42,7 +42,7 @@ export function MyOffCanvas(Props: {
      * 浏览器相关行为要在effect里实现，避免服务端渲染报错b
      */
     if (window && window.innerWidth < 800) {
-      setDirection("bottom");
+      setDirection('bottom');
     }
   }, [globalBoot.boot, Props.visible]);
 

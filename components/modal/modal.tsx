@@ -1,8 +1,8 @@
-import { useContext, useEffect, useRef, useState } from "react";
-import { BootContext } from "../../contexts/boot.context";
-import { debugFatory } from "@/app/lib";
+import { useContext, useEffect, useRef, useState } from 'react';
+import { BootContext } from '../../contexts/boot.context';
+import { debugFatory } from '@/app/lib';
 
-let debug = debugFatory("Modal");
+let debug = debugFatory('Modal');
 export function MyModal(Props: {
   children?: any;
   onConfirm?: any;
@@ -24,7 +24,7 @@ export function MyModal(Props: {
     setMounted(true);
     if (state.boot && targetEL.current && !bootstrapItem) {
       let modal = new state.boot.Modal(targetEL.current);
-      targetEL.current.addEventListener("hidden.bs.modal", (event: any) => {
+      targetEL.current.addEventListener('hidden.bs.modal', (event: any) => {
         Props.onHide && Props.onHide(event);
       });
       setBootstrapItem(modal);
@@ -52,7 +52,7 @@ export function MyModal(Props: {
       <div className="modal-dialog  modal-dialog-centered">
         <div className="modal-content">
           <div className="modal-header">
-            <h5 className="modal-title">{Props.title || ""}</h5>
+            <h5 className="modal-title">{Props.title || ''}</h5>
             <button
               type="button"
               className="btn-close"

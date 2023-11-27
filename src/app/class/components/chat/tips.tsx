@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import styles from "./style.module.css";
+import { useEffect, useState } from 'react';
+import styles from './style.module.css';
 
 export function Tips(Props: { onHide?: any; children?: any; styles?: any }) {
   let [unmounted, setUmounted] = useState(true);
@@ -23,8 +23,8 @@ export function Tips(Props: { onHide?: any; children?: any; styles?: any }) {
   }, [Props]);
   return unmounted ? (
     <div
-      className={`${styles["message"]} ${styles["msg-tips"]} ${
-        visible ? styles["msg-tips-show"] : ""
+      className={`${styles['message']} ${styles['msg-tips']} ${
+        visible ? styles['msg-tips-show'] : ''
       }`}
       style={Props.styles}
     >
