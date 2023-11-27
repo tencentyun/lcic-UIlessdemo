@@ -447,7 +447,7 @@ export default function Home(Props: {
                         className={`btn btn-primary `}
                         onClick={hostStart}
                       >
-                        开始
+                        开始直播
                       </button>
                     </div>
                   </div>

@@ -150,7 +150,6 @@ export function AppHeader(Props: {
           debug(err);
           Props.whenError && Props.whenError(err);
           // reject(err);
-          console.log("err:", err, err.data);
         });
     });
   };

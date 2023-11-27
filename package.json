@@ -3,14 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --hostname=0.0.0.0 --port=8100",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "ssl":"local-ssl-proxy --source 8101 --target 8100"
   },
   "dependencies": {
     "@tcic/watch_sdk": "*",
     "debug": "^4.3.4",
+    "local-ssl-proxy": "^2.0.5",
     "next": "14.0.1",
     "react": "^18",
     "react-dom": "^18",

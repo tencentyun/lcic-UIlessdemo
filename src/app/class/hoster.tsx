@@ -24,9 +24,9 @@ export function Hoster(Props: {
     if (Props.client) {
       Props.client.localPreview({
         view: `${info.userId}`,
-        options: {
-          objectFit: "contain",
-        },
+        // options: {
+        //   objectFit: "",
+        // },
       });
     }
   }, [Props.client]);
