@@ -1,7 +1,7 @@
-import { debugFatory } from "@/app/lib";
-import cssModule from "./style.module.css";
-import { useEffect, useState } from "react";
-let debug = debugFatory("InfoNav");
+import { debugFatory } from '@/app/lib';
+import cssModule from './style.module.css';
+import { useEffect, useState } from 'react';
+let debug = debugFatory('InfoNav');
 
 /**
  *
@@ -14,13 +14,13 @@ function formatIncrementalTime(ms: number) {
   const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
 
   const formattedTime = `${padZero(hours)}:${padZero(minutes)}:${padZero(
-    seconds
+    seconds,
   )}`;
   return formattedTime;
 }
 
 function padZero(num: number) {
-  return num.toString().padStart(2, "0");
+  return num.toString().padStart(2, '0');
 }
 
 export function InfoNav(Props: {
@@ -37,7 +37,7 @@ export function InfoNav(Props: {
   };
 }) {
   let [timer, setTime] = useState<any>(null);
-  let [duration, setDuration] = useState("00:00:00");
+  let [duration, setDuration] = useState('00:00:00');
   useEffect(() => {
     if (!timer && Props.showMark?.startTime) {
       setTime(
@@ -46,11 +46,12 @@ export function InfoNav(Props: {
           let startTime = Props.showMark!.startTime;
           // debug("now - startTime:", now, startTime);
           setDuration(formatIncrementalTime(now - startTime));
-        }, 1000)
+        }, 1000),
       );
     }
     return () => {
       clearTimeout(timer);
+      setTime(null);
     };
   }, [Props]);
 
@@ -58,7 +59,7 @@ export function InfoNav(Props: {
     <nav className="navbar navbar-expand-md navbar-dark fixed-top">
       <div className="container-fluid">
         <div
-          className={`navbar-brand ${cssModule["user-name"]}`}
+          className={`navbar-brand ${cssModule['user-name']}`}
           onClick={() => {
             Props.clickHandler?.name?.();
           }}
@@ -69,22 +70,22 @@ export function InfoNav(Props: {
               <div
                 className={`${
                   Props.showMark.isBegin
-                    ? cssModule["begin"]
-                    : cssModule["not-begin"]
+                    ? cssModule['begin']
+                    : cssModule['not-begin']
                 }`}
               >
                 <span
-                  className={`${cssModule["mark"]} ${
-                    Props.showMark.isBegin ? cssModule["green-mark"] : ""
+                  className={`${cssModule['mark']} ${
+                    Props.showMark.isBegin ? cssModule['green-mark'] : ''
                   }`}
                 ></span>
                 {Props.showMark.isBegin ? (
                   <>
                     直播中
-                    <span className={cssModule["time"]}>{duration}</span>
+                    <span className={cssModule['time']}>{duration}</span>
                   </>
                 ) : (
-                  "未开始"
+                  '未开始'
                 )}
               </div>
             </>
@@ -94,7 +95,7 @@ export function InfoNav(Props: {
         </div>
         <div>
           <span
-            className={cssModule["member-counter"]}
+            className={cssModule['member-counter']}
             onClick={() => {
               Props.clickHandler?.memberCounter?.();
             }}
@@ -102,7 +103,7 @@ export function InfoNav(Props: {
             {Props.online_number}人
           </span>
           <button
-            className={`btn ${cssModule["quit-btn"]}`}
+            className={`btn ${cssModule['quit-btn']}`}
             onClick={() => {
               Props.clickHandler?.quit?.();
             }}

@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { debugFatory } from "../lib";
-import styles from "./page.module.css";
-let debug = debugFatory("Hoster");
+import { useEffect, useState } from 'react';
+import { debugFatory } from '../lib';
+import styles from './page.module.css';
+let debug = debugFatory('Hoster');
 
 export type MemberStream = {
   type: string;
@@ -59,7 +59,7 @@ export function Hoster(Props: {
     });
   };
   let videPause = () => {
-    debug("Props.client:", Props.client);
+    debug('Props.client:', Props.client);
     // Props.client.pausePublish({
     //   target: {
     //     video: true,
@@ -93,10 +93,10 @@ export function Hoster(Props: {
           });
    * 
    */
-  debug("tcic info", info);
+  debug('tcic info', info);
   return (
-    <div className={styles["stream-wrap"]}>
-      <div className={styles["stream-view"]} id={`${info.userId}`}></div>
+    <div className={styles['stream-wrap']}>
+      <div className={styles['stream-view']} id={`${info.userId}`}></div>
       {Props.children}
     </div>
   );

@@ -1,14 +1,14 @@
-"use client";
+'use client';
 /**
  * 全局对象注册
  */
-import Script from "next/script";
-import cssModule from "./style.module.css";
-import { cache, useContext, useEffect, useState } from "react";
-import { Loading } from "../loading/loading";
-import { BootContext } from "../../../../../contexts/boot.context";
-import { RoleName, debugFatory } from "@/app/lib";
-let debug = debugFatory("Header");
+import Script from 'next/script';
+import cssModule from './style.module.css';
+import { cache, useContext, useEffect, useState } from 'react';
+import { Loading } from '../loading/loading';
+import { BootContext } from '../../../../../contexts/boot.context';
+import { RoleName, debugFatory } from '@/app/lib';
+let debug = debugFatory('Header');
 // type
 // :
 // "main"
@@ -37,9 +37,9 @@ export function AppHeader(Props: {
   let [ready, setReady] = useState(false);
   useEffect(() => {
     let global = window as any;
-    debug("header mounted", Props.uid, ready, global.TCIC_SPY);
+    debug('header mounted', Props.uid, ready, global.TCIC_SPY);
     if (Props.uid && !ready && global.TCIC_SPY) {
-      initBoot("effected ");
+      initBoot('effected ');
     }
     return () => {
       setReady(false);
@@ -47,16 +47,16 @@ export function AppHeader(Props: {
       state.hostInfo = null;
       state.myInfo = null;
       dispatch({
-        type: "merge",
+        type: 'merge',
         arg: {
           ...state,
         },
       });
-      debug("header unmounted");
+      debug('header unmounted');
     };
   }, [Props.uid]);
   let initBoot = async (reson: string) => {
-    debug("reson:", reson, Props);
+    debug('reson:', reson, Props);
     setReady(true);
     let global = window as any;
     state.sdk = global.TCIC_SPY;
@@ -66,7 +66,7 @@ export function AppHeader(Props: {
       classId: parseInt(Props.cid, 10),
       token: Props.token,
     });
-    debug("inited");
+    debug('inited');
     state.tcic = tcic;
     state.tim = state.sdk.createTimClient(state.tcic);
     let roomInfo = tcic.classInfo.class_info.room_info;
@@ -99,12 +99,12 @@ export function AppHeader(Props: {
     ]
 }
          */
-      debug("users", users);
+      debug('users', users);
       let [myinfo, hostInfo] = users;
       if (hostIsTeacher) {
         let myInfoResult: any = {
           userId: myinfo.user_id,
-          roleName: "teacher",
+          roleName: 'teacher',
           classId: tcic.classId,
           detail: {
             role: RoleName.HOSTER,
@@ -116,7 +116,7 @@ export function AppHeader(Props: {
       } else {
         state.myInfo = {
           userId: myinfo.user_id,
-          roleName: "student",
+          roleName: 'student',
           classId: tcic.classId,
           detail: {
             role: RoleName.AUDIENCE,
@@ -125,7 +125,7 @@ export function AppHeader(Props: {
         };
         state.hostInfo = {
           userId: hostInfo.user_id,
-          roleName: "teacher",
+          roleName: 'teacher',
           classId: tcic.classId,
           detail: {
             role: RoleName.AUDIENCE,
@@ -138,11 +138,11 @@ export function AppHeader(Props: {
        * todo: 时序可以再优化，这里阻塞时间比较长
        */
       dispatch({
-        type: "merge",
+        type: 'merge',
         arg: state,
       });
 
-      debug("AppHeader tcic: merged", tcic);
+      debug('AppHeader tcic: merged', tcic);
 
       Props.whenReady && Props.whenReady(tcic);
     });
@@ -152,7 +152,7 @@ export function AppHeader(Props: {
    */
   let tcicScriptLoaded = async () => {
     if (!ready) {
-      initBoot("scriptLoaded");
+      initBoot('scriptLoaded');
     }
   };
 
@@ -167,7 +167,7 @@ export function AppHeader(Props: {
     token: string;
     classId: number;
   }) => {
-    debug("inite TCIC---->>>>", param);
+    debug('inite TCIC---->>>>', param);
     let tcic = param.sdk.create(param);
     return new Promise((resolve, reject) => {
       tcic

@@ -1,4 +1,4 @@
-import { createContext, useEffect, useReducer } from "react";
+import { createContext, useEffect, useReducer } from 'react';
 
 /**
  *
@@ -13,7 +13,7 @@ export function contextFactory<
   T extends Record<
     string,
     (state: S, action: { type: any; arg?: any; state: S }) => S
-  >
+  >,
 >(actions: T, opts?: { defaultVal?: S; jsxEL?: any }) {
   const Context = createContext<{
     state: S;
@@ -21,29 +21,29 @@ export function contextFactory<
   }>(opts?.defaultVal as any);
   let myRducer = function (
     state: S,
-    actionHandler: { type: keyof typeof actions; arg: any }
+    actionHandler: { type: keyof typeof actions; arg: any },
   ): S | Error {
-    if (actionHandler.type === "_init") {
+    if (actionHandler.type === '_init') {
       return { ...actionHandler.arg };
     }
     if (actions[actionHandler.type]) {
       return actions[actionHandler.type](
         state as any,
-        actionHandler as any
+        actionHandler as any,
       ) as any;
     }
     throw new Error(`传入了不存在的Action, ${String(actionHandler.type)}`);
   };
 
-  let myProvider = function (props: { children: any; state: S }) {
+  let MyProvider = function (props: { children: any; state: S }) {
     const [state, dispatch]: [any, any] = useReducer<any>(
       myRducer,
-      opts?.defaultVal
+      opts?.defaultVal,
     );
     useEffect(() => {
       if (props.state) {
         dispatch({
-          type: "_init",
+          type: '_init',
           arg: props.state,
         });
       }
@@ -58,7 +58,7 @@ export function contextFactory<
     );
   };
   return {
-    Provider: myProvider,
+    Provider: MyProvider,
     Context: Context,
   };
 }

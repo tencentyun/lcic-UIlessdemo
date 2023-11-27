@@ -1,9 +1,9 @@
-"use client";
-import styles from "./page.module.css";
-import { useState } from "react";
-import { Demo } from "./demo";
-import { RoleName } from "./lib";
-import { useRouter } from "next/navigation";
+'use client';
+import styles from './page.module.css';
+import { useState } from 'react';
+import { Demo } from './demo';
+import { RoleName } from './lib';
+import { useRouter } from 'next/navigation';
 
 // import { AppHeader } from "./components/header/header";
 
@@ -22,14 +22,14 @@ let getRandomName = (name: string) => {
 };
 
 export default function Home() {
-  let [classId, setClassId] = useState("");
+  let [classId, setClassId] = useState('');
   let router = useRouter();
   let [currentType, setCurrentType] = useState<any>(RoleName.AUDIENCE);
-  let [nick, setNick] = useState(getRandomName("Audience"));
+  let [nick, setNick] = useState(getRandomName('Audience'));
   let [creatingRoom, setCreatingRoom] = useState(false);
   let changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!/^\d+$/.test(e.target.value)) {
-      setClassId("");
+      setClassId('');
       return;
     }
     setClassId(e.target.value);
@@ -48,16 +48,16 @@ export default function Home() {
     let result = await demoInfo.createRoom({
       nick: nick,
     });
-    console.log("demoInfo.createRoom:", result);
+    console.log('demoInfo.createRoom:', result);
     jumpToRoom(result.RoomId, nick);
     // result.RoomId;
   };
   let jumpToRoom = async (class_id: string, nick: string) => {
     let demoInfo = new Demo();
     let userInfo = await demoInfo.developInit(class_id, nick);
-    console.log("enter room", userInfo);
+    console.log('enter room', userInfo);
     router.push(
-      `/class?cid=${class_id}&uid=${userInfo.UserId}&token=${userInfo.Token}`
+      `/class?cid=${class_id}&uid=${userInfo.UserId}&token=${userInfo.Token}`,
     );
   };
 
@@ -73,16 +73,16 @@ export default function Home() {
   }>[] = [
     {
       id: RoleName.AUDIENCE,
-      text: "观众",
+      text: '观众',
       val: {
-        placeHolder: "输入房间号",
+        placeHolder: '输入房间号',
       },
     },
     {
       id: RoleName.HOSTER,
-      text: "房主",
+      text: '房主',
       val: {
-        placeHolder: "输入昵称",
+        placeHolder: '输入昵称',
       },
     },
   ];
@@ -92,9 +92,9 @@ export default function Home() {
       <div className="container-lg">
         <div className="row">
           <div className="col">
-            <h1 className={`${styles["demo-title"]}`}>LCIC-demo</h1>
+            <h1 className={`${styles['demo-title']}`}>LCIC-demo</h1>
 
-            <div className={`${styles["inputWrap"]}`}>
+            <div className={`${styles['inputWrap']}`}>
               <div className="input-group mb-3">
                 <button
                   className="btn btn-secondary dropdown-toggle"
@@ -113,9 +113,9 @@ export default function Home() {
                           return;
                         }
                         if (item.id === RoleName.AUDIENCE) {
-                          setNick(getRandomName("Audience"));
+                          setNick(getRandomName('Audience'));
                         } else {
-                          setNick(getRandomName("Host"));
+                          setNick(getRandomName('Host'));
                         }
                         setCurrentType(item.id);
                       }}
@@ -187,7 +187,7 @@ export default function Home() {
                     className={`btn btn-primary`}
                     onClick={createRoomHandler}
                   >
-                    {creatingRoom ? "创建中..." : "创建"}
+                    {creatingRoom ? '创建中...' : '创建'}
                   </button>
                 </>
               )}

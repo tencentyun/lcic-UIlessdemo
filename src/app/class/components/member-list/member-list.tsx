@@ -1,15 +1,15 @@
-"use client";
-import { Dispatch, useContext, useEffect, useReducer, useState } from "react";
-import { MyOffCanvas } from "../../../../../components/offcanvas/offcanvas";
-import styles from "./style.module.css";
-import { MyInfo, checkUserPermission, debugFatory } from "@/app/lib";
-import { Loading } from "../loading/loading";
-import { ModalContext } from "../../../../../contexts/modal.context";
-import { BootContext } from "../../../../../contexts/boot.context";
+'use client';
+import { Dispatch, useContext, useEffect, useReducer, useState } from 'react';
+import { MyOffCanvas } from '../../../../../components/offcanvas/offcanvas';
+import styles from './style.module.css';
+import { MyInfo, checkUserPermission, debugFatory } from '@/app/lib';
+import { Loading } from '../loading/loading';
+import { ModalContext } from '../../../../../contexts/modal.context';
+import { BootContext } from '../../../../../contexts/boot.context';
 
 export type Member = TCIC.Common.Item<any>;
 
-let debug = debugFatory("MemberList");
+let debug = debugFatory('MemberList');
 type MemberViewProps = {
   page: number;
   pageSize: number;
@@ -65,10 +65,10 @@ export enum TMemberStatus {
    */
   Offline = 5,
 }
-type ActionParam = { type: "update"; arg: Partial<MemberViewProps> };
+type ActionParam = { type: 'update'; arg: Partial<MemberViewProps> };
 function memberReducer(state: MemberViewProps, actions: ActionParam) {
   switch (actions.type) {
-    case "update":
+    case 'update':
       return { ...state, ...actions.arg };
     default:
       return state;
@@ -102,7 +102,7 @@ export function MemberList(Props: {
       onlineNumber: Props.init.onlineNumber,
       myInfo: null,
       hostInfo: null,
-    } as MemberViewProps
+    } as MemberViewProps,
   );
 
   let { state: BootState } = useContext(BootContext);
@@ -112,7 +112,7 @@ export function MemberList(Props: {
   let [loading, setLoading] = useState(false);
   useEffect(() => {
     dispatch({
-      type: "update",
+      type: 'update',
       arg: {
         myInfo: BootState.myInfo,
         hostInfo: BootState.hostInfo,
@@ -136,14 +136,14 @@ export function MemberList(Props: {
           setLoading(false);
           let onlineMember = res.total - res.member_offline_number;
           let updateData = {
-            members: getValidMembers(res.members, [roomInfo.teacher_id || ""]),
+            members: getValidMembers(res.members, [roomInfo.teacher_id || '']),
             onlineNumber: state.hostInfo ? onlineMember - 1 : onlineMember, //减去host自己
             total: res.total,
           };
           Props.onUpdate && Props.onUpdate(updateData);
 
           dispatch({
-            type: "update",
+            type: 'update',
             arg: updateData,
           });
         });
@@ -155,7 +155,7 @@ export function MemberList(Props: {
   }
 
   let kickoutUser = (udata: Member) => {
-    debug("userId", udata);
+    debug('userId', udata);
     showModal({
       content: `确定踢出用户${udata.text}？`,
       onCancel: () => {
@@ -165,7 +165,7 @@ export function MemberList(Props: {
         hideModal();
         let updateData = {
           members: getValidMembers(state.members, [
-            roomInfo.teacher_id || "",
+            roomInfo.teacher_id || '',
             udata.id,
           ]),
           onlineNumber: state.onlineNumber - 1, //减去刚踢的用户
@@ -173,7 +173,7 @@ export function MemberList(Props: {
         };
         Props.onUpdate && Props.onUpdate(updateData);
         dispatch({
-          type: "update",
+          type: 'update',
           arg: updateData,
         });
         Props.tcic.memberAction({
@@ -190,7 +190,7 @@ export function MemberList(Props: {
   };
 
   let hasKickPermission = state.myInfo
-    ? checkUserPermission(state.myInfo, "kickOut")
+    ? checkUserPermission(state.myInfo, 'kickOut')
     : false;
   let memberItem = function (data: Member) {
     if (data.id === roomInfo.teacher_id) {
@@ -202,11 +202,11 @@ export function MemberList(Props: {
     }
 
     return (
-      <div className={`${styles["member"]}`} key={data.id}>
+      <div className={`${styles['member']}`} key={data.id}>
         {text}
         {hasKickPermission ? (
           <i
-            className={`${styles["kickout-icon"]} float-end`}
+            className={`${styles['kickout-icon']} float-end`}
             onClick={() => {
               kickoutUser(data);
             }}
@@ -221,16 +221,16 @@ export function MemberList(Props: {
   return (
     <MyOffCanvas
       visible={Props.visible}
-      classList={`${styles["bg"]}`}
+      classList={`${styles['bg']}`}
       header={
-        <div className={`${styles["header"]}`}>
-          <h1 className={`${styles["title"]}`}>观众列表</h1>
+        <div className={`${styles['header']}`}>
+          <h1 className={`${styles['title']}`}>观众列表</h1>
           <div className="container">
             <div className="row">
               <div className="col text-start">
                 {`在线观众(${state.onlineNumber})`}
                 {loading ? (
-                  <div className={`${styles["member-loading"]}`}>
+                  <div className={`${styles['member-loading']}`}>
                     <Loading size="small"></Loading>
                   </div>
                 ) : (
@@ -251,7 +251,7 @@ export function MemberList(Props: {
       }}
     >
       {state.members.map((item) => memberItem(item))}
-      <div className={styles["foot-cover"]}></div>
+      <div className={styles['foot-cover']}></div>
     </MyOffCanvas>
   );
 }

@@ -1,7 +1,7 @@
-import { useState } from "react";
-import styles from "./page.module.css";
-import { debugFatory } from "../lib";
-let debug = debugFatory("Audience");
+import { useState } from 'react';
+import styles from './page.module.css';
+import { debugFatory } from '../lib';
+let debug = debugFatory('Audience');
 
 export function Audience(Props: {
   children?: any;
@@ -11,7 +11,7 @@ export function Audience(Props: {
   start: boolean;
 }) {
   let [start, setStart] = useState(false);
-  const streamType = ["main"];
+  const streamType = ['main'];
   let roomInfo = Props.tcic.classInfo.class_info.room_info;
   let trtcClient = Props.client;
   let videoStart = () => {
@@ -38,9 +38,9 @@ export function Audience(Props: {
   //     videPause();
   //   }
   return (
-    <div className={styles["stream-wrap"]}>
+    <div className={styles['stream-wrap']}>
       <div
-        className={styles["stream-view"]}
+        className={styles['stream-view']}
         id={`${roomInfo.teacher_id}`}
       ></div>
       {Props.children}

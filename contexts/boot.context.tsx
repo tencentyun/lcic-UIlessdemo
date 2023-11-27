@@ -1,6 +1,6 @@
-import { MyInfo, debugFatory } from "@/app/lib";
-import { contextFactory } from "./context-util";
-let debug = debugFatory("boot_Context");
+import { MyInfo, debugFatory } from '@/app/lib';
+import { contextFactory } from './context-util';
+let debug = debugFatory('boot_Context');
 
 /**
  * boot为全局bootstrap对象
@@ -20,20 +20,26 @@ let contextObj = contextFactory(
        * 合并所有初始值
        */
       result = { ...result, ...newObj };
-      debug("update: result", result);
+      debug('update: result', result);
       return result;
     },
   },
   {
     defaultVal: {
+      /**
+       * boot为全局bootstrap对象
+       */
       boot: null as any,
+      /**
+       * tcic登陆
+       */
       tcic: null as any,
       sdk: null as any,
       tim: null as any,
       myInfo: null as MyInfo | null,
       hostInfo: null as MyInfo | null,
     },
-  }
+  },
 );
 
 export let BootContext = contextObj.Context;

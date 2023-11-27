@@ -1,11 +1,11 @@
-"use client";
+'use client';
 // import type { Metadata } from "next";
-import "./globals.css";
-import "./bootstrap.min.css";
-import Script from "next/script";
-import { BootProvider } from "../../contexts/boot.context";
-import { useState } from "react";
-import { ModalProvider } from "../../contexts/modal.context";
+import './globals.css';
+import './bootstrap.min.css';
+import Script from 'next/script';
+import { BootProvider } from '../../contexts/boot.context';
+import { useState } from 'react';
+import { ModalProvider } from '../../contexts/modal.context';
 
 // export const metadata: Metadata = {
 //   title: "Create Next App",
@@ -41,7 +41,7 @@ export default function RootLayout({
           src={`${process.env.NEXT_PUBLIC_BASE_PATH}/boot/bootstrap.bundle.min.js`}
           onLoad={bootOnload}
         ></Script>
-        <body className={"d-flex flex-column h-100"}>
+        <body className={'d-flex flex-column h-100'}>
           <ModalProvider>{children}</ModalProvider>
         </body>
       </BootProvider>

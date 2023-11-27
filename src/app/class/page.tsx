@@ -1,32 +1,35 @@
-"use client";
-import styles from "./page.module.css";
-import { useContext, useEffect, useState } from "react";
-import { AppHeader } from "./components/header/header";
-import { Loading } from "./components/loading/loading";
-import { Footer } from "./components/footer/footer";
+/**
+ * 刷新进入页面会比较简单，少一些资源销毁状态重置等逻辑
+ */
+'use client';
+import styles from './page.module.css';
+import { useContext, useEffect, useState } from 'react';
+import { AppHeader } from './components/header/header';
+import { Loading } from './components/loading/loading';
+import { Footer } from './components/footer/footer';
 import {
   Member,
   MemberList,
   getValidMembers,
-} from "./components/member-list/member-list";
-import { InfoPanel } from "./components/info-panel/info-panel";
-import { Chat } from "./components/chat/chat";
-import { Settings } from "./components/settings/settings";
-import { useVisible } from "../../../hooks/visible";
-import { BootContext } from "../../../contexts/boot.context";
+} from './components/member-list/member-list';
+import { InfoPanel } from './components/info-panel/info-panel';
+import { Chat } from './components/chat/chat';
+import { Settings } from './components/settings/settings';
+import { useVisible } from '../../../hooks/visible';
+import { BootContext } from '../../../contexts/boot.context';
 import {
   MyInfo,
   RoleName,
   TClassStatus,
   checkUserPermission,
   debugFatory,
-} from "../lib";
-import { InfoNav } from "./components/nav/info-nav";
-import { Tips } from "./components/chat/tips";
-import { Hoster } from "./hoster";
-import { Audience } from "./audience";
-import { ModalContext } from "../../../contexts/modal.context";
-import { useSearchParams, useRouter } from "next/navigation";
+} from '../lib';
+import { InfoNav } from './components/nav/info-nav';
+import { Tips } from './components/chat/tips';
+import { Hoster } from './hoster';
+import { Audience } from './audience';
+import { ModalContext } from '../../../contexts/modal.context';
+import { useSearchParams, useRouter } from 'next/navigation';
 // import VConsole from 'vconsole';
 
 // import { useRouter } from "next/navigation";
@@ -47,7 +50,7 @@ export type MemberStream = {
   url: string;
 };
 
-let debug = debugFatory("HomePage");
+let debug = debugFatory('HomePage');
 /**
  *
  * @param Props
@@ -70,7 +73,7 @@ export default function Home(Props: { params: any }) {
   let [classInfo, setClassInfo] = useState({
     startTime: 0,
     classState: TClassStatus.Not_Start,
-    name: "",
+    name: '',
   });
   const router = useRouter();
   let searchParams = useSearchParams();
@@ -88,9 +91,9 @@ export default function Home(Props: { params: any }) {
     page: number;
     total: number;
   } | null>(null);
-  let token = searchParams.get("token") as string;
-  let cid = searchParams.get("cid") as string;
-  let uid = searchParams.get("uid") as string;
+  let token = searchParams.get('token') as string;
+  let cid = searchParams.get('cid') as string;
+  let uid = searchParams.get('uid') as string;
   useEffect(() => {
     // const vConsole = new VConsole();
     // debug(vConsole);
@@ -98,8 +101,8 @@ export default function Home(Props: { params: any }) {
       let hostInfo: MyInfo | null = state.hostInfo;
       let myInfo: MyInfo = state.myInfo!;
       let roomInfo: any = state.tcic.classInfo.class_info.room_info;
-      debug("Hea roomInfo:", roomInfo);
-      debug("myInfo:", myInfo);
+      debug('Hea roomInfo:', roomInfo);
+      debug('myInfo:', myInfo);
       /**
        * 主播则等待开播
        */
@@ -118,6 +121,10 @@ export default function Home(Props: { params: any }) {
        *
        */
       let tryGetMemberList = () => {
+        /**
+         * 这里有重试的情况，重试时tcic可能已经被释放
+         */
+        if (!state.tcic) return;
         state.tcic
           .getMembers(cid, {
             page: 0,
@@ -127,8 +134,8 @@ export default function Home(Props: { params: any }) {
             let onlineNumber = hostInfo //房主可能不在线
               ? res.total - res.member_offline_number - 1
               : res.total - res.member_offline_number;
-            debug(":onlineNumber:", onlineNumber);
-            debug("res:", res);
+            debug(':onlineNumber:', onlineNumber);
+            debug('res:', res);
             if (res.error_code != 0) {
               setTimeout(() => {
                 tryGetMemberList();
@@ -137,7 +144,7 @@ export default function Home(Props: { params: any }) {
             }
             setOnlineNumber(onlineNumber);
             setMemberListInitData({
-              members: getValidMembers(res.members, [hostInfo?.userId || ""]),
+              members: getValidMembers(res.members, [hostInfo?.userId || '']),
               onlineNumber: onlineNumber,
               total: res.total,
               page: 0,
@@ -145,15 +152,28 @@ export default function Home(Props: { params: any }) {
           });
       };
       tryGetMemberList();
-    } else {
-      setMyRole(null);
     }
   }, [state.tcic]);
 
+  let leaveRoom = () => {
+    /**
+     * 页面被销毁时，重置状态
+     */
+    setStart(false);
+    setMyRole(null);
+    debug('unmounted class Page', state.tcic);
+    state.tcic?.destroy();
+    state.tim?.destroy();
+    trtcClient?.destroy();
+    setTimeout(() => {
+      router.push(`/`);
+    }, 300);
+  };
+
   useEffect(() => {
     if (state.tim) {
-      state.tim.on("saasadminMsgReceived", (payload: any, data: any) => {
-        debug("saasadminMsgReceived:", payload);
+      state.tim.on('saasadminMsgReceived', (payload: any, data: any) => {
+        debug('saasadminMsgReceived:', payload);
         let msgTypeMap: any = {
           /**
            * 事件控制？
@@ -164,14 +184,14 @@ export default function Home(Props: { params: any }) {
              */
             let eventActionMap: any = {
               member_quit: () => {
-                debug("member_quit:", payload);
+                debug('member_quit:', payload);
               },
               member_online: () => {
-                debug("member_online", payload);
+                debug('member_online', payload);
                 let result = payload.data.data.map(
                   (
                     item: { avatar: string; nickname: string; user_id: string },
-                    index: any
+                    index: any,
                   ) => {
                     return (
                       <Tips
@@ -181,7 +201,7 @@ export default function Home(Props: { params: any }) {
                         }}
                       >{`${item.nickname}来了`}</Tips>
                     );
-                  }
+                  },
                 );
                 setTipsArray((preList) => {
                   let pre = preList.concat();
@@ -198,6 +218,7 @@ export default function Home(Props: { params: any }) {
           control: () => {
             let eventActionMap: any = {
               class_info_change: () => {
+                debug('control got classInfoChanged', payload);
                 if (payload.data.data.status === TClassStatus.Already_Start) {
                   setClassInfo((preState) => {
                     return {
@@ -231,14 +252,10 @@ export default function Home(Props: { params: any }) {
               change_member_stream: () => {},
               class_end: () => {
                 showModal({
-                  content: "已结束",
+                  content: '已结束',
                   onConfirm: () => {
                     hideModal();
-                    /**
-                     * 这里要看为啥basepath不生效
-                     *  push / 没进入到base
-                     */
-                    router.push(`/${process.env.NEXT_PUBLIC_BASE_PATH}}`);
+                    leaveRoom();
                   },
                 });
               },
@@ -249,17 +266,17 @@ export default function Home(Props: { params: any }) {
           /**
            * 权限更新
            */
-          "v1/permissions": () => {},
+          'v1/permissions': () => {},
           /**
            * 房间信息同步
            */
-          "v1/sync": () => {
-            debug("v1/sync:", payload);
+          'v1/sync': () => {
+            debug('v1/sync:', payload);
             /**
              * 更新在线人数
              */
             setOnlineNumber(
-              payload.data.online_number - payload.data.teacher_online_number //在线人数减去老师在线人数
+              payload.data.online_number - payload.data.teacher_online_number, //在线人数减去老师在线人数
             );
           },
         };
@@ -275,7 +292,7 @@ export default function Home(Props: { params: any }) {
 
   let whenReady = (tcic: any) => {
     let trtcClient = new TCIC_SPY.createTrtcClient(tcic);
-    debug("trtcClient:", trtcClient);
+    debug('trtcClient:', trtcClient);
     setTrtcClient(trtcClient);
   };
 
@@ -286,13 +303,13 @@ export default function Home(Props: { params: any }) {
         content: <div>{err.data.error_msg}</div>,
         onConfirm: () => {
           hideModal();
-          router.push("/");
+          leaveRoom();
         },
         btn: {
-          ok: "好的",
+          ok: '好的',
         },
       });
-      debug("trtcClient:err", err.data);
+      debug('trtcClient:err', err.data);
     }
   };
 
@@ -312,21 +329,21 @@ export default function Home(Props: { params: any }) {
         <></>
       ) : (
         btnVisible && (
-          <div className={`${styles["ready-cover"]}`}>
+          <div className={`${styles['ready-cover']}`}>
             <button
               className={`btn btn-primary `}
               onClick={() => {
                 myRole === RoleName.HOSTER ? hostStart() : setStart(true);
               }}
             >
-              {myRole === RoleName.HOSTER ? "恢复直播" : "进入"}
+              {myRole === RoleName.HOSTER ? '恢复直播' : '进入'}
             </button>
           </div>
         )
       )
     ) : (
       <>
-        <div className={`${styles["beifore-begin"]}`}>正在准备,请稍后</div>
+        <div className={`${styles['beifore-begin']}`}>正在准备,请稍后</div>
       </>
     );
 
@@ -364,26 +381,24 @@ export default function Home(Props: { params: any }) {
                  * 课程还未开始
                  */
                 if (classInfo.classState === TClassStatus.Not_Start) {
-                  router.push("/");
+                  leaveRoom();
                   return;
                 }
                 let canEndClass = false;
-                if (checkUserPermission(state.tcic.myInfo(), "endClass")) {
+                if (checkUserPermission(state.tcic.myInfo(), 'endClass')) {
                   canEndClass = true;
                 }
                 /**
                  * 课堂未开始不能结束？
                  */
                 showModal({
-                  content: canEndClass ? "确定结束?" : "确定离开?",
+                  content: canEndClass ? '确定结束?' : '确定离开?',
                   onConfirm: () => {
                     hideModal();
                     if (canEndClass) {
                       state.tcic.endClass();
                     }
-                    setTimeout(() => {
-                      router.push("/");
-                    }, 3000);
+                    leaveRoom();
                   },
                 });
               },
@@ -399,7 +414,7 @@ export default function Home(Props: { params: any }) {
         <div className={`container-lg`}>
           <div className="row">
             <div className="col">
-              {typeof myRole === "number" ? (
+              {typeof myRole === 'number' ? (
                 myRole === RoleName.HOSTER ? (
                   <Hoster
                     tcic={state.tcic}
@@ -449,7 +464,7 @@ export default function Home(Props: { params: any }) {
         <Footer>
           <div className="row mb-4">
             <div className="col-8">
-              {typeof myRole === "number" ? (
+              {typeof myRole === 'number' ? (
                 <Chat isHost={myRole === RoleName.HOSTER}>
                   {tipsArray.map((item) => item)}
                 </Chat>

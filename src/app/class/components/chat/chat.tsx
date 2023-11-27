@@ -1,11 +1,11 @@
-import { useContext, useEffect, useRef, useState } from "react";
-import styles from "./style.module.css";
-import { BootContext } from "../../../../../contexts/boot.context";
-import { debugFatory } from "@/app/lib";
-import { Loading } from "../loading/loading";
-import { EmojiPanel, emojiList } from "./emoji";
-import { useVisible } from "../../../../../hooks/visible";
-let debug = debugFatory("Chat");
+import { useContext, useEffect, useRef, useState } from 'react';
+import styles from './style.module.css';
+import { BootContext } from '../../../../../contexts/boot.context';
+import { debugFatory } from '@/app/lib';
+import { Loading } from '../loading/loading';
+import { EmojiPanel, emojiList } from './emoji';
+import { useVisible } from '../../../../../hooks/visible';
+let debug = debugFatory('Chat');
 /**
  * {
     "GroupId": "336929693",
@@ -29,11 +29,11 @@ let debug = debugFatory("Chat");
  * 
  */
 type SubType =
-  | "v1/stage"
-  | "v1/sync"
-  | "v1/permissions"
-  | "v1/hand_up"
-  | "v1/stage_loop";
+  | 'v1/stage'
+  | 'v1/sync'
+  | 'v1/permissions'
+  | 'v1/hand_up'
+  | 'v1/stage_loop';
 export interface MessageData {
   ID: string;
   GroupId: string;
@@ -69,29 +69,29 @@ export function Chat(Props: { children?: any; isHost?: boolean }) {
   let [newmsgcounter, setMsgCounter] = useState(0);
   let [emojiVisible, emojiShow, emojiHide] = useVisible();
   let [timReady, setTimReady] = useState(false);
-  let [chatInput, setChatInput] = useState("");
+  let [chatInput, setChatInput] = useState('');
   const MAX_MSG = 200;
   function createMyMsg(msg: string): MessageData {
     // hostInfo.detail.user_name
     let myInfo = state.myInfo;
     if (!myInfo) {
-      throw new Error("myInfo is null");
+      throw new Error('myInfo is null');
     }
-    debug('myInfo: createMyMsg',myInfo)
+    debug('myInfo: createMyMsg', myInfo);
     return {
       ID: `faked_${++fake_counter}`,
       Operator_Account: myInfo.userId,
       From_Account: myInfo.userId,
       GroupId: state.tcic?.classInfo.class_info.room_info.room_id,
-      CallbackCommand: "Group.CallbackAfterSendMsg",
+      CallbackCommand: 'Group.CallbackAfterSendMsg',
       NickName: myInfo.detail.nickname,
-      Type: "AVChatRoom",
+      Type: 'AVChatRoom',
       MsgTime: Date.now(),
       MsgSeq: fake_counter,
-      CloudCustomData: "",
+      CloudCustomData: '',
       MsgBody: [
         {
-          MsgType: "TIMTextElem",
+          MsgType: 'TIMTextElem',
           MsgContent: {
             Text: msg,
           },
@@ -110,9 +110,9 @@ export function Chat(Props: { children?: any; isHost?: boolean }) {
    * 获取历史消息
    */
   useEffect(() => {
-    debug("state: efected", state, timReady);
+    debug('state: efected', state, timReady);
     if (state.tim && !timReady) {
-      debug("state: efected into", state, timReady);
+      debug('state: efected into', state, timReady);
       /**
        * 不知道为什么会触发两次efect
        * 临时处理，防止重复调用
@@ -130,18 +130,18 @@ export function Chat(Props: { children?: any; isHost?: boolean }) {
           setMsgList(data);
           setInited(true);
         });
-        target.on("groupMsgReceived",async (msg: any) => {
-          debug("groupMsgReceived groupMsgReceived:", msg);
+        target.on('groupMsgReceived', async (msg: any) => {
+          debug('groupMsgReceived groupMsgReceived:', msg);
           let userInfoArr = await state.tcic.getUserInfoByIds([msg.from]);
           let userInfo = userInfoArr[0];
-          debug("groupMsgReceived userInfo:", userInfo);
+          debug('groupMsgReceived userInfo:', userInfo);
           /**
            * 如果有没有直接报错
            */
           let newMsg: MessageData = {
             ID: msg.ID,
             GroupId: msg.to,
-            CallbackCommand: "Group.CallbackAfterSendMsg",
+            CallbackCommand: 'Group.CallbackAfterSendMsg',
             From_Account: msg.from,
             Operator_Account: msg.from,
             NickName: userInfo.nickname,
@@ -171,14 +171,14 @@ export function Chat(Props: { children?: any; isHost?: boolean }) {
 
   let renderHistoryMsg = msgList.map((item: MessageData, index) => {
     return (
-      <div key={item.ID} className={`${styles["message"]}`}>
-        <span className={`${styles["nick"]}`}>{item.NickName}：</span>
+      <div key={item.ID} className={`${styles['message']}`}>
+        <span className={`${styles['nick']}`}>{item.NickName}：</span>
         {item.MsgBody.map((msg) => {
           /**
            * 检查是否表情
            */
           let target = emojiList.find(
-            (emoji) => emoji.text === msg.MsgContent.Text
+            (emoji) => emoji.text === msg.MsgContent.Text,
           );
           if (target) {
             return <div key={item.ID} className={target.val!.img}></div>;
@@ -230,7 +230,7 @@ export function Chat(Props: { children?: any; isHost?: boolean }) {
   let sendMsg = () => {
     // chatInput
     if (!/^\s+$/.test(chatInput)) {
-      let msgObj = createMyMsg(chatInput); 
+      let msgObj = createMyMsg(chatInput);
       setMsgList((preList) => {
         let newList = preList.concat();
         newList.push(msgObj);
@@ -238,18 +238,18 @@ export function Chat(Props: { children?: any; isHost?: boolean }) {
       });
 
       state.tim.sendRoomMsg(chatInput);
-      setChatInput("");
+      setChatInput('');
     }
   };
 
   return (
     <>
-      <div className={`${styles["wrap"]}`}>
+      <div className={`${styles['wrap']}`}>
         <div
           ref={listEl}
-          className={`${styles["message-list"]}`}
+          className={`${styles['message-list']}`}
           style={{
-            bottom: Props.isHost ? "-50px" : "50px",
+            bottom: Props.isHost ? '-50px' : '50px',
           }}
         >
           {inited ? (
@@ -268,21 +268,21 @@ export function Chat(Props: { children?: any; isHost?: boolean }) {
         {Props.children}
 
         <div
-          className={`${styles["new-tips"]} ${
+          className={`${styles['new-tips']} ${
             showNewMsgTips && newmsgcounter
-              ? styles["new-show"]
-              : styles["new-hide"]
+              ? styles['new-show']
+              : styles['new-hide']
           }`}
           onClick={jumpToNewMsg}
         >
-          有{newmsgcounter}条新消息<i className={`${styles["down-icon"]}`}></i>
+          有{newmsgcounter}条新消息<i className={`${styles['down-icon']}`}></i>
         </div>
         {Props.isHost ? (
           <></>
         ) : (
           <>
             <div
-              className={`${styles["emoji"]}`}
+              className={`${styles['emoji']}`}
               onClick={() => {
                 inited && emojiShow();
               }}
@@ -290,13 +290,13 @@ export function Chat(Props: { children?: any; isHost?: boolean }) {
             <input
               type="text"
               maxLength={MAX_MSG}
-              className={`form-control ${styles["chat-input"]}`}
+              className={`form-control ${styles['chat-input']}`}
               placeholder="聊聊吧～"
               onChange={msgChangedHandler}
               value={chatInput}
             />
             <div
-              className={`btn btn-primary  btn-sm ${styles["sendBtn"]}`}
+              className={`btn btn-primary  btn-sm ${styles['sendBtn']}`}
               onClick={sendMsg}
             >
               发送
