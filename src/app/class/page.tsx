@@ -26,7 +26,7 @@ import { Tips } from "./components/chat/tips";
 import { Hoster } from "./hoster";
 import { Audience } from "./audience";
 import { ModalContext } from "../../../contexts/modal.context";
-import { useSearchParams,useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 // import VConsole from 'vconsole';
 
 // import { useRouter } from "next/navigation";
@@ -54,9 +54,7 @@ let debug = debugFatory("HomePage");
  *  searchParams从查询参数中获取
  * @returns
  */
-export default function Home(Props: {
-  params: any;
-}) {
+export default function Home(Props: { params: any }) {
   /**
    * start为授权交互，表示客户本地推流是否开始
    */
@@ -75,7 +73,7 @@ export default function Home(Props: {
     name: "",
   });
   const router = useRouter();
-  let searchParams = useSearchParams()
+  let searchParams = useSearchParams();
   /**
    *  {
     cid: string;
@@ -90,9 +88,9 @@ export default function Home(Props: {
     page: number;
     total: number;
   } | null>(null);
-  let token = searchParams.get('token') as string;
-  let cid =  searchParams.get('cid') as string;
-  let uid =  searchParams.get('uid') as string;
+  let token = searchParams.get("token") as string;
+  let cid = searchParams.get("cid") as string;
+  let uid = searchParams.get("uid") as string;
   useEffect(() => {
     // const vConsole = new VConsole();
     // debug(vConsole);
@@ -118,23 +116,31 @@ export default function Home(Props: {
       /**
        * 先获取一次成员列表
        */
-      state.tcic
-        .getMembers(cid, {
-          page: 0,
-          limit: 10,
-        })
-        .then((res: any) => {
-          let onlineNumber = hostInfo //房主可能不在线
-            ? res.total - res.member_offline_number - 1
-            : res.total - res.member_offline_number;
-          setOnlineNumber(onlineNumber); //减去host自己
-          setMemberListInitData({
-            members: getValidMembers(res.members, [hostInfo?.userId || ""]),
-            onlineNumber: onlineNumber,
-            total: res.total,
+      let tryGetMemberList = () => {
+        state.tcic
+          .getMembers(cid, {
             page: 0,
+            limit: 10,
+          })
+          .then((res: any) => {
+            let onlineNumber = hostInfo //房主可能不在线
+              ? res.total - res.member_offline_number - 1
+              : res.total - res.member_offline_number;
+            debug(":onlineNumber:", onlineNumber);
+            debug("res:", res);
+            if (res.error_code != 0) {
+              return tryGetMemberList();
+            }
+            setOnlineNumber(onlineNumber);
+            setMemberListInitData({
+              members: getValidMembers(res.members, [hostInfo?.userId || ""]),
+              onlineNumber: onlineNumber,
+              total: res.total,
+              page: 0,
+            });
           });
-        });
+      };
+      // tryGetMemberList()
     }
   }, [state.tcic]);
 
@@ -246,7 +252,9 @@ export default function Home(Props: {
             /**
              * 更新在线人数
              */
-            setOnlineNumber(payload.data.online_number);
+            setOnlineNumber(
+              payload.data.online_number - payload.data.teacher_online_number //在线人数减去老师在线人数
+            );
           },
         };
 
@@ -346,10 +354,20 @@ export default function Home(Props: {
                 roomInfoShow();
               },
               quit: () => {
+                /**
+                 * 课程还未开始
+                 */
+                if (classInfo.classState === TClassStatus.Not_Start) {
+                  router.push("/");
+                  return;
+                }
                 let canEndClass = false;
                 if (checkUserPermission(state.tcic.myInfo(), "endClass")) {
                   canEndClass = true;
                 }
+                /**
+                 * 课堂未开始不能结束？
+                 */
                 showModal({
                   content: canEndClass ? "确定结束?" : "确定离开?",
                   onConfirm: () => {
@@ -357,7 +375,9 @@ export default function Home(Props: {
                     if (canEndClass) {
                       state.tcic.endClass();
                     }
-                    window.location.href = "/";
+                    setTimeout(() => {
+                      router.push("/");
+                    }, 3000);
                   },
                 });
               },

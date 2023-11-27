@@ -34,10 +34,21 @@ export function AppHeader(Props: {
   children?: any;
 }) {
   let { state, dispatch } = useContext(BootContext);
-  let tcicScriptLoaded = async () => {
+  let [ready, setReady] = useState(false);
+  useEffect(() => {
+    let global = window as any;
+    debug("header mounted", Props.uid, ready, global.TCIC_SPY);
+    if (Props.uid && !ready && global.TCIC_SPY) {
+      initBoot();
+    }
+    return () => {
+      setReady(false);
+    };
+  }, [Props.uid]);
+  let initBoot = async () => {
+    setReady(true);
     let global = window as any;
     state.sdk = global.TCIC_SPY;
-    debug("debug loaed!");
     let tcic: any = await initTcic({
       sdk: state.sdk,
       userId: Props.uid,
@@ -77,54 +88,61 @@ export function AppHeader(Props: {
     ]
 }
          */
-        debug('users',users);
-        let [myinfo, hostInfo] = users;
-        if (hostIsTeacher) {
-          let myInfoResult: any = {
-            userId: myinfo.user_id,
-            roleName: "teacher",
-            classId: tcic.classId,
-            detail: {
-              role: RoleName.HOSTER,
-              ...myinfo,
-            },
-          };
-          state.myInfo = myInfoResult;
-          state.hostInfo = myInfoResult;
-        } else {
-          state.myInfo = {
-            userId: myinfo.user_id,
-            roleName: "student",
-            classId: tcic.classId,
-            detail: {
-              role: RoleName.AUDIENCE,
-              ...myinfo,
-            },
-          };
-          state.hostInfo = {
-            userId: hostInfo.user_id,
-            roleName: "teacher",
-            classId: tcic.classId,
-            detail: {
-              role: RoleName.AUDIENCE,
-              ...hostInfo,
-            },
-          };
-        }
-        /**
-         * 注意这里时序，保证state更新时，所有信息都已经更新
-         * todo: 时序可以再优化，这里阻塞时间比较长
-         */
-        dispatch({
-          type: "merge",
-          arg: state,
-        });
+      debug("users", users);
+      let [myinfo, hostInfo] = users;
+      if (hostIsTeacher) {
+        let myInfoResult: any = {
+          userId: myinfo.user_id,
+          roleName: "teacher",
+          classId: tcic.classId,
+          detail: {
+            role: RoleName.HOSTER,
+            ...myinfo,
+          },
+        };
+        state.myInfo = myInfoResult;
+        state.hostInfo = myInfoResult;
+      } else {
+        state.myInfo = {
+          userId: myinfo.user_id,
+          roleName: "student",
+          classId: tcic.classId,
+          detail: {
+            role: RoleName.AUDIENCE,
+            ...myinfo,
+          },
+        };
+        state.hostInfo = {
+          userId: hostInfo.user_id,
+          roleName: "teacher",
+          classId: tcic.classId,
+          detail: {
+            role: RoleName.AUDIENCE,
+            ...hostInfo,
+          },
+        };
+      }
+      /**
+       * 注意这里时序，保证state更新时，所有信息都已经更新
+       * todo: 时序可以再优化，这里阻塞时间比较长
+       */
+      dispatch({
+        type: "merge",
+        arg: state,
+      });
 
-        debug("AppHeader tcic: merged", tcic);
+      debug("AppHeader tcic: merged", tcic);
 
-        Props.whenReady && Props.whenReady(tcic);
-  
+      Props.whenReady && Props.whenReady(tcic);
     });
+  };
+  /**
+   *
+   */
+  let tcicScriptLoaded = async () => {
+    if (!ready) {
+      initBoot();
+    }
   };
 
   /**
@@ -138,6 +156,7 @@ export function AppHeader(Props: {
     token: string;
     classId: number;
   }) => {
+    debug("inite TCIC---->>>>");
     let tcic = param.sdk.create(param);
     return new Promise((resolve, reject) => {
       tcic

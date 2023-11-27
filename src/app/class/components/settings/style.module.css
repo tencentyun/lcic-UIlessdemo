@@ -6,8 +6,11 @@
   text-align: center;
   font-size: 12px;
   margin: 0px 5px;
-
   border-radius: 15px;
+}
+
+.btn-single {
+  display: inline-block;
 }
 
 .text {
@@ -29,4 +32,18 @@
   width: 13px;
   display: inline-block;
   height: 13px;
+}
+
+.single-setting-icon,
+.single-share-icon {
+  background-image: url(/next/_next/static/media/share.1f205d41.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 36px;
+  display: inline-block;
+  height: 36px;
+  background-size: 50%;
+  background-position: 10px 8px;
+  background-color: #00000063;
+  border-radius: 50%;
 }
