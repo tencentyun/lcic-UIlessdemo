@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 const SDK_APPID_MAP = {
   prod: {
@@ -16,7 +16,7 @@ let getUnixTime = function (time: number) {
 };
 
 export class Demo {
-  private _demoHost = "https://tcic-demo-api.qcloudclass.com";
+  private _demoHost = 'https://tcic-demo-api.qcloudclass.com';
   private _sdkAppId = SDK_APPID_MAP.prod.ultimate;
   private _uins: string[] = [];
   /**
@@ -31,14 +31,14 @@ export class Demo {
     if (this._uins.length > 0) {
       return this._uins;
     }
-    let uinRes = await this.demoRequest("/getDevelopers", {
+    let uinRes = await this.demoRequest('/getDevelopers', {
       param: {
-        Env: "prod",
-        env: "prod",
+        Env: 'prod',
+        env: 'prod',
       },
     });
 
-    console.log("result:", uinRes);
+    console.log('result:', uinRes);
     this._uins = uinRes.Uin;
     return this._uins;
   }
@@ -49,7 +49,7 @@ export class Demo {
    */
   async developInit(
     classId: string,
-    nick?: string
+    nick?: string,
   ): Promise<{
     RequestId: string;
     Token: string;
@@ -57,9 +57,9 @@ export class Demo {
   }> {
     let uin = await this.getValidUin();
     let roomInfoRes = await this.describeRoomInfo(uin, classId);
-    console.log("roomInfoRes", roomInfoRes);
+    console.log('roomInfoRes', roomInfoRes);
     let login = await this.login({
-      Id: nick || "testxxx",
+      Id: nick || 'testxxx',
       // Role: "student",
       Uin: uin,
       SdkAppId: roomInfoRes.Response.SdkAppId,
@@ -71,10 +71,10 @@ export class Demo {
       Uin: uin,
       RoomId: parseInt(classId, 10),
     };
-    return this.demoRequest("/describeRoom", {
+    return this.demoRequest('/describeRoom', {
       param: {
-        scene: "default",
-        env: "prod",
+        scene: 'default',
+        env: 'prod',
         ...describeRoomParams,
       },
     });
@@ -91,10 +91,10 @@ export class Demo {
 }
      * 
      */
-    return this.demoRequest("/login", {
+    return this.demoRequest('/login', {
       param: {
         ...param,
-        env: "prod",
+        env: 'prod',
       },
     });
   }
@@ -132,7 +132,7 @@ export class Demo {
           },
        * };
        */
-        SubType: "videodoc", // 教室布局
+        SubType: 'videodoc', // 教室布局
         VideoOrientation: 0, // 视频方向，0-横屏，1-竖屏
         RecordLayout: 1, //  录制模板，枚举值参考 https://cloud.tencent.com/document/product/1639/89744#dbdb018b-d36f-488b-b830-deb6689c9c64
         AudienceType: 1, //观看类型，1-RTC观看, 2-CDN观看（大班课）
@@ -145,22 +145,22 @@ export class Demo {
         DisableRecord: 1, // 是否开启录制 1-开启，-0-关闭
         Uin: uin, //创建房间时，好像只能用这个uin
         SdkAppId: this._sdkAppId,
-        scene: "default", //场景值，控制可配用于加载自定义JS/CSS
-        env: "prod",
+        scene: 'default', //场景值，控制可配用于加载自定义JS/CSS
+        env: 'prod',
       };
     };
-    let result = await this.demoRequest("/createRoom", {
+    let result = await this.demoRequest('/createRoom', {
       param: getCreateRoomParam(),
     });
-    console.log("result:", result);
+    console.log('result:', result);
     return result.Response;
   }
   private async demoRequest(path: string, opts: { param: any }) {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       let res = await fetch(`${this._demoHost}${path}`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-type": "application/json",
+          'Content-type': 'application/json',
         },
         body: JSON.stringify(opts.param),
       });
