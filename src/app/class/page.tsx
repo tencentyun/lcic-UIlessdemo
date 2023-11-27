@@ -98,7 +98,7 @@ export default function Home(Props: { params: any }) {
       let hostInfo: MyInfo | null = state.hostInfo;
       let myInfo: MyInfo = state.myInfo!;
       let roomInfo: any = state.tcic.classInfo.class_info.room_info;
-      debug("roomInfo:", roomInfo);
+      debug("Hea roomInfo:", roomInfo);
       debug("myInfo:", myInfo);
       /**
        * 主播则等待开播
@@ -114,7 +114,8 @@ export default function Home(Props: { params: any }) {
 
       setMyRole(myInfo.detail.role);
       /**
-       * 先获取一次成员列表
+       * 先获取一次成员列表,
+       *
        */
       let tryGetMemberList = () => {
         state.tcic
@@ -129,7 +130,10 @@ export default function Home(Props: { params: any }) {
             debug(":onlineNumber:", onlineNumber);
             debug("res:", res);
             if (res.error_code != 0) {
-              return tryGetMemberList();
+              setTimeout(() => {
+                tryGetMemberList();
+              }, 500);
+              return;
             }
             setOnlineNumber(onlineNumber);
             setMemberListInitData({
@@ -140,7 +144,9 @@ export default function Home(Props: { params: any }) {
             });
           });
       };
-      // tryGetMemberList()
+      tryGetMemberList();
+    } else {
+      setMyRole(null);
     }
   }, [state.tcic]);
 

@@ -39,13 +39,24 @@ export function AppHeader(Props: {
     let global = window as any;
     debug("header mounted", Props.uid, ready, global.TCIC_SPY);
     if (Props.uid && !ready && global.TCIC_SPY) {
-      initBoot();
+      initBoot("effected ");
     }
     return () => {
       setReady(false);
+      state.tcic = null;
+      state.hostInfo = null;
+      state.myInfo = null;
+      dispatch({
+        type: "merge",
+        arg: {
+          ...state,
+        },
+      });
+      debug("header unmounted");
     };
   }, [Props.uid]);
-  let initBoot = async () => {
+  let initBoot = async (reson: string) => {
+    debug("reson:", reson, Props);
     setReady(true);
     let global = window as any;
     state.sdk = global.TCIC_SPY;
@@ -141,7 +152,7 @@ export function AppHeader(Props: {
    */
   let tcicScriptLoaded = async () => {
     if (!ready) {
-      initBoot();
+      initBoot("scriptLoaded");
     }
   };
 
@@ -156,7 +167,7 @@ export function AppHeader(Props: {
     token: string;
     classId: number;
   }) => {
-    debug("inite TCIC---->>>>");
+    debug("inite TCIC---->>>>", param);
     let tcic = param.sdk.create(param);
     return new Promise((resolve, reject) => {
       tcic
