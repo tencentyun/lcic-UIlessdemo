@@ -1,5 +1,6 @@
 /**
- * 刷新进入页面会比较简单，少一些资源销毁状态重置等逻辑
+ * 先必须刷新进入课中页，
+ * 销毁重置状态逻辑有问题 退出后重新进入功能异常
  */
 'use client';
 import styles from './page.module.css';
@@ -385,7 +386,11 @@ export default function Home(Props: { params: any }) {
                   return;
                 }
                 let canEndClass = false;
-                if (checkUserPermission(state.tcic.myInfo(), 'endClass')) {
+
+                if (
+                  state.myInfo &&
+                  checkUserPermission(state.myInfo, 'endClass')
+                ) {
                   canEndClass = true;
                 }
                 /**
