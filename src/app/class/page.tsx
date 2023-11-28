@@ -51,6 +51,12 @@ export type MemberStream = {
   url: string;
 };
 
+type MemberHandsUp = {
+  user_id: string;
+  user_name: string;
+  hand_up_times: number;
+  hand_up_timestamp: number;
+};
 let debug = debugFatory('HomePage');
 /**
  *
@@ -71,6 +77,10 @@ export default function Home(Props: { params: any }) {
   let [tipsArray, setTipsArray] = useState<any[]>([]);
   let [myRole, setMyRole] = useState<RoleName | null>(null);
   let [btnVisible, setBtnVisible] = useState(true);
+  /**
+   * 允许连麦
+   */
+  let [callEnable, setCallEnable] = useState(false);
   let [classInfo, setClassInfo] = useState({
     startTime: 0,
     classState: TClassStatus.Not_Start,
@@ -102,8 +112,16 @@ export default function Home(Props: { params: any }) {
       let hostInfo: MyInfo | null = state.hostInfo;
       let myInfo: MyInfo = state.myInfo!;
       let roomInfo: any = state.tcic.classInfo.class_info.room_info;
-      debug('Hea roomInfo:', roomInfo);
-      debug('myInfo:', myInfo);
+      let oncallingMembers = state.tcic.memberInfo.members; //台上用户信息
+      debug('Settings Hea roomInfo:', oncallingMembers);
+      debug('Settings myInfo:', myInfo);
+      let isOnCalling = oncallingMembers.find((item: any) => {
+        return item.user_id === myInfo.userId;
+      });
+      debug('Settings isOnCalling:', isOnCalling);
+      if (isOnCalling) {
+        setCallEnable(true);
+      }
       /**
        * 主播则等待开播
        */
@@ -264,10 +282,37 @@ export default function Home(Props: { params: any }) {
             eventActionMap[payload.data.action] &&
               eventActionMap[payload.data.action]();
           },
+
           /**
-           * 权限更新
+           *  用户举手，申请连麦功能
            */
-          'v1/permissions': () => {},
+          'v1/hand_up': () => {
+            let handUpsMember: MemberHandsUp[] = payload.data.hand_ups;
+
+            debug('v1/hand_up:', handUpsMember);
+          },
+          /**
+           * trtc房间权限更新，主要涵盖音视频/白板相关内容，
+           * 例如屏幕分享，音视频，白板操作等等
+           */
+          'v1/permissions': () => {
+            debug('v1/permissions:', payload);
+            debug('saasadminMsgReceived: ', payload.data.permissions);
+            let myPermission = payload.data.permissions.find((item: any) => {
+              return item.user_id == uid;
+            });
+            if (myPermission) {
+              /**
+               * 直播场景简单处理，只要上台就允许连麦
+               */
+              debug('myPermission:', myPermission);
+              setCallEnable(true);
+            } else {
+              setCallEnable(false);
+            }
+
+            debug('saasadminMsgReceived: v1/permissions my', uid, myPermission);
+          },
           /**
            * 房间信息同步
            */
@@ -291,8 +336,8 @@ export default function Home(Props: { params: any }) {
    * main为主流 ， auxiliary为辅流,电商场景，没有辅流
    */
 
-  let whenReady = (tcic: any) => {
-    let trtcClient = new TCIC_SPY.createTrtcClient(tcic);
+  let whenReady = (tcic: any, sdk: any) => {
+    let trtcClient = new sdk.createTrtcClient(tcic);
     debug('trtcClient:', trtcClient);
     setTrtcClient(trtcClient);
   };
@@ -347,6 +392,7 @@ export default function Home(Props: { params: any }) {
         <div className={`${styles['beifore-begin']}`}>正在准备,请稍后</div>
       </>
     );
+  let isHost = myRole === RoleName.HOSTER;
 
   return (
     <>
@@ -468,7 +514,9 @@ export default function Home(Props: { params: any }) {
         <InfoPanel visible={roomInfoVisible} onHide={roomInfoHide}></InfoPanel>
         <Footer>
           <div className="row mb-4">
-            <div className="col-8">
+            <div
+              className={`${isHost ? 'col-8' : 'col-8'} align-self-end px-1`}
+            >
               {typeof myRole === 'number' ? (
                 <Chat isHost={myRole === RoleName.HOSTER}>
                   {tipsArray.map((item) => item)}
@@ -477,8 +525,17 @@ export default function Home(Props: { params: any }) {
                 <></>
               )}
             </div>
-            <div className="col-4">
-              <Settings></Settings>
+            <div
+              className={`${isHost ? 'col-4' : 'col-4'} align-self-end px-1`}
+            >
+              <Settings
+                role={myRole}
+                trtcClient={trtcClient}
+                // sdk={state.sdk}
+                tcic={state.tcic}
+                callEnable={callEnable}
+                start={start}
+              ></Settings>
             </div>
           </div>
           {myRole === RoleName.HOSTER &&

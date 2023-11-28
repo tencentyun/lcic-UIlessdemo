@@ -34,9 +34,12 @@
   height: 13px;
 }
 
-.single-setting-icon,
-.single-share-icon {
-  background-image: url(/next/_next/static/media/share.1f205d41.svg);
+.s-gift-icon,
+.s-call-icon,
+.s-setting-icon,
+.s-awesome-icon,
+.s-share-icon {
+  background-image: url('../info-panel/img/share.svg');
   background-size: contain;
   background-repeat: no-repeat;
   width: 36px;
@@ -46,4 +49,39 @@
   background-position: 10px 8px;
   background-color: #00000063;
   border-radius: 50%;
+  vertical-align: bottom;
+}
+
+.s-setting-icon{
+  background-image: url("img/setting.svg");
+  background-position: 9px 9px;
+}
+.s-call-icon{
+  background-image: url("img/call.svg");
+  background-position: 9px 9px;
+}
+.s-gift-icon{
+  background-image: url("img/gift.svg");
+  background-position: 9px 9px;
+}
+.s-awesome-icon{
+  background-image: url("img/awesome.svg");
+  background-position: 9px 9px;
+}
+
+.icon-wrap{
+  text-align: center;
+  margin-top: 5px;
+}
+.call-waiting{
+  background-color: red;
+}
+
+.waiting{
+  border: 1px solid #ccc;
+  padding: 10px;
+  font-size: 14px;
+  background-color: #5f5d5d;
+  border-radius: 5px;
+  color: #fff;
 }

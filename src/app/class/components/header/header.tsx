@@ -144,7 +144,7 @@ export function AppHeader(Props: {
 
       debug('AppHeader tcic: merged', tcic);
 
-      Props.whenReady && Props.whenReady(tcic);
+      Props.whenReady && Props.whenReady(tcic, state.sdk);
     });
   };
   /**
