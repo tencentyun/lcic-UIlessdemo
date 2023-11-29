@@ -10,6 +10,7 @@ let debug = debugFatory('Settings');
 type SettingItem = TCIC.Common.Item<{
   icon: string;
 }>;
+type RemoteItem = TCIC.Common.Item<any>;
 /**
  *
  * @param Props
@@ -22,28 +23,60 @@ export function Settings(Props: {
   let { state } = useContext(BootContext);
   let [settingVisible, settingListShow, settingListHide] = useVisible();
   let [shareVisible, shareShow, shareHide] = useVisible();
+  let [published, setPublished] = useState(false);
+  let [remoteList, setRemoteList] = useState([] as RemoteItem[]);
   let [settingList, setSettingList] = useState<SettingItem[]>([]);
   let { showModal, hideModal, showCounterDown } = useContext(ModalContext);
-  let [joinCall, setJoingCall] = useState(false);
-  let [callEnable, setCallEnable] = useState(false);
+  let [callEnable, setCallEnable] = useState({
+    able: false, //远端是否允许上麦
+    ready: false, //本地上麦意愿
+  });
   let { state: Interactions } = useContext(InteractionContext);
 
+  /**
+   * 主动下台
+   */
+  let downStage = () => {
+    state.tcic.memberAction({
+      classId: state.tcic.classId,
+      userId: state.tcic?.myInfo().id,
+      actionType: TMemberActionType.Stage_Down,
+    });
+    setCallEnable((pre) => {
+      return {
+        ...pre,
+        ready: false,
+      };
+    });
+    if (published) {
+      state.trtcClient.unPublish();
+      setPublished(false);
+    }
+  };
+
+  /**
+   * 申请上台
+   */
+  let upStage = () => {
+    setCallEnable((pre) => {
+      return { ...pre, ready: true };
+    });
+    state.tcic.memberAction({
+      classId: state.tcic.classId,
+      userId: state.tcic?.myInfo().id,
+      actionType: TMemberActionType.Hand_Up,
+    });
+  };
   let clickHandler = (item: SettingItem) => {
     let settingHandlerMap: any = {
       call: () => {
-        if (!joinCall) {
+        if (!callEnable.ready) {
           if (state.trtcClient) {
             showModal({
               content: '申请连麦',
               onConfirm: () => {
-                // Props.trtcClient.startLocalPreview()
                 hideModal();
-                setJoingCall(true);
-                state.tcic.memberAction({
-                  classId: state.tcic.classId,
-                  userId: state.tcic?.myInfo().id,
-                  actionType: TMemberActionType.Hand_Up,
-                });
+                upStage();
               },
             });
           }
@@ -52,17 +85,8 @@ export function Settings(Props: {
             showModal({
               content: '取消连麦',
               onConfirm: () => {
-                // Props.trtcClient.startLocalPreview()
                 hideModal();
-                setJoingCall(false);
-                state.tcic.memberAction({
-                  classId: state.tcic.classId,
-                  userId: state.tcic?.myInfo().id,
-                  actionType: TMemberActionType.Stage_Down,
-                });
-                state.trtcClient.unPublish().then(() => {
-                  Props.onCancel && Props.onCancel();
-                });
+                downStage();
               },
             });
           }
@@ -114,14 +138,18 @@ export function Settings(Props: {
   let audienceList = ['share', 'gift', 'call', 'awesome'];
 
   useEffect(() => {
+    if (!state.tcic) {
+      return;
+    }
+    let hostInfo = state.tcic.hostInfo();
+    let isHost = state.tcic.userId === hostInfo.id;
     if (!Props.start) {
       /**
        * 没开始的不展示设置项
        */
       return setSettingList([]);
     }
-    let myInfo = state.tcic.myInfo();
-    if (myInfo.val.role === RoleName.HOSTER) {
+    if (isHost) {
       setSettingList(
         totalSettings.filter((item) => hosterList.includes(item.id)),
       );
@@ -130,71 +158,157 @@ export function Settings(Props: {
         totalSettings.filter((item) => audienceList.includes(item.id)),
       );
     }
+
+    if (isHost) {
+      return;
+    }
+
+    debug('连麦中');
+    /**
+     * 刷新进入页面时的提示
+     */
+    if (Props.start && callEnable.able) {
+      showModal({
+        content: '你在连麦中，是否继续',
+        onConfirm: () => {
+          hideModal();
+          setCallEnable((pre) => {
+            return { ...pre, ready: true };
+          });
+        },
+        onCancel: () => {
+          hideModal();
+          downStage();
+        },
+      });
+    }
   }, [Props.start]);
 
   useEffect(() => {
-    debug('Interactions:', Interactions);
-  }, [Interactions]);
+    debug('onStageMembers .settingList:', settingList);
+    /**
+     * 仅仅当连麦设置项存在时，才需要处理
+     */
+    if (!settingList.find((item) => item.id === 'call')) {
+      if (!state.tcic) {
+        return;
+      }
+      /**
+       * 这里是房主逻辑
+       */
+      let myInfo = state.tcic.myInfo();
+      let hostInfo = state.tcic.hostInfo();
+      let invalidIds = [myInfo.id, hostInfo.id];
+      let membersOnCalling = Interactions.onStageMembers.filter((item) => {
+        return !invalidIds.includes(item.id);
+      });
+      debug('willSHow this', membersOnCalling);
+      setRemoteList(membersOnCalling);
+      membersOnCalling.forEach((item) => {
+        state.trtcClient.wantedView({
+          view: item.id,
+          userId: item.id,
+        });
+      });
 
-  // useEffect(() => {
-  //   /**
-  //    * 房主不需要处理
-  //    */
-  //   if (Props.role === RoleName.HOSTER) {
-  //     return;
-  //   }
-  //   if (!Props.start) {
-  //     return;
-  //   }
-  //   debug('user Props', Props);
-  //   /**
-  //    * 表示此时用户在麦上
-  //    */
-  //   if (Props.callEnable) {
-  //     setJoingCall(true);
-  //     /**
-  //      * 进入房间后，如果允许连麦，且已经申请连麦
-  //      * 则自动推流
-  //      */
-  //     Props.trtcClient
-  //       .localPreview({
-  //         view: `${state.myInfo?.userId}`,
-  //         // options: {
-  //         //   objectFit: "",
-  //         // },
-  //       })
-  //       .then(() => {
-  //         Props.trtcClient.localPublish();
-  //       });
-  //   } else {
-  //     /**
-  //      * 表示用户在麦下,或者被踢下麦
-  //      */
+      return;
+    }
 
-  //     /**
-  //      * 表示当前用户正在连麦中,需要被强制踢下线
-  //      */
-  //     if (joinCall) {
-  //       debug('force unPublish');
-  //       Props.trtcClient.unPublish().catch((e: any) => {
-  //         /**
-  //          * 取消发布的错误不影响运行
-  //          */
-  //         debug('unPublish error:', e);
-  //       });
-  //       setJoingCall(false);
-  //     }
-  //     /**
-  //      * 如果当前joinCall为 false表示用户主动取消，不需要反复unPublish
-  //      */
-  //   }
-  // }, [Props.callEnable, Props.start]);
+    let checkIfOnStage = () => {
+      let myInfo = state.tcic.myInfo();
+      return Interactions.onStageMembers.find((item) => item.id === myInfo.id);
+    };
+    let onStage = checkIfOnStage();
+    /**
+     * 没有发布流时，如果发现自己被邀请上台，开启连麦流程
+     */
+    if (state.tcic && !published) {
+      debug(':::', onStage, Props);
+      /**
+       * 已经开始上课，并且本人在台上，则自动连麦
+       */
+      if (onStage && Props.start) {
+        showModal({
+          content: '你被邀请连麦，是否同意',
+          onConfirm: () => {
+            hideModal();
+            setCallEnable({
+              able: true,
+              ready: true,
+            });
+          },
+          onCancel: () => {
+            hideModal();
+            downStage();
+          },
+        });
+      }
+      if (onStage && !Props.start) {
+        setCallEnable((preObj) => {
+          return { ...preObj, able: true };
+        });
+      }
+    }
+
+    /**
+     * 正在发布中上台人员权限变更，发现自己不在授权列表时，自动下台
+     */
+    if (published && !onStage) {
+      showModal({
+        content: '你已经被请下台',
+        onConfirm: () => {
+          hideModal();
+        },
+        btn: {
+          ok: '好的',
+        },
+      });
+      downStage();
+      setCallEnable({ ready: false, able: false });
+    }
+  }, [Interactions.onStageMembers, settingList]);
+
+  useEffect(() => {
+    debug('totalSettings:', settingList);
+    /**
+     * 仅仅当连麦设置项存在时，才需要处理
+     */
+    if (!settingList.find((item) => item.id === 'call')) {
+      return;
+    }
+    if (state.trtcClient && Interactions.hasEnterTrtcRoom && !published) {
+      debug('callEnable: will set Call Enable', callEnable);
+      if (callEnable.able && callEnable.ready) {
+        setPublished(true);
+        state.trtcClient
+          .localPreview({
+            view: `${state.tcic.myInfo()?.id}`,
+          })
+          .then(() => {
+            state.trtcClient.localPublish();
+          });
+      }
+    }
+  }, [callEnable, Interactions.hasEnterTrtcRoom]);
 
   return (
     <>
       <div className="container">
-        {callEnable ? (
-          joinCall ? (
+        {remoteList.length > 0 ? (
+          <div className="row">
+            {remoteList.map((item) => {
+              return (
+                <div key={item.id} className="col px-1">
+                  <div id={item.id}></div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <></>
+        )}
+        {callEnable.able ? (
+          callEnable.ready ? (
             <div className="row">
               <div className="col px-1">
                 <div id={state.tcic.myInfo()?.id}></div>
@@ -203,7 +317,7 @@ export function Settings(Props: {
           ) : (
             <></>
           )
-        ) : joinCall ? (
+        ) : callEnable.ready ? (
           <div className="row">
             <div className="col px-1">
               <div className={`${style['waiting']}`}>连麦申请中..</div>
@@ -220,7 +334,7 @@ export function Settings(Props: {
                 <i
                   className={`${item.val?.icon} ${
                     item.id === 'call'
-                      ? joinCall
+                      ? callEnable.ready
                         ? style['call-waiting']
                         : ''
                       : undefined

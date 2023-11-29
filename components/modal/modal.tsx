@@ -56,7 +56,7 @@ export function MyModal(Props: {
             <button
               type="button"
               className="btn-close"
-              data-bs-dismiss="modal"
+              onClick={cancleHandler}
               aria-label="Close"
             ></button>
           </div>

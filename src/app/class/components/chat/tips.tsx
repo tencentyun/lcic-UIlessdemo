@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
 import styles from './style.module.css';
 
-export function Tips(Props: { onHide?: any; children?: any; styles?: any }) {
+export function Tips(Props: {
+  onHide?: any;
+  children?: any;
+  styles?: any;
+  onClick?: any;
+}) {
   let [unmounted, setUmounted] = useState(true);
   let [visible, setVsiible] = useState(false);
   useEffect(() => {
@@ -23,6 +28,7 @@ export function Tips(Props: { onHide?: any; children?: any; styles?: any }) {
   }, [Props]);
   return unmounted ? (
     <div
+      onClick={Props.onClick}
       className={`${styles['message']} ${styles['msg-tips']} ${
         visible ? styles['msg-tips-show'] : ''
       }`}

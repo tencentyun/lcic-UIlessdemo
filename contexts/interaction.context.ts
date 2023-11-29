@@ -30,6 +30,8 @@ let contextObj = contextFactory(
       historyOnlineNum: 0, //历史在线人数
       handsUpMembers: [] as TCIC.Common.Item<any>[], //举手成员
       onStageMembers: [] as TCIC.Common.Item<any>[], //台上成员列表
+      hasEnterTrtcRoom: false, //是否已经进入Trtc房间
+      newEnterRoomMembers: [] as TCIC.Common.Item<any>[], //新进入房间的成员
     },
   },
 );

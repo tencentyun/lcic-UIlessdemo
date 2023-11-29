@@ -145,6 +145,19 @@ export function SysMsgProvider(Props: { children: any }) {
           'v1/hand_up': () => {
             //   let resutMembers: MemberHandsUp[] = payload.data.hand_ups;
             debug('v1/hand_up:', payload);
+
+            interationUpdate({
+              type: 'update',
+              state: {
+                handsUpMembers: payload.data.hand_ups.map((item: any) => {
+                  return {
+                    id: item.user_id,
+                    text: item.user_name,
+                    val: item,
+                  };
+                }),
+              },
+            });
             //   /**
             //    * 过滤掉自己，避免重复出现小红点
             //    */

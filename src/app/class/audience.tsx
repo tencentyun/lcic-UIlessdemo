@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import styles from './page.module.css';
 import { debugFatory } from '../lib';
 import { BootContext } from '../../../contexts/boot.context';
+import { InteractionContext } from '../../../contexts/interaction.context';
 let debug = debugFatory('Audience');
 
 export function Audience(Props: {
@@ -13,6 +14,7 @@ export function Audience(Props: {
   const streamType = ['main'];
   let { state } = useContext(BootContext);
   let [start, setStart] = useState(false);
+  let { dispatch: interactionUpdate } = useContext(InteractionContext);
   let trtcClient = state.trtcClient;
   let roomInfo = Props.tcic?.classInfo.class_info.room_info || {};
   debug('auidence roomInfo:', roomInfo);
@@ -21,6 +23,12 @@ export function Audience(Props: {
      * 互动课
      */
     trtcClient.enterRoom().then(() => {
+      interactionUpdate({
+        type: 'update',
+        state: {
+          hasEnterTrtcRoom: true,
+        },
+      });
       streamType.forEach((type) => {
         trtcClient.wantedView({
           view: `${roomInfo.teacher_id}`,

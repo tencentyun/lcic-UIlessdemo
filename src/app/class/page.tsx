@@ -8,18 +8,13 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { AppHeader } from './components/header/header';
 import { Loading } from './components/loading/loading';
 import { Footer } from './components/footer/footer';
-import {
-  Member,
-  MemberList,
-  getValidMembers,
-} from './components/member-list/member-list';
+import { Member, MemberList } from './components/member-list/member-list';
 import { InfoPanel } from './components/info-panel/info-panel';
 import { Chat } from './components/chat/chat';
 import { Settings } from './components/settings/settings';
 import { useVisible } from '../../../hooks/visible';
 import { BootContext } from '../../../contexts/boot.context';
 import {
-  MyInfo,
   RoleName,
   TClassStatus,
   checkUserPermission,
@@ -87,27 +82,10 @@ export default function Home(Props: { params: any }) {
   let [btnVisible, setBtnVisible] = useState(true);
   // let timerRef = useRef<any>(null);
   let { state: roomState, dispatch } = useContext(RoomContext);
-  /**
-   * 用户互动信息
-   */
-  let [stageMemberInfo, setStageMemberInfo] = useState<{
-    red: boolean;
-    handsup: TCIC.Common.Item<any>[];
-    invated: TCIC.Common.Item<any>[];
-  }>({
-    red: false,
-    handsup: [],
-    invated: [],
-  });
+
   let { state } = useContext(BootContext);
   const router = useRouter();
   let searchParams = useSearchParams();
-  let [memberListInitData, setMemberListInitData] = useState<{
-    members: Member[];
-    onlineNumber: number;
-    page: number;
-    total: number;
-  } | null>(null);
   let token = searchParams.get('token') as string;
   let cid = searchParams.get('cid') as string;
   let uid = searchParams.get('uid') as string;
@@ -148,6 +126,30 @@ export default function Home(Props: { params: any }) {
       });
     }
   }, [state.tcic]);
+
+  useEffect(() => {
+    let myInfo = state.tcic?.myInfo();
+    let showHandsUpMember = interactionState.handsUpMembers.filter(
+      (item) => myInfo.id !== item.id,
+    );
+    let result = showHandsUpMember.map((item, index: any) => {
+      return (
+        <Tips
+          onClick={() => {
+            memberListShow();
+          }}
+          key={`${item.id}_${index}_${new Date().getTime()}`}
+          styles={{
+            bottom: `${350 + index * 54}px`,
+          }}
+        >{`${item.text}申请连麦`}</Tips>
+      );
+    });
+    setTipsArray((preList) => {
+      let pre = preList.concat();
+      return [...pre, ...result];
+    });
+  }, [interactionState.handsUpMembers]);
 
   let leaveRoom = () => {
     /**
@@ -253,7 +255,6 @@ export default function Home(Props: { params: any }) {
       <AppHeader whenError={whenError} cid={cid} uid={uid} token={token}>
         {state.tcic ? (
           <InfoNav
-            showRed={stageMemberInfo.red}
             showMark={
               isHost
                 ? {

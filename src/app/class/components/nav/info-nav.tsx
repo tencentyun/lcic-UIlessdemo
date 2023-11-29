@@ -26,7 +26,6 @@ function padZero(num: number) {
 }
 
 export function InfoNav(Props: {
-  showRed: boolean;
   clickHandler?: {
     quit?: () => void;
     name?: () => void;
@@ -41,7 +40,8 @@ export function InfoNav(Props: {
   let [duration, setDuration] = useState('00:00:00');
   let [showRed, setShowRed] = useState(false);
   let { state: RoomState } = useContext(RoomContext);
-  let { state: InterationState } = useContext(InteractionContext);
+  let { state: Interations } = useContext(InteractionContext);
+
   useEffect(() => {
     if (!timerRef.current && Props.showMark?.startTime) {
       timerRef.current = setInterval(() => {
@@ -59,10 +59,10 @@ export function InfoNav(Props: {
 
   useEffect(() => {
     debug('Props>showred', Props);
-    if (Props.showRed) {
+    if (Interations.handsUpMembers.length > 0) {
       setShowRed(true);
     }
-  }, [Props.showRed]);
+  }, [Interations.handsUpMembers]);
 
   let hideRed = () => {
     setShowRed(false);
@@ -114,7 +114,7 @@ export function InfoNav(Props: {
               hideRed();
             }}
           >
-            {InterationState.onlineAuienceNum}人
+            {Interations.onlineAuienceNum}人
           </span>
           {showRed ? <span className={`${cssModule['red']}`}></span> : <></>}
 

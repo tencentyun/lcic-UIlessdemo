@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { debugFatory } from '../lib';
 import styles from './page.module.css';
 import { BootContext } from '../../../contexts/boot.context';
+import { InteractionContext } from '../../../contexts/interaction.context';
 let debug = debugFatory('Hoster');
 
 export type MemberStream = {
@@ -21,6 +22,7 @@ export function Hoster(Props: {
   let info = Props.tcic.myInfo();
   let [isPublished, setPublished] = useState(false);
   let { state } = useContext(BootContext);
+  let { dispatch: interactionUpdate } = useContext(InteractionContext);
   useEffect(() => {
     if (state.trtcClient) {
       state.trtcClient.localPreview({
@@ -56,6 +58,12 @@ export function Hoster(Props: {
       await Props.tcic.startClass();
     }
     state.trtcClient.enterRoom().then(() => {
+      interactionUpdate({
+        type: 'update',
+        state: {
+          hasEnterTrtcRoom: true,
+        },
+      });
       state.trtcClient.localPublish();
     });
   };

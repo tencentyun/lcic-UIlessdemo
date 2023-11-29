@@ -283,7 +283,7 @@ export function MemberList(Props: {
     let isHandsUp = InterationState.handsUpMembers.find(
       (item) => item.id === data.id,
     );
-    text = `${isHandsUp ? `${text} [举手]` : `${text}`}`;
+    text = `${isHandsUp ? `${text} [申请连麦]` : `${text}`}`;
     let isOnStage = false;
 
     let isInvated = InterationState.onStageMembers.find(
