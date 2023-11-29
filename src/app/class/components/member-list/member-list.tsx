@@ -2,10 +2,12 @@
 import { Dispatch, useContext, useEffect, useReducer, useState } from 'react';
 import { MyOffCanvas } from '../../../../../components/offcanvas/offcanvas';
 import styles from './style.module.css';
-import { MyInfo, checkUserPermission, debugFatory } from '@/app/lib';
+import { TMemberActionType, checkUserPermission, debugFatory } from '@/app/lib';
 import { Loading } from '../loading/loading';
 import { ModalContext } from '../../../../../contexts/modal.context';
 import { BootContext } from '../../../../../contexts/boot.context';
+import { RoomContext } from '../../../../../contexts/room.context';
+import { InteractionContext } from '../../../../../contexts/interaction.context';
 
 export type Member = TCIC.Common.Item<any>;
 
@@ -14,10 +16,8 @@ type MemberViewProps = {
   page: number;
   pageSize: number;
   members: Member[];
-  total: number;
-  onlineNumber: number;
-  myInfo: MyInfo | null;
-  hostInfo: MyInfo | null;
+  myInfo: Member | null;
+  hostInfo: Member | null;
 };
 export function getValidMembers(data: any, exceptIds: string[]) {
   return data
@@ -77,29 +77,19 @@ function memberReducer(state: MemberViewProps, actions: ActionParam) {
 
 export function MemberList(Props: {
   onHide: (evnet: any) => void;
-  tcic: any;
-  classId: string;
   visible: boolean;
-  onUpdate?: (data: {
-    members: Member[];
-    onlineNumber: number;
-    total: number;
-  }) => void;
-  init: {
-    members: Member[];
-    onlineNumber: number;
-    page: number;
-    total: number;
-  };
 }) {
+  debug('Props:', Props.visible);
+  /**
+   * 暂时先不做分页，一次性拉50条数据
+   */
   let [state, dispatch]: [MemberViewProps, Dispatch<ActionParam>] = useReducer(
     memberReducer,
     {
-      page: Props.init.page,
-      pageSize: 10,
-      members: Props.init.members,
-      total: Props.init.total,
-      onlineNumber: Props.init.onlineNumber,
+      page: 0,
+      pageSize: 50,
+      members: [],
+      total: -1,
       myInfo: null,
       hostInfo: null,
     } as MemberViewProps,
@@ -107,52 +97,92 @@ export function MemberList(Props: {
 
   let { state: BootState } = useContext(BootContext);
 
+  let { state: RoomState } = useContext(RoomContext);
+  let { state: InterationState } = useContext(InteractionContext);
+
   let { showModal, hideModal } = useContext(ModalContext);
 
   let [loading, setLoading] = useState(false);
+
+  /**
+   * 初始化用户信息
+   */
   useEffect(() => {
+    debug('debug:', BootState.tcic);
+    if (BootState.tcic) {
+      dispatch({
+        type: 'update',
+        arg: {
+          myInfo: BootState.tcic.myInfo(),
+          hostInfo: BootState.tcic.hostInfo(),
+        },
+      });
+    }
+  }, [BootState.tcic]);
+
+  function updateState(res: any) {
+    let onlineMember = res.total - res.member_offline_number;
+    let updateData = {
+      members: getValidMembers(res.members, [state.hostInfo?.id]),
+      onlineNumber: state.hostInfo ? onlineMember - 1 : onlineMember, //减去host自己
+      total: res.total,
+    };
+
     dispatch({
       type: 'update',
-      arg: {
-        myInfo: BootState.myInfo,
-        hostInfo: BootState.hostInfo,
-      },
+      arg: updateData,
     });
-  }, [BootState.myInfo]);
-  let tcicObj = Props.tcic;
-  let roomInfo: { teacher_id: string } =
-    Props.tcic.classInfo.class_info.room_info;
-  // debug("Props.visible:", Props.visible);
+  }
 
   useEffect(() => {
+    /**
+     * RoomState的时序在BootState之后
+     */
+    if (RoomState.classId) {
+      debug('WIll request init memberList');
+      /**
+       * 暂时先拉一页
+       */
+      BootState.tcic
+        .getMembersDetail(RoomState.classId, {
+          page: state.page,
+          limit: state.pageSize,
+        })
+        .then((res: any) => {
+          debug('res.members:', res.members);
+          res.members = getValidMembers(res.members, [
+            state.hostInfo?.id || '',
+          ]);
+
+          updateState(res);
+        });
+    }
+  }, [RoomState.classId]);
+
+  useEffect(() => {
+    if (!BootState.tcic) {
+      throw new Error('初始化sdk后才能展示用户列表');
+    }
+    /**
+     * 没有初始化房间信息
+     */
+    if (!RoomState.classId) {
+      throw new Error('初始化roomState后才能用户列表');
+    }
     if (Props.visible) {
       setLoading(true);
-      tcicObj
-        .getMembers(Props.classId, {
+
+      BootState.tcic
+        .getMembersDetail(RoomState.classId, {
           page: state.page,
           limit: state.pageSize,
         })
         .then((res: any) => {
           setLoading(false);
-          let onlineMember = res.total - res.member_offline_number;
-          let updateData = {
-            members: getValidMembers(res.members, [roomInfo.teacher_id || '']),
-            onlineNumber: state.hostInfo ? onlineMember - 1 : onlineMember, //减去host自己
-            total: res.total,
-          };
-          Props.onUpdate && Props.onUpdate(updateData);
-
-          dispatch({
-            type: 'update',
-            arg: updateData,
-          });
+          updateState(res);
         });
     }
-  }, [Props.visible]);
-
-  if (!tcicObj) {
-    return;
-  }
+  }, [Props.visible, RoomState]);
 
   let kickoutUser = (udata: Member) => {
     debug('userId', udata);
@@ -165,19 +195,18 @@ export function MemberList(Props: {
         hideModal();
         let updateData = {
           members: getValidMembers(state.members, [
-            roomInfo.teacher_id || '',
+            state.hostInfo?.id || '',
             udata.id,
           ]),
-          onlineNumber: state.onlineNumber - 1, //减去刚踢的用户
-          total: state.total - 1,
+          onlineNumber: InterationState.onlineAuienceNum - 1, //减去刚踢的用户
+          total: InterationState.historyOnlineNum - 1,
         };
-        Props.onUpdate && Props.onUpdate(updateData);
         dispatch({
           type: 'update',
           arg: updateData,
         });
-        Props.tcic.memberAction({
-          classId: Props.classId,
+        BootState.tcic.memberAction({
+          classId: RoomState.classId,
           userId: udata.id,
           actionType: 18,
           /**
@@ -189,28 +218,99 @@ export function MemberList(Props: {
     });
   };
 
+  let callUser = (udata: Member, uninvate: boolean = false) => {
+    debug('userId', udata);
+    showModal({
+      content: uninvate
+        ? `是否取消与${udata.text}连麦？`
+        : `是否邀请${udata.text}连麦？`,
+      onCancel: () => {
+        hideModal();
+      },
+      onConfirm() {
+        hideModal();
+        // let updateData = {
+        //   members: getValidMembers(state.members, [
+        //     roomInfo.teacher_id || '',
+        //     udata.id,
+        //   ]),
+        //   onlineNumber: state.onlineNumber - 1, //减去刚踢的用户
+        //   total: state.total - 1,
+        // };
+        // Props.onUpdate && Props.onUpdate(updateData);
+        // dispatch({
+        //   type: 'update',
+        //   arg: updateData,
+        // });
+
+        /**
+         * 先让用户下台，再上台，保证有提示
+         */
+        BootState.tcic
+          .memberAction({
+            classId: RoomState.classId,
+            userId: udata.id,
+            actionType: TMemberActionType.Stage_Down,
+          })
+          .finally((res: any) => {
+            if (!uninvate) {
+              /**
+               * todo: 将类型引入到项目
+               **/
+              BootState.tcic.memberAction({
+                classId: RoomState.classId,
+                userId: udata.id,
+                actionType: TMemberActionType.Stage_Up,
+              });
+            }
+          });
+      },
+    });
+  };
+
   let hasKickPermission = state.myInfo
     ? checkUserPermission(state.myInfo, 'kickOut')
     : false;
   let memberItem = function (data: Member) {
-    if (data.id === roomInfo.teacher_id) {
+    debug('dataL Member', data, Props);
+    if (data.id === state.hostInfo?.id) {
       return;
     }
     let text = data.text;
-    if (state.myInfo?.userId === data.id) {
+    if (state.myInfo?.id === data.id) {
       text = `${data.text}(我)`;
     }
+    let isHandsUp = InterationState.handsUpMembers.find(
+      (item) => item.id === data.id,
+    );
+    text = `${isHandsUp ? `${text} [举手]` : `${text}`}`;
+    let isOnStage = false;
 
+    let isInvated = InterationState.onStageMembers.find(
+      (item) => item.id === data.id,
+    );
+    isOnStage = !!isInvated;
     return (
       <div className={`${styles['member']}`} key={data.id}>
         {text}
         {hasKickPermission ? (
-          <i
-            className={`${styles['kickout-icon']} float-end`}
-            onClick={() => {
-              kickoutUser(data);
-            }}
-          ></i>
+          <>
+            <i
+              className={`${styles['kickout-icon']} float-end`}
+              onClick={() => {
+                kickoutUser(data);
+              }}
+            ></i>
+
+            <i
+              className={` ${styles['call-icon']} ${
+                isOnStage ? styles['red-icon'] : ''
+              } float-end`}
+              onClick={() => {
+                callUser(data, isOnStage);
+              }}
+            ></i>
+          </>
         ) : (
           <></>
         )}
@@ -228,7 +328,7 @@ export function MemberList(Props: {
           <div className="container">
             <div className="row">
               <div className="col text-start">
-                {`在线观众(${state.onlineNumber})`}
+                {`在线观众(${InterationState.onlineAuienceNum})`}
                 {loading ? (
                   <div className={`${styles['member-loading']}`}>
                     <Loading size="small"></Loading>

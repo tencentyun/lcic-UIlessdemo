@@ -1,6 +1,8 @@
 import { debugFatory } from '@/app/lib';
 import cssModule from './style.module.css';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { RoomContext } from '../../../../../contexts/room.context';
+import { InteractionContext } from '../../../../../contexts/interaction.context';
 let debug = debugFatory('InfoNav');
 
 /**
@@ -24,8 +26,7 @@ function padZero(num: number) {
 }
 
 export function InfoNav(Props: {
-  title: string;
-  online_number: string;
+  showRed: boolean;
   clickHandler?: {
     quit?: () => void;
     name?: () => void;
@@ -36,24 +37,36 @@ export function InfoNav(Props: {
     startTime: number;
   };
 }) {
-  let [timer, setTime] = useState<any>(null);
+  let timerRef = useRef<any>(null);
   let [duration, setDuration] = useState('00:00:00');
+  let [showRed, setShowRed] = useState(false);
+  let { state: RoomState } = useContext(RoomContext);
+  let { state: InterationState } = useContext(InteractionContext);
   useEffect(() => {
-    if (!timer && Props.showMark?.startTime) {
-      setTime(
-        setInterval(() => {
-          let now = new Date().getTime();
-          let startTime = Props.showMark!.startTime;
-          // debug("now - startTime:", now, startTime);
-          setDuration(formatIncrementalTime(now - startTime));
-        }, 1000),
-      );
+    if (!timerRef.current && Props.showMark?.startTime) {
+      timerRef.current = setInterval(() => {
+        let now = new Date().getTime();
+        let startTime = RoomState.startTime;
+        // debug("now - startTime:", now, startTime);
+        setDuration(formatIncrementalTime(now - startTime));
+      }, 1000);
     }
     return () => {
-      clearTimeout(timer);
-      setTime(null);
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
     };
   }, [Props]);
+
+  useEffect(() => {
+    debug('Props>showred', Props);
+    if (Props.showRed) {
+      setShowRed(true);
+    }
+  }, [Props.showRed]);
+
+  let hideRed = () => {
+    setShowRed(false);
+  };
 
   return (
     <nav className="navbar navbar-expand-md navbar-dark fixed-top">
@@ -64,7 +77,7 @@ export function InfoNav(Props: {
             Props.clickHandler?.name?.();
           }}
         >
-          {Props.title}
+          {RoomState.className}
           {Props.showMark ? (
             <>
               <div
@@ -93,15 +106,18 @@ export function InfoNav(Props: {
             <></>
           )}
         </div>
-        <div>
+        <div className={`${cssModule['right-wrap']}`}>
           <span
             className={cssModule['member-counter']}
             onClick={() => {
               Props.clickHandler?.memberCounter?.();
+              hideRed();
             }}
           >
-            {Props.online_number}人
+            {InterationState.onlineAuienceNum}人
           </span>
+          {showRed ? <span className={`${cssModule['red']}`}></span> : <></>}
+
           <button
             className={`btn ${cssModule['quit-btn']}`}
             onClick={() => {

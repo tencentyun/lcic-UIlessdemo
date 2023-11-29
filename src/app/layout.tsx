@@ -6,6 +6,10 @@ import Script from 'next/script';
 import { BootProvider } from '../../contexts/boot.context';
 import { useState } from 'react';
 import { ModalProvider } from '../../contexts/modal.context';
+import { SysMsgProvider } from '../../contexts/sysmsg.context';
+import { RoomProvider } from '../../contexts/room.context';
+import { InteractionProvider } from '../../contexts/interaction.context';
+import { PermissionProvider } from '../../contexts/permission.context';
 
 // export const metadata: Metadata = {
 //   title: "Create Next App",
@@ -33,8 +37,7 @@ export default function RootLayout({
           tcic: null,
           sdk: null,
           tim: null,
-          myInfo: null,
-          hostInfo: null,
+          trtcClient: null,
         }}
       >
         <Script
@@ -42,7 +45,15 @@ export default function RootLayout({
           onLoad={bootOnload}
         ></Script>
         <body className={'d-flex flex-column h-100'}>
-          <ModalProvider>{children}</ModalProvider>
+          <ModalProvider>
+            <RoomProvider>
+              <PermissionProvider>
+                <InteractionProvider>
+                  <SysMsgProvider>{children}</SysMsgProvider>
+                </InteractionProvider>
+              </PermissionProvider>
+            </RoomProvider>
+          </ModalProvider>
         </body>
       </BootProvider>
     </html>

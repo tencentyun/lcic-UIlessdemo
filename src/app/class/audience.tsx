@@ -1,21 +1,22 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import styles from './page.module.css';
 import { debugFatory } from '../lib';
+import { BootContext } from '../../../contexts/boot.context';
 let debug = debugFatory('Audience');
 
 export function Audience(Props: {
   children?: any;
   tcic: any;
-  client: any;
   token: string;
   start: boolean;
 }) {
-  let [start, setStart] = useState(false);
   const streamType = ['main'];
-  let roomInfo = Props.tcic.classInfo.class_info.room_info;
-  let trtcClient = Props.client;
+  let { state } = useContext(BootContext);
+  let [start, setStart] = useState(false);
+  let trtcClient = state.trtcClient;
+  let roomInfo = Props.tcic?.classInfo.class_info.room_info || {};
+  debug('auidence roomInfo:', roomInfo);
   let videoStart = () => {
-    setStart(true);
     /**
      * 互动课
      */
@@ -29,11 +30,15 @@ export function Audience(Props: {
       });
     });
   };
-  if (Props.start) {
+
+  useEffect(() => {
     if (!start) {
-      videoStart();
+      if (Props.start) {
+        setStart(true);
+        videoStart();
+      }
     }
-  }
+  }, [Props.start]);
   //   else {
   //     videPause();
   //   }

@@ -4,7 +4,7 @@
  */
 'use client';
 import styles from './page.module.css';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { AppHeader } from './components/header/header';
 import { Loading } from './components/loading/loading';
 import { Footer } from './components/footer/footer';
@@ -31,6 +31,9 @@ import { Hoster } from './hoster';
 import { Audience } from './audience';
 import { ModalContext } from '../../../contexts/modal.context';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { SysMsgContext } from '../../../contexts/sysmsg.context';
+import { RoomContext } from '../../../contexts/room.context';
+import { InteractionContext } from '../../../contexts/interaction.context';
 // import VConsole from 'vconsole';
 
 // import { useRouter } from "next/navigation";
@@ -57,11 +60,16 @@ type MemberHandsUp = {
   hand_up_times: number;
   hand_up_timestamp: number;
 };
+
 let debug = debugFatory('HomePage');
+
+type MemberInfo = TCIC.Common.Item<{ role: RoleName }>;
 /**
  *
  * @param Props
- *  searchParams从查询参数中获取
+ * searchParams从查询参数中获取
+ * 处理非角色业务逻辑.
+ * 系统消息联动使用SysContext
  * @returns
  */
 export default function Home(Props: { params: any }) {
@@ -70,32 +78,30 @@ export default function Home(Props: { params: any }) {
    */
   let [start, setStart] = useState(false);
   let { showModal, hideModal, showCounterDown } = useContext(ModalContext);
-  let [onlineNumber, setOnlineNumber] = useState(0);
-  let [trtcClient, setTrtcClient] = useState<any>(null);
+  let {} = useContext(SysMsgContext);
+  let { state: interactionState, dispatch: interactionDispatch } =
+    useContext(InteractionContext);
   let [memberListVisible, memberListShow, memberListHide] = useVisible();
   let [roomInfoVisible, roomInfoShow, roomInfoHide] = useVisible();
   let [tipsArray, setTipsArray] = useState<any[]>([]);
-  let [myRole, setMyRole] = useState<RoleName | null>(null);
   let [btnVisible, setBtnVisible] = useState(true);
+  // let timerRef = useRef<any>(null);
+  let { state: roomState, dispatch } = useContext(RoomContext);
   /**
-   * 允许连麦
+   * 用户互动信息
    */
-  let [callEnable, setCallEnable] = useState(false);
-  let [classInfo, setClassInfo] = useState({
-    startTime: 0,
-    classState: TClassStatus.Not_Start,
-    name: '',
+  let [stageMemberInfo, setStageMemberInfo] = useState<{
+    red: boolean;
+    handsup: TCIC.Common.Item<any>[];
+    invated: TCIC.Common.Item<any>[];
+  }>({
+    red: false,
+    handsup: [],
+    invated: [],
   });
+  let { state } = useContext(BootContext);
   const router = useRouter();
   let searchParams = useSearchParams();
-  /**
-   *  {
-    cid: string;
-    token: string;
-    uid: string;
-  };
-   */
-  let { state } = useContext(BootContext);
   let [memberListInitData, setMemberListInitData] = useState<{
     members: Member[];
     onlineNumber: number;
@@ -106,71 +112,40 @@ export default function Home(Props: { params: any }) {
   let cid = searchParams.get('cid') as string;
   let uid = searchParams.get('uid') as string;
   useEffect(() => {
-    // const vConsole = new VConsole();
-    // debug(vConsole);
     if (state.tcic) {
-      let hostInfo: MyInfo | null = state.hostInfo;
-      let myInfo: MyInfo = state.myInfo!;
+      let hostInfo: MemberInfo = state.tcic.hostInfo();
       let roomInfo: any = state.tcic.classInfo.class_info.room_info;
-      let oncallingMembers = state.tcic.memberInfo.members; //台上用户信息
-      debug('Settings Hea roomInfo:', oncallingMembers);
-      debug('Settings myInfo:', myInfo);
-      let isOnCalling = oncallingMembers.find((item: any) => {
-        return item.user_id === myInfo.userId;
-      });
-      debug('Settings isOnCalling:', isOnCalling);
-      if (isOnCalling) {
-        setCallEnable(true);
-      }
+      debug('state.tcic.memberInfo:', state.tcic.memberInfo);
       /**
-       * 主播则等待开播
+       * 设置房间信息
        */
-      setClassInfo({
-        classState: roomInfo.status,
-        startTime: roomInfo.real_start_time,
-        name: roomInfo.name,
+      dispatch({
+        type: 'update',
+        state: {
+          startTime: roomInfo.real_start_time * 1000,
+          className: roomInfo.name,
+          classState: roomInfo.status,
+          classId: `${state.tcic.classInfo.class_info.class_id}`,
+          endTime: 0,
+        },
       });
-      // if (roomInfo.teacher_id === myInfo.userId) {
-      //   setIsBegin(true);
-      // }
 
-      setMyRole(myInfo.detail.role);
       /**
-       * 先获取一次成员列表,
-       *
+       * 设置用户互动信息
        */
-      let tryGetMemberList = () => {
-        /**
-         * 这里有重试的情况，重试时tcic可能已经被释放
-         */
-        if (!state.tcic) return;
-        state.tcic
-          .getMembers(cid, {
-            page: 0,
-            limit: 10,
-          })
-          .then((res: any) => {
-            let onlineNumber = hostInfo //房主可能不在线
-              ? res.total - res.member_offline_number - 1
-              : res.total - res.member_offline_number;
-            debug(':onlineNumber:', onlineNumber);
-            debug('res:', res);
-            if (res.error_code != 0) {
-              setTimeout(() => {
-                tryGetMemberList();
-              }, 500);
-              return;
-            }
-            setOnlineNumber(onlineNumber);
-            setMemberListInitData({
-              members: getValidMembers(res.members, [hostInfo?.userId || '']),
-              onlineNumber: onlineNumber,
-              total: res.total,
-              page: 0,
-            });
-          });
-      };
-      tryGetMemberList();
+      interactionDispatch({
+        type: 'update',
+        state: {
+          onlineNum: state.tcic.memberInfo.online_number,
+          onStageMembers: state.tcic.memberInfo.members.map((item: any) => {
+            return {
+              id: item.user_id,
+              text: item.user_name,
+              val: item,
+            };
+          }),
+        },
+      });
     }
   }, [state.tcic]);
 
@@ -178,175 +153,23 @@ export default function Home(Props: { params: any }) {
     /**
      * 页面被销毁时，重置状态
      */
-    setStart(false);
-    setMyRole(null);
+    // setStart(false);
     debug('unmounted class Page', state.tcic);
     state.tcic?.destroy();
     state.tim?.destroy();
-    trtcClient?.destroy();
+    state.trtcClient?.destroy();
     setTimeout(() => {
       router.push(`/`);
     }, 300);
   };
 
-  useEffect(() => {
-    if (state.tim) {
-      state.tim.on('saasadminMsgReceived', (payload: any, data: any) => {
-        debug('saasadminMsgReceived:', payload);
-        let msgTypeMap: any = {
-          /**
-           * 事件控制？
-           */
-          event: () => {
-            /**
-             * 动作行为
-             */
-            let eventActionMap: any = {
-              member_quit: () => {
-                debug('member_quit:', payload);
-              },
-              member_online: () => {
-                debug('member_online', payload);
-                let result = payload.data.data.map(
-                  (
-                    item: { avatar: string; nickname: string; user_id: string },
-                    index: any,
-                  ) => {
-                    return (
-                      <Tips
-                        key={`${item.user_id}_${index}_${new Date().getTime()}`}
-                        styles={{
-                          bottom: `${350 + index * 54}px`,
-                        }}
-                      >{`${item.nickname}来了`}</Tips>
-                    );
-                  },
-                );
-                setTipsArray((preList) => {
-                  let pre = preList.concat();
-                  return [...pre, ...result];
-                });
-              },
-            };
-            eventActionMap[payload.data.action] &&
-              eventActionMap[payload.data.action]();
-          },
-          /**
-           * 房间控制？
-           */
-          control: () => {
-            let eventActionMap: any = {
-              class_info_change: () => {
-                debug('control got classInfoChanged', payload);
-                if (payload.data.data.status === TClassStatus.Already_Start) {
-                  setClassInfo((preState) => {
-                    return {
-                      ...preState,
-                      classState: TClassStatus.Already_Start,
-                      startTime: payload.data.data.real_start_time,
-                    };
-                  });
-                }
-                /**
-                 * 会出现两种消息，第二种不知道有什么用
-                 * {
-    "action": "class_info_change",
-    "data": {
-        "real_end_time": 1700721430,
-        "status": 2
-    },
-    "online_number": 0
-}
-{
-    "action": "class_info_change",
-    "data": {
-        "message_record_url": "https://tcic-dev-source-1257307760.cos.ap-shanghai.myqcloud.com/message/prod/3923193/332868184_1700711299_im.log"
-    },
-    "online_number": 0
-}
-
-                 * 
-                 */
-              },
-              change_member_stream: () => {},
-              class_end: () => {
-                showModal({
-                  content: '已结束',
-                  onConfirm: () => {
-                    hideModal();
-                    leaveRoom();
-                  },
-                });
-              },
-            };
-            eventActionMap[payload.data.action] &&
-              eventActionMap[payload.data.action]();
-          },
-
-          /**
-           *  用户举手，申请连麦功能
-           */
-          'v1/hand_up': () => {
-            let handUpsMember: MemberHandsUp[] = payload.data.hand_ups;
-
-            debug('v1/hand_up:', handUpsMember);
-          },
-          /**
-           * trtc房间权限更新，主要涵盖音视频/白板相关内容，
-           * 例如屏幕分享，音视频，白板操作等等
-           */
-          'v1/permissions': () => {
-            debug('v1/permissions:', payload);
-            debug('saasadminMsgReceived: ', payload.data.permissions);
-            let myPermission = payload.data.permissions.find((item: any) => {
-              return item.user_id == uid;
-            });
-            if (myPermission) {
-              /**
-               * 直播场景简单处理，只要上台就允许连麦
-               */
-              debug('myPermission:', myPermission);
-              setCallEnable(true);
-            } else {
-              setCallEnable(false);
-            }
-
-            debug('saasadminMsgReceived: v1/permissions my', uid, myPermission);
-          },
-          /**
-           * 房间信息同步
-           */
-          'v1/sync': () => {
-            debug('v1/sync:', payload);
-            /**
-             * 更新在线人数
-             */
-            setOnlineNumber(
-              payload.data.online_number - payload.data.teacher_online_number, //在线人数减去老师在线人数
-            );
-          },
-        };
-
-        msgTypeMap[payload.type] && msgTypeMap[payload.type]();
-      });
-    }
-  }, [state.tim]);
-  /**
-   *  获取流类型
-   * main为主流 ， auxiliary为辅流,电商场景，没有辅流
-   */
-
-  let whenReady = (tcic: any, sdk: any) => {
-    let trtcClient = new sdk.createTrtcClient(tcic);
-    debug('trtcClient:', trtcClient);
-    setTrtcClient(trtcClient);
-  };
-
   let whenError = (err: any) => {
-    if (err.data.error_code === 10301) {
+    debug('trtcClient:err', err.data);
+    if (err.data.error_code != 0) {
       // alert(err.data.error_msg);
       showModal({
-        content: <div>{err.data.error_msg}</div>,
+        title: `错误码：${err.data.error_code}`,
+        content: <div>{`${err.data.error_msg}`}</div>,
         onConfirm: () => {
           hideModal();
           leaveRoom();
@@ -355,12 +178,13 @@ export default function Home(Props: { params: any }) {
           ok: '好的',
         },
       });
-      debug('trtcClient:err', err.data);
     }
   };
 
   let hostStart = () => {
+    debug('wille show counter down');
     setBtnVisible(false);
+    debug('wille show counter down');
     showCounterDown({
       counter: 3,
       callback: () => {
@@ -369,8 +193,35 @@ export default function Home(Props: { params: any }) {
     });
   };
 
+  let audienceStart = () => {
+    setStart(true);
+    // let oncallingMembers = state.tcic.memberInfo.members; //台上用户信息
+    // // let myInfo = state.myInfo!;
+    // debug('Settings Hea roomInfo:', oncallingMembers);
+    // debug('Settings myInfo:', myInfo);
+    // let isOnCalling = oncallingMembers.find((item: any) => {
+    //   return item.user_id === myInfo.userId;
+    // });
+    // debug('Settings isOnCalling:', isOnCalling);
+    // if (isOnCalling && myInfo.detail.role != RoleName.HOSTER) {
+    //   showModal({
+    //     content: '你已被邀请，是否连麦',
+    //     onConfirm: () => {
+    //       // Props.trtcClient.startLocalPreview()
+    //       hideModal();
+    //       setCallEnable(true);
+    //     },
+    //   });
+    // }
+  };
+
+  let myRole = RoleName.AUDIENCE;
+  if (state.tcic) {
+    myRole = state.tcic.myInfo().val.role;
+  }
+  let isHost = myRole === RoleName.HOSTER;
   let startRover =
-    classInfo.classState === TClassStatus.Already_Start ? (
+    roomState.classState === TClassStatus.Already_Start ? (
       start ? (
         <></>
       ) : (
@@ -379,40 +230,36 @@ export default function Home(Props: { params: any }) {
             <button
               className={`btn btn-primary `}
               onClick={() => {
-                myRole === RoleName.HOSTER ? hostStart() : setStart(true);
+                isHost ? hostStart() : audienceStart();
               }}
             >
-              {myRole === RoleName.HOSTER ? '恢复直播' : '进入'}
+              {isHost ? '恢复直播' : '进入'}
             </button>
           </div>
         )
       )
     ) : (
       <>
-        <div className={`${styles['beifore-begin']}`}>正在准备,请稍后</div>
+        <div className={`${styles['beifore-begin']}`}>
+          {myRole === RoleName.HOSTER
+            ? '正在准备,请稍后'
+            : '主播正在准备,请稍后'}
+        </div>
       </>
     );
-  let isHost = myRole === RoleName.HOSTER;
 
   return (
     <>
-      <AppHeader
-        whenReady={whenReady}
-        whenError={whenError}
-        cid={cid}
-        uid={uid}
-        token={token}
-      >
+      <AppHeader whenError={whenError} cid={cid} uid={uid} token={token}>
         {state.tcic ? (
           <InfoNav
-            title={classInfo.name}
-            online_number={`${onlineNumber}`}
+            showRed={stageMemberInfo.red}
             showMark={
-              myRole === RoleName.HOSTER
+              isHost
                 ? {
                     isBegin:
-                      classInfo.classState === TClassStatus.Already_Start,
-                    startTime: classInfo.startTime * 1000,
+                      roomState.classState === TClassStatus.Already_Start,
+                    startTime: roomState.startTime,
                   }
                 : undefined
             }
@@ -427,18 +274,18 @@ export default function Home(Props: { params: any }) {
                 /**
                  * 课程还未开始
                  */
-                if (classInfo.classState === TClassStatus.Not_Start) {
+                if (roomState.classState === TClassStatus.Not_Start) {
                   leaveRoom();
                   return;
                 }
                 let canEndClass = false;
 
-                if (
-                  state.myInfo &&
-                  checkUserPermission(state.myInfo, 'endClass')
-                ) {
-                  canEndClass = true;
-                }
+                // if (
+                //   state.myInfo &&
+                //   checkUserPermission(state.myInfo, 'endClass')
+                // ) {
+                //   canEndClass = true;
+                // }
                 /**
                  * 课堂未开始不能结束？
                  */
@@ -465,11 +312,11 @@ export default function Home(Props: { params: any }) {
         <div className={`container-lg`}>
           <div className="row">
             <div className="col">
-              {typeof myRole === 'number' ? (
-                myRole === RoleName.HOSTER ? (
+              {state.tcic ? (
+                isHost ? (
                   <Hoster
                     tcic={state.tcic}
-                    client={trtcClient}
+                    // client={trtcClient}
                     token={token}
                     start={start}
                   >
@@ -478,7 +325,7 @@ export default function Home(Props: { params: any }) {
                 ) : (
                   <Audience
                     tcic={state.tcic}
-                    client={trtcClient}
+                    // client={trtcClient}
                     start={start}
                     token={token}
                   >
@@ -494,19 +341,10 @@ export default function Home(Props: { params: any }) {
           </div>
         </div>
 
-        {memberListInitData ? (
+        {roomState.classId ? (
           <MemberList
             visible={memberListVisible}
             onHide={memberListHide}
-            tcic={state.tcic}
-            classId={cid}
-            init={memberListInitData}
-            onUpdate={(data) => {
-              /**
-               * 列表同步数据
-               */
-              setOnlineNumber(data.onlineNumber);
-            }}
           ></MemberList>
         ) : (
           <></>
@@ -517,10 +355,8 @@ export default function Home(Props: { params: any }) {
             <div
               className={`${isHost ? 'col-8' : 'col-8'} align-self-end px-1`}
             >
-              {typeof myRole === 'number' ? (
-                <Chat isHost={myRole === RoleName.HOSTER}>
-                  {tipsArray.map((item) => item)}
-                </Chat>
+              {roomState.classId && start ? (
+                <Chat>{tipsArray.map((item) => item)}</Chat>
               ) : (
                 <></>
               )}
@@ -528,18 +364,11 @@ export default function Home(Props: { params: any }) {
             <div
               className={`${isHost ? 'col-4' : 'col-4'} align-self-end px-1`}
             >
-              <Settings
-                role={myRole}
-                trtcClient={trtcClient}
-                // sdk={state.sdk}
-                tcic={state.tcic}
-                callEnable={callEnable}
-                start={start}
-              ></Settings>
+              <Settings start={start}></Settings>
             </div>
           </div>
-          {myRole === RoleName.HOSTER &&
-          classInfo.classState === TClassStatus.Not_Start &&
+          {isHost &&
+          roomState.classState === TClassStatus.Not_Start &&
           !start ? (
             btnVisible && (
               <>

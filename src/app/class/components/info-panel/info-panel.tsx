@@ -5,12 +5,13 @@ import { BootContext } from '../../../../../contexts/boot.context';
 import { Loading } from '../loading/loading';
 import { debugFatory } from '@/app/lib';
 import { ModalContext } from '../../../../../contexts/modal.context';
+import { RoomContext } from '../../../../../contexts/room.context';
 
 /**
  * 给数字串补充空格，每三位一个空格
  * @param num
  */
-function addPadding(num: number) {
+function addPadding(num: string) {
   let numStr = num.toString();
   let result = '';
   for (let i = 0; i < numStr.length; i++) {
@@ -38,19 +39,20 @@ function copyToClipboard(text: any) {
  * @returns
  */
 export function InfoPanel(Props: { visible: boolean; onHide: () => void }) {
-  let { state } = useContext(BootContext);
+  let { state: RoomState } = useContext(RoomContext);
   let { showModal, hideModal } = useContext(ModalContext);
+
+  debug('Context:', RoomState);
+
   return (
     <MyOffCanvas
       classList={styles['bg']}
       visible={Props.visible}
       onHide={Props.onHide}
       header={
-        state.tcic ? (
+        RoomState.className ? (
           <>
-            <h1 className={`${styles['title']}`}>
-              {state.tcic.classInfo.class_info.room_info.name}
-            </h1>
+            <h1 className={`${styles['title']}`}>{RoomState.className}</h1>
             <div className={`${styles['share-btn']}`}></div>
           </>
         ) : (
@@ -58,16 +60,16 @@ export function InfoPanel(Props: { visible: boolean; onHide: () => void }) {
         )
       }
     >
-      {state.tcic ? (
+      {RoomState.classId ? (
         <div className={`${styles['info']}`}>
           <ul>
             <li>
               <span className={`${styles['weak-text']}`}> ID:</span>
-              {addPadding(state.tcic.classInfo.class_info.class_id)}
+              {addPadding(RoomState.classId)}
               <span
                 className={`${styles['copy-btn']}`}
                 onClick={() => {
-                  copyToClipboard(state.tcic.classInfo.class_info.class_id);
+                  copyToClipboard(RoomState.classId);
                   showModal({
                     content: '复制成功',
                     onConfirm: () => {
@@ -78,9 +80,7 @@ export function InfoPanel(Props: { visible: boolean; onHide: () => void }) {
                     },
                   });
                 }}
-              >
-                {' '}
-              </span>
+              ></span>
             </li>
             {/* <li>
               <span className={`${styles["weak-text"]}`}> 简介:</span>

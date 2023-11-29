@@ -1,8 +1,8 @@
-import { debugFatory } from "@/app/lib";
-import { MyModal } from "../components/modal/modal";
-import { createContext, useState } from "react";
-import { CounterDown } from "@/app/class/components/counter-down/counter-down";
-let debug = debugFatory("Modal_Context");
+import { debugFatory } from '@/app/lib';
+import { MyModal } from '../components/modal/modal';
+import { createContext, useState } from 'react';
+import { CounterDown } from '@/app/class/components/counter-down/counter-down';
+let debug = debugFatory('Modal_Context');
 
 type showModalParam = {
   content?: any;
@@ -24,9 +24,6 @@ let contextObj = createContext({
   showCounterDown: (arg: showCounterDownParam) => {},
 });
 
-/**
- * 先强制类型转换，因为只用了factory部分功能，可以考虑优化写法
- */
 export let ModalContext = contextObj;
 
 export let ModalProvider = function ModalProvider(Props: { children: any }) {
@@ -73,6 +70,7 @@ export let ModalProvider = function ModalProvider(Props: { children: any }) {
         onHide={modalState.onCancel}
         onCancel={modalState.onCancel}
         onConfirm={modalState.onConfirm}
+        title={modalState.title || undefined}
         btn={modalState.btn || undefined}
       >
         {modalState.content}

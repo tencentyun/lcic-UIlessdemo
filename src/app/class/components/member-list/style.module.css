@@ -33,6 +33,7 @@
   left: 0px;
 }
 
+.call-icon,
 .kickout-icon {
   background-image: url(img/kickout.svg);
   background-repeat: no-repeat;
@@ -47,4 +48,15 @@
   display: inline-block;
   vertical-align: middle;
   margin-left: 10px;
+}
+
+
+.call-icon{
+  background-image: url(../settings/img/call.svg);
+  background-size: contain;
+  margin-right: 20px;
+}
+.red-icon{
+  background-color: red;
+  border-radius: 50%;
 }

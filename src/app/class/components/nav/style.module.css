@@ -54,3 +54,16 @@
   color: #cfd4e5;
   margin-left: 5px;
 }
+.right-wrap{
+  position: relative;
+}
+
+.red{
+  background-color: #ff0f00;
+  width: 10px;
+  height: 10px;
+  border-radius: 10px;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}

@@ -27,17 +27,26 @@ let contextObj = contextFactory(
   {
     defaultVal: {
       /**
-       * boot为全局bootstrap对象
+       * 全局bootstrap对象
        */
       boot: null as any,
       /**
-       * tcic登陆
+       * 已登陆的业务对象
        */
       tcic: null as any,
+      /**
+       * TCIC_SPYSDK引用
+       */
       sdk: null as any,
+      /**
+       * 消息通道
+       * 获取系统消息，和群组互动信息
+       */
       tim: null as any,
-      myInfo: null as MyInfo | null,
-      hostInfo: null as MyInfo | null,
+      /**
+       * trtc客户端
+       */
+      trtcClient: null as any,
     },
   },
 );

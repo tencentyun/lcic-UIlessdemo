@@ -17,7 +17,11 @@ export function contextFactory<
 >(actions: T, opts?: { defaultVal?: S; jsxEL?: any }) {
   const Context = createContext<{
     state: S;
-    dispatch: React.Dispatch<{ type: keyof typeof actions; arg?: any }>;
+    dispatch: React.Dispatch<{
+      type: keyof typeof actions;
+      arg?: any;
+      state?: Partial<S>;
+    }>;
   }>(opts?.defaultVal as any);
   let myRducer = function (
     state: S,
@@ -35,7 +39,7 @@ export function contextFactory<
     throw new Error(`传入了不存在的Action, ${String(actionHandler.type)}`);
   };
 
-  let MyProvider = function (props: { children: any; state: S }) {
+  let MyProvider = function (props: { children: any; state?: S }) {
     const [state, dispatch]: [any, any] = useReducer<any>(
       myRducer,
       opts?.defaultVal,

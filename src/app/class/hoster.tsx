@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { debugFatory } from '../lib';
 import styles from './page.module.css';
+import { BootContext } from '../../../contexts/boot.context';
 let debug = debugFatory('Hoster');
 
 export type MemberStream = {
@@ -12,7 +13,6 @@ export type MemberStream = {
 export function Hoster(Props: {
   children?: any;
   tcic: any;
-  client: any;
   token: string;
   start: boolean;
 }) {
@@ -20,23 +20,24 @@ export function Hoster(Props: {
 
   let info = Props.tcic.myInfo();
   let [isPublished, setPublished] = useState(false);
+  let { state } = useContext(BootContext);
   useEffect(() => {
-    if (Props.client) {
-      Props.client.localPreview({
+    if (state.trtcClient) {
+      state.trtcClient.localPreview({
         view: `${info.userId}`,
         // options: {
         //   objectFit: "",
         // },
       });
     }
-  }, [Props.client]);
+  }, [state.trtcClient]);
   if (!Props.tcic) {
     return;
   }
   let videoPublish = async () => {
     setPublished(true);
     if (isPublished) {
-      Props.client.resumePublish({
+      state.trtcClient.resumePublish({
         target: {
           video: true,
           audio: true,
@@ -54,13 +55,13 @@ export function Hoster(Props: {
     if (needStartClass) {
       await Props.tcic.startClass();
     }
-    Props.client.enterRoom().then(() => {
-      Props.client.localPublish();
+    state.trtcClient.enterRoom().then(() => {
+      state.trtcClient.localPublish();
     });
   };
   let videPause = () => {
-    debug('Props.client:', Props.client);
-    // Props.client.pausePublish({
+    debug('state.trtcClient:', state.trtcClient);
+    // state.trtcClient.pausePublish({
     //   target: {
     //     video: true,
     //     audio: true,

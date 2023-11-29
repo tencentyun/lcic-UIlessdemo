@@ -58,7 +58,7 @@ let fake_counter = 0;
 /**
  * @interface ChatProps
  */
-export function Chat(Props: { children?: any; isHost?: boolean }) {
+export function Chat(Props: { children?: any }) {
   let { state } = useContext(BootContext);
   /**
    * 判断是否初始化成功
@@ -70,21 +70,32 @@ export function Chat(Props: { children?: any; isHost?: boolean }) {
   let [emojiVisible, emojiShow, emojiHide] = useVisible();
   let [timReady, setTimReady] = useState(false);
   let [chatInput, setChatInput] = useState('');
+  let [isHost, setIsHost] = useState(false);
   const MAX_MSG = 200;
+  useEffect(() => {
+    if (state.tcic) {
+      let myInfo = state.tcic.myInfo();
+      let hostInfo = state.tcic.hostInfo();
+      if (myInfo.id === hostInfo.id) {
+        setIsHost(true);
+      }
+    }
+  }, [state.tcic]);
+
   function createMyMsg(msg: string): MessageData {
     // hostInfo.detail.user_name
-    let myInfo = state.myInfo;
+    let myInfo = state.tcic?.myInfo();
     if (!myInfo) {
       throw new Error('myInfo is null');
     }
     debug('myInfo: createMyMsg', myInfo);
     return {
       ID: `faked_${++fake_counter}`,
-      Operator_Account: myInfo.userId,
-      From_Account: myInfo.userId,
+      Operator_Account: myInfo.id,
+      From_Account: myInfo.id,
       GroupId: state.tcic?.classInfo.class_info.room_info.room_id,
       CallbackCommand: 'Group.CallbackAfterSendMsg',
-      NickName: myInfo.detail.nickname,
+      NickName: myInfo.text,
       Type: 'AVChatRoom',
       MsgTime: Date.now(),
       MsgSeq: fake_counter,
@@ -249,7 +260,7 @@ export function Chat(Props: { children?: any; isHost?: boolean }) {
           ref={listEl}
           className={`${styles['message-list']}`}
           style={{
-            bottom: Props.isHost ? '-50px' : '50px',
+            bottom: isHost ? '-20px' : '50px',
           }}
         >
           {inited ? (
@@ -277,7 +288,7 @@ export function Chat(Props: { children?: any; isHost?: boolean }) {
         >
           有{newmsgcounter}条新消息<i className={`${styles['down-icon']}`}></i>
         </div>
-        {Props.isHost ? (
+        {isHost ? (
           <></>
         ) : (
           <>

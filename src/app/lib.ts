@@ -137,15 +137,7 @@ export enum TMemberActionType {
   Sub_Camera = 20,
 }
 
-export type MyInfo = {
-  userId: string;
-  classId: string;
-  roleName: 'student' | 'teacher';
-  detail: {
-    role: RoleName;
-    nickname: string;
-  };
-};
+export type MyInfo = TCIC.Common.Item<any>;
 /**
  * 权限列表
  */
@@ -158,7 +150,7 @@ export function checkUserPermission(
   permissions: PermisionList,
 ) {
   let rolePermissionMap: PermisionList[][] = [[], ['kickOut', 'endClass']];
-  if (rolePermissionMap[userInfo.detail.role].includes(permissions)) {
+  if (rolePermissionMap[userInfo.val.role].includes(permissions)) {
     return true;
   }
 }

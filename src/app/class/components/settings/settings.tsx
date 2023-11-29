@@ -5,6 +5,7 @@ import { SettingList } from '../setting-list/setting-list';
 import { useVisible } from '../../../../../hooks/visible';
 import { RoleName, TMemberActionType, debugFatory } from '@/app/lib';
 import { ModalContext } from '../../../../../contexts/modal.context';
+import { InteractionContext } from '../../../../../contexts/interaction.context';
 let debug = debugFatory('Settings');
 type SettingItem = TCIC.Common.Item<{
   icon: string;
@@ -15,11 +16,8 @@ type SettingItem = TCIC.Common.Item<{
  * @returns
  */
 export function Settings(Props: {
-  role: RoleName | null;
-  trtcClient: any;
-  tcic: any;
   start: boolean; // 是否开始
-  callEnable: boolean; //是否允许连麦
+  onCancel?: any;
 }) {
   let { state } = useContext(BootContext);
   let [settingVisible, settingListShow, settingListHide] = useVisible();
@@ -27,42 +25,44 @@ export function Settings(Props: {
   let [settingList, setSettingList] = useState<SettingItem[]>([]);
   let { showModal, hideModal, showCounterDown } = useContext(ModalContext);
   let [joinCall, setJoingCall] = useState(false);
+  let [callEnable, setCallEnable] = useState(false);
+  let { state: Interactions } = useContext(InteractionContext);
 
   let clickHandler = (item: SettingItem) => {
     let settingHandlerMap: any = {
       call: () => {
         if (!joinCall) {
-          if (Props.trtcClient) {
+          if (state.trtcClient) {
             showModal({
               content: '申请连麦',
               onConfirm: () => {
-                debug('Props.trtcClient:', Props.tcic, Props.trtcClient);
                 // Props.trtcClient.startLocalPreview()
                 hideModal();
                 setJoingCall(true);
-                Props.tcic.memberAction({
-                  classId: Props.tcic.classId,
-                  userId: state.myInfo?.userId,
+                state.tcic.memberAction({
+                  classId: state.tcic.classId,
+                  userId: state.tcic?.myInfo().id,
                   actionType: TMemberActionType.Hand_Up,
                 });
               },
             });
           }
         } else {
-          if (Props.trtcClient) {
+          if (state.trtcClient) {
             showModal({
               content: '取消连麦',
               onConfirm: () => {
-                debug('Props.trtcClient:', Props.tcic, Props.trtcClient);
                 // Props.trtcClient.startLocalPreview()
                 hideModal();
                 setJoingCall(false);
-                Props.tcic.memberAction({
-                  classId: Props.tcic.classId,
-                  userId: state.myInfo?.userId,
-                  actionType: TMemberActionType.Hand_Up_Cancel,
+                state.tcic.memberAction({
+                  classId: state.tcic.classId,
+                  userId: state.tcic?.myInfo().id,
+                  actionType: TMemberActionType.Stage_Down,
                 });
-                Props.trtcClient.unPublish();
+                state.trtcClient.unPublish().then(() => {
+                  Props.onCancel && Props.onCancel();
+                });
               },
             });
           }
@@ -112,11 +112,6 @@ export function Settings(Props: {
   ];
   let hosterList = ['setting', 'share'];
   let audienceList = ['share', 'gift', 'call', 'awesome'];
-  useEffect(() => {
-    if (Props.trtcClient) {
-      debug('Props.trtcClient mounted:', Props.trtcClient);
-    }
-  }, []);
 
   useEffect(() => {
     if (!Props.start) {
@@ -125,7 +120,8 @@ export function Settings(Props: {
        */
       return setSettingList([]);
     }
-    if (Props.role === RoleName.HOSTER) {
+    let myInfo = state.tcic.myInfo();
+    if (myInfo.val.role === RoleName.HOSTER) {
       setSettingList(
         totalSettings.filter((item) => hosterList.includes(item.id)),
       );
@@ -134,61 +130,74 @@ export function Settings(Props: {
         totalSettings.filter((item) => audienceList.includes(item.id)),
       );
     }
-  }, [Props.role, Props.start]);
+  }, [Props.start]);
 
   useEffect(() => {
-    /**
-     * 房主不需要处理
-     */
-    if (Props.role === RoleName.HOSTER) {
-      return;
-    }
-    if (!Props.start) {
-      return;
-    }
-    debug('user Props', Props);
-    /**
-     * 表示此时用户在麦上
-     */
-    if (Props.callEnable) {
-      setJoingCall(true);
-      /**
-       * 进入房间后，如果允许连麦，且已经申请连麦
-       * 则自动推流
-       */
-      Props.trtcClient
-        .localPreview({
-          view: `${state.myInfo?.userId}`,
-          // options: {
-          //   objectFit: "",
-          // },
-        })
-        .then(() => {
-          Props.trtcClient.localPublish();
-        });
-    } else {
-      /**
-       * 表示用户在麦下,或者被踢下麦
-       */
-      setJoingCall(false);
+    debug('Interactions:', Interactions);
+  }, [Interactions]);
 
-      Props.trtcClient.unPublish().catch((e: any) => {
-        /**
-         * 取消发布的错误不影响运行
-         */
-        debug('unPublish error:', e);
-      });
-    }
-  }, [Props.callEnable, Props.start]);
+  // useEffect(() => {
+  //   /**
+  //    * 房主不需要处理
+  //    */
+  //   if (Props.role === RoleName.HOSTER) {
+  //     return;
+  //   }
+  //   if (!Props.start) {
+  //     return;
+  //   }
+  //   debug('user Props', Props);
+  //   /**
+  //    * 表示此时用户在麦上
+  //    */
+  //   if (Props.callEnable) {
+  //     setJoingCall(true);
+  //     /**
+  //      * 进入房间后，如果允许连麦，且已经申请连麦
+  //      * 则自动推流
+  //      */
+  //     Props.trtcClient
+  //       .localPreview({
+  //         view: `${state.myInfo?.userId}`,
+  //         // options: {
+  //         //   objectFit: "",
+  //         // },
+  //       })
+  //       .then(() => {
+  //         Props.trtcClient.localPublish();
+  //       });
+  //   } else {
+  //     /**
+  //      * 表示用户在麦下,或者被踢下麦
+  //      */
+
+  //     /**
+  //      * 表示当前用户正在连麦中,需要被强制踢下线
+  //      */
+  //     if (joinCall) {
+  //       debug('force unPublish');
+  //       Props.trtcClient.unPublish().catch((e: any) => {
+  //         /**
+  //          * 取消发布的错误不影响运行
+  //          */
+  //         debug('unPublish error:', e);
+  //       });
+  //       setJoingCall(false);
+  //     }
+  //     /**
+  //      * 如果当前joinCall为 false表示用户主动取消，不需要反复unPublish
+  //      */
+  //   }
+  // }, [Props.callEnable, Props.start]);
 
   return (
     <>
-      <div className={`container`}>
-        {Props.callEnable ? (
+      <div className="container">
+        {callEnable ? (
           joinCall ? (
             <div className="row">
               <div className="col px-1">
-                <div id={state.myInfo?.userId}></div>
+                <div id={state.tcic.myInfo()?.id}></div>
               </div>
             </div>
           ) : (

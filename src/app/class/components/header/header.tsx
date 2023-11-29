@@ -4,20 +4,11 @@
  */
 import Script from 'next/script';
 import cssModule from './style.module.css';
-import { cache, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Loading } from '../loading/loading';
 import { BootContext } from '../../../../../contexts/boot.context';
-import { RoleName, debugFatory } from '@/app/lib';
+import { debugFatory } from '@/app/lib';
 let debug = debugFatory('Header');
-// type
-// :
-// "main"
-// url
-// :
-// "webrtc://29734.liveplay.myqcloud.com/live/1400313729_326322678_tic_push_user_326322678_168497_main?txSecret=644ab9465ed91dd7f6cfe1a5fc35a1b7&txTime=654B9520"
-// user_id
-// :
-// "tic_push_user_326322678_168497"
 
 /**
  *
@@ -26,8 +17,8 @@ let debug = debugFatory('Header');
  * @returns
  */
 export function AppHeader(Props: {
-  whenReady: any;
-  whenError: any;
+  whenReady?: any;
+  whenError?: any;
   uid: string;
   token: string;
   cid: string;
@@ -43,15 +34,14 @@ export function AppHeader(Props: {
     }
     return () => {
       setReady(false);
-      state.tcic = null;
-      state.hostInfo = null;
-      state.myInfo = null;
-      dispatch({
-        type: 'merge',
-        arg: {
-          ...state,
-        },
-      });
+      // // state.tcic.destroy();
+      // state.tcic = null;
+      // dispatch({
+      //   type: 'merge',
+      //   arg: {
+      //     ...state,
+      //   },
+      // });
       debug('header unmounted');
     };
   }, [Props.uid]);
@@ -66,86 +56,21 @@ export function AppHeader(Props: {
       classId: parseInt(Props.cid, 10),
       token: Props.token,
     });
+    let trtcClient = new state.sdk.createTrtcClient(tcic);
     debug('inited');
+    state.trtcClient = trtcClient;
     state.tcic = tcic;
     state.tim = state.sdk.createTimClient(state.tcic);
-    let roomInfo = tcic.classInfo.class_info.room_info;
-    let hostIsTeacher = tcic.userId === roomInfo.teacher_id;
-    let requestIds = hostIsTeacher
-      ? [tcic.userId]
-      : [tcic.userId, roomInfo.teacher_id];
-
-    tcic.getUserInfoByIds(requestIds).then((users: any) => {
-      /**
-         * {
-    "error_code": 0,
-    "error_msg": "成功",
-    "request_id": "93266ab96bcbf5934b550197540b1c26",
-    "users": [
-        {
-            "user_id": "2YZPKmn5PNVoqrB5rekE2Je8yji",
-            "school_id": 3923193,
-            "nickname": "Audience_826",
-            "avatar": "",
-            "user_origin_id": ""
-        },
-        {
-            "user_id": "2Srao3bzGyRLWIVX6Wg6HhBv1Ao",
-            "school_id": 3923193,
-            "nickname": "teacher8316",
-            "avatar": "",
-            "user_origin_id": ""
-        }
-    ]
-}
-         */
-      debug('users', users);
-      let [myinfo, hostInfo] = users;
-      if (hostIsTeacher) {
-        let myInfoResult: any = {
-          userId: myinfo.user_id,
-          roleName: 'teacher',
-          classId: tcic.classId,
-          detail: {
-            role: RoleName.HOSTER,
-            ...myinfo,
-          },
-        };
-        state.myInfo = myInfoResult;
-        state.hostInfo = myInfoResult;
-      } else {
-        state.myInfo = {
-          userId: myinfo.user_id,
-          roleName: 'student',
-          classId: tcic.classId,
-          detail: {
-            role: RoleName.AUDIENCE,
-            ...myinfo,
-          },
-        };
-        state.hostInfo = {
-          userId: hostInfo.user_id,
-          roleName: 'teacher',
-          classId: tcic.classId,
-          detail: {
-            role: RoleName.AUDIENCE,
-            ...hostInfo,
-          },
-        };
-      }
-      /**
-       * 注意这里时序，保证state更新时，所有信息都已经更新
-       * todo: 时序可以再优化，这里阻塞时间比较长
-       */
-      dispatch({
-        type: 'merge',
-        arg: state,
-      });
-
-      debug('AppHeader tcic: merged', tcic);
-
-      Props.whenReady && Props.whenReady(tcic, state.sdk);
+    /**
+     * dispatch的时序非常重要
+     * 保证SDK 初始化完后才更新，否则容易出现数据无法获取的情况
+     */
+    dispatch({
+      type: 'merge',
+      arg: state,
     });
+
+    Props.whenReady && Props.whenReady(tcic, state.sdk);
   };
   /**
    *
@@ -179,7 +104,6 @@ export function AppHeader(Props: {
         .catch((err: any) => {
           debug(err);
           Props.whenError && Props.whenError(err);
-          // reject(err);
         });
     });
   };
