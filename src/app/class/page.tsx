@@ -92,6 +92,7 @@ export default function Home(Props: { params: any }) {
   useEffect(() => {
     if (state.tcic) {
       let roomInfo: any = state.tcic.classInfo.class_info.room_info;
+      let hostInfo = state.tcic.hostInfo();
       debug('state.tcic.memberInfo:', state.tcic.memberInfo);
       /**
        * 设置房间信息
@@ -107,6 +108,16 @@ export default function Home(Props: { params: any }) {
         },
       });
 
+      let isHostOnline = state.tcic.memberInfo.members.find(
+        (item: any) => item.user_id === hostInfo.id,
+      );
+      let hostNum = isHostOnline ? 1 : 0;
+      debug(
+        'state.tcic.memberInfo.online_number:',
+        state.tcic.memberInfo.online_number,
+        hostNum,
+        hostInfo,
+      );
       /**
        * 设置用户互动信息
        */
@@ -114,6 +125,7 @@ export default function Home(Props: { params: any }) {
         type: 'update',
         state: {
           onlineNum: state.tcic.memberInfo.online_number,
+          onlineAuienceNum: state.tcic.memberInfo.online_number - hostNum,
           onStageMembers: state.tcic.memberInfo.members.map((item: any) => {
             return {
               id: item.user_id,
@@ -156,12 +168,22 @@ export default function Home(Props: { params: any }) {
      */
     // setStart(false);
     debug('unmounted class Page', state.tcic);
-    state.tcic?.destroy();
-    state.tim?.destroy();
-    state.trtcClient.unPublish();
-    state.trtcClient?.destroy();
+    try {
+      state.tcic?.destroy();
+      state.tim?.destroy();
+      state.trtcClient.unPublish();
+      state.trtcClient?.destroy();
+    } catch (err) {
+      debug('leave class Page err', err);
+    }
+    /**
+     * 暂时先简单刷新页面重置状态，保证体验正常
+     */
     setTimeout(() => {
       router.push(`/`);
+      setTimeout(() => {
+        window.location.reload();
+      }, 200);
     }, 300);
   };
 

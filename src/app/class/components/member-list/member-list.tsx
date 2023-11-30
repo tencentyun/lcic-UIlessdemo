@@ -338,7 +338,11 @@ export function MemberList(Props: {
                 )}
               </div>
               {hasKickPermission ? (
-                <div className="col text-end">移出</div>
+                <>
+                  <div className="col text-end">
+                    <span>连麦</span> <span>移出</span>
+                  </div>
+                </>
               ) : (
                 <></>
               )}

@@ -58,6 +58,22 @@ export function SysMsgProvider(Props: { children: any }) {
               member_quit: () => {
                 debug('member_quit:', payload);
               },
+              member_join: () => {
+                debug('member_join:', payload);
+                interationUpdate({
+                  type: 'update',
+                  state: {
+                    onlineNum: InterationState.onlineAuienceNum + 1,
+                    newEnterRoomMembers: payload.data.data.map((item: any) => {
+                      return {
+                        id: item.user_id,
+                        text: item.nickname,
+                        val: item,
+                      };
+                    }),
+                  },
+                });
+              },
               member_online: () => {
                 debug('member_online', payload);
                 let result = payload.data.data.map(
