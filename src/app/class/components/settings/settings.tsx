@@ -97,20 +97,20 @@ export function Settings(Props: {
   };
 
   let totalSettings: SettingItem[] = [
-    {
-      id: 'share',
-      text: '分享',
-      val: {
-        icon: `${style['s-share-icon']}`,
-      },
-    },
-    {
-      id: 'setting',
-      text: '设置',
-      val: {
-        icon: `${style['s-setting-icon']}`,
-      },
-    },
+    // {
+    //   id: 'share',
+    //   text: '分享',
+    //   val: {
+    //     icon: `${style['s-share-icon']}`,
+    //   },
+    // },
+    // {
+    //   id: 'setting',
+    //   text: '设置',
+    //   val: {
+    //     icon: `${style['s-setting-icon']}`,
+    //   },
+    // },
     {
       id: 'call',
       text: '连麦',
@@ -119,13 +119,13 @@ export function Settings(Props: {
       },
     },
 
-    {
-      id: 'gift',
-      text: '赠送礼物',
-      val: {
-        icon: `${style['s-gift-icon']}`,
-      },
-    },
+    // {
+    //   id: 'gift',
+    //   text: '赠送礼物',
+    //   val: {
+    //     icon: `${style['s-gift-icon']}`,
+    //   },
+    // },
     {
       id: 'awesome',
       text: '点赞',
