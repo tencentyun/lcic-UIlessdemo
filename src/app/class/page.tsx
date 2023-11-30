@@ -149,18 +149,32 @@ export default function Home(Props: { params: any }) {
           onClick={() => {
             memberListShow();
           }}
-          key={`${item.id}_${index}_${new Date().getTime()}`}
+          key={`${item.id}_call_${index}_${new Date().getTime()}`}
           styles={{
             bottom: `${350 + index * 54}px`,
           }}
         >{`${item.text}申请连麦`}</Tips>
       );
     });
+    let newEnterRoomMembers = interactionState.newEnterRoomMembers.filter(
+      (item) => myInfo.id !== item.id,
+    );
+    let newResult = newEnterRoomMembers.map((item, index: any) => {
+      return (
+        <Tips
+          key={`${item.id}_chat_${index}_${new Date().getTime()}`}
+          styles={{
+            bottom: `${350 + index * 54}px`,
+          }}
+        >{`${item.text}来了`}</Tips>
+      );
+    });
+    result = result.concat(newResult);
     setTipsArray((preList) => {
       let pre = preList.concat();
       return [...pre, ...result];
     });
-  }, [interactionState.handsUpMembers]);
+  }, [interactionState.handsUpMembers, interactionState.newEnterRoomMembers]);
 
   let leaveRoom = () => {
     /**

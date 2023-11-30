@@ -63,7 +63,7 @@ export function SysMsgProvider(Props: { children: any }) {
                 interationUpdate({
                   type: 'update',
                   state: {
-                    onlineNum: InterationState.onlineAuienceNum + 1,
+                    onlineAuienceNum: InterationState.onlineAuienceNum + 1,
                     newEnterRoomMembers: payload.data.data.map((item: any) => {
                       return {
                         id: item.user_id,

@@ -98,7 +98,8 @@ export function MemberList(Props: {
   let { state: BootState } = useContext(BootContext);
 
   let { state: RoomState } = useContext(RoomContext);
-  let { state: InterationState } = useContext(InteractionContext);
+  let { state: InterationState, dispatch: interationDispatch } =
+    useContext(InteractionContext);
 
   let { showModal, hideModal } = useContext(ModalContext);
 
@@ -153,6 +154,18 @@ export function MemberList(Props: {
           res.members = getValidMembers(res.members, [
             state.hostInfo?.id || '',
           ]);
+
+          /**
+           * 先直接减去host数量,host有可能不在线，
+           * todo 改为更严峻的逻辑计算
+           */
+          interationDispatch({
+            type: 'update',
+            arg: {
+              onlineAuienceNum:
+                res.member_number - res.member_offline_number - 1,
+            },
+          });
 
           updateState(res);
         });
