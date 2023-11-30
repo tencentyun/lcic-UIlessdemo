@@ -91,7 +91,6 @@ export default function Home(Props: { params: any }) {
   let uid = searchParams.get('uid') as string;
   useEffect(() => {
     if (state.tcic) {
-      let hostInfo: MemberInfo = state.tcic.hostInfo();
       let roomInfo: any = state.tcic.classInfo.class_info.room_info;
       debug('state.tcic.memberInfo:', state.tcic.memberInfo);
       /**
@@ -159,6 +158,7 @@ export default function Home(Props: { params: any }) {
     debug('unmounted class Page', state.tcic);
     state.tcic?.destroy();
     state.tim?.destroy();
+    state.trtcClient.unPublish();
     state.trtcClient?.destroy();
     setTimeout(() => {
       router.push(`/`);
@@ -280,13 +280,10 @@ export default function Home(Props: { params: any }) {
                   return;
                 }
                 let canEndClass = false;
-
-                // if (
-                //   state.myInfo &&
-                //   checkUserPermission(state.myInfo, 'endClass')
-                // ) {
-                //   canEndClass = true;
-                // }
+                let myInfo = state.tcic.myInfo();
+                if (myInfo && checkUserPermission(myInfo, 'endClass')) {
+                  canEndClass = true;
+                }
                 /**
                  * 课堂未开始不能结束？
                  */
