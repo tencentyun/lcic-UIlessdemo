@@ -220,6 +220,24 @@ export function MemberList(Props: {
 
   let callUser = (udata: Member, uninvate: boolean = false) => {
     debug('userId', udata);
+    /**
+     * 一次最多邀请一个用户上台
+     */
+    if (!uninvate) {
+      if (InterationState.onStageMembers.length > 1) {
+        showModal({
+          content: `最多只能邀请一个用户连麦,请先将其它用户取消连麦`,
+          onCancel: () => {
+            hideModal();
+          },
+          onConfirm() {
+            hideModal();
+          },
+        });
+        return;
+      }
+    }
+
     showModal({
       content: uninvate
         ? `是否取消与${udata.text}连麦？`

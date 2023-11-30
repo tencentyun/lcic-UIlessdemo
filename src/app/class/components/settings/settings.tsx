@@ -205,10 +205,17 @@ export function Settings(Props: {
       debug('willSHow this', membersOnCalling);
       setRemoteList(membersOnCalling);
       membersOnCalling.forEach((item) => {
-        state.trtcClient.wantedView({
-          view: item.id,
-          userId: item.id,
-        });
+        try {
+          state.trtcClient.wantedView({
+            view: item.id,
+            userId: item.id,
+          });
+        } catch (err) {
+          /**
+           * 切换用户时会出现 dom 时序问题，暂时忽略，不会影响主业务流程
+           */
+          debug('err:', err);
+        }
       });
 
       return;
