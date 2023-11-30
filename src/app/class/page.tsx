@@ -30,7 +30,6 @@ import { SysMsgContext } from '../../../contexts/sysmsg.context';
 import { RoomContext } from '../../../contexts/room.context';
 import { InteractionContext } from '../../../contexts/interaction.context';
 // import VConsole from 'vconsole';
-
 // import { useRouter } from "next/navigation";
 
 // type
@@ -91,7 +90,7 @@ export default function Home(Props: { params: any }) {
   let uid = searchParams.get('uid') as string;
   useEffect(() => {
     if (state.tcic) {
-      let roomInfo: any = state.tcic.classInfo.class_info.room_info;
+      let roomInfo: any = state.tcic.classInfo?.class_info.room_info;
       let hostInfo = state.tcic.hostInfo();
       debug('state.tcic.memberInfo:', state.tcic.memberInfo);
       /**
@@ -103,7 +102,7 @@ export default function Home(Props: { params: any }) {
           startTime: roomInfo.real_start_time * 1000,
           className: roomInfo.name,
           classState: roomInfo.status,
-          classId: `${state.tcic.classInfo.class_info.class_id}`,
+          classId: `${state.tcic.classInfo?.class_info.class_id}`,
           endTime: 0,
         },
       });
@@ -139,7 +138,7 @@ export default function Home(Props: { params: any }) {
   }, [state.tcic]);
 
   useEffect(() => {
-    let myInfo = state.tcic?.myInfo();
+    let myInfo = state.tcic?.myInfo()!;
     let showHandsUpMember = interactionState.handsUpMembers.filter(
       (item) => myInfo.id !== item.id,
     );
@@ -185,7 +184,7 @@ export default function Home(Props: { params: any }) {
     try {
       state.tcic?.destroy();
       state.tim?.destroy();
-      state.trtcClient.unPublish();
+      state.trtcClient?.unPublish();
       state.trtcClient?.destroy();
     } catch (err) {
       debug('leave class Page err', err);
@@ -255,6 +254,7 @@ export default function Home(Props: { params: any }) {
 
   let myRole = RoleName.AUDIENCE;
   if (state.tcic) {
+    debug('state.tcic:', state.tcic);
     myRole = state.tcic.myInfo().val.role;
   }
   let isHost = myRole === RoleName.HOSTER;
@@ -316,7 +316,7 @@ export default function Home(Props: { params: any }) {
                   return;
                 }
                 let canEndClass = false;
-                let myInfo = state.tcic.myInfo();
+                let myInfo = state.tcic?.myInfo();
                 if (myInfo && checkUserPermission(myInfo, 'endClass')) {
                   canEndClass = true;
                 }
@@ -328,7 +328,7 @@ export default function Home(Props: { params: any }) {
                   onConfirm: () => {
                     hideModal();
                     if (canEndClass) {
-                      state.tcic.endClass();
+                      state.tcic?.end();
                     }
                     leaveRoom();
                   },
@@ -349,7 +349,6 @@ export default function Home(Props: { params: any }) {
               {state.tcic ? (
                 isHost ? (
                   <Hoster
-                    tcic={state.tcic}
                     // client={trtcClient}
                     token={token}
                     start={start}

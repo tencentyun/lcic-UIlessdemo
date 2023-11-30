@@ -1,5 +1,3 @@
-declare const TCIC_SPY: any;
-
 declare const bootstrap: any;
 
 declare namespace TCIC {

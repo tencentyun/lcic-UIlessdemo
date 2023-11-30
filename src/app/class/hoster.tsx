@@ -13,37 +13,32 @@ export type MemberStream = {
 
 export function Hoster(Props: {
   children?: any;
-  tcic: any;
   token: string;
   start: boolean;
 }) {
   // debug("tcic", Props.tcic);
 
-  let info = Props.tcic.myInfo();
   let [isPublished, setPublished] = useState(false);
   let { state } = useContext(BootContext);
   let { dispatch: interactionUpdate } = useContext(InteractionContext);
   useEffect(() => {
-    if (state.trtcClient) {
-      state.trtcClient.localPreview({
-        view: `${info.userId}`,
-        // options: {
-        //   objectFit: "",
-        // },
-      });
+    if (state.tcic) {
+      let info = state.tcic?.myInfo()!;
+      if (state.trtcClient) {
+        state.trtcClient.localPreview({
+          view: `${info.id}`,
+          // options: {
+          //   objectFit: "",
+          // },
+        });
+      }
     }
   }, [state.trtcClient]);
-  if (!Props.tcic) {
-    return;
-  }
   let videoPublish = async () => {
     setPublished(true);
     if (isPublished) {
-      state.trtcClient.resumePublish({
-        target: {
-          video: true,
-          audio: true,
-        },
+      state.trtcClient?.resumePublish({
+        target: ['video', 'audio'],
       });
       return;
     }
@@ -51,20 +46,20 @@ export function Hoster(Props: {
      * 判断是否已经开始上课
      */
     let needStartClass = false;
-    if (Props.tcic.classInfo.class_info.room_info.real_start_time === 0) {
+    if (state.tcic?.classInfo?.class_info.room_info.real_start_time === 0) {
       needStartClass = true;
     }
     if (needStartClass) {
-      await Props.tcic.startClass();
+      await state.tcic?.start();
     }
-    state.trtcClient.enterRoom().then(() => {
+    state.trtcClient?.enterRoom().then(() => {
       interactionUpdate({
         type: 'update',
         state: {
           hasEnterTrtcRoom: true,
         },
       });
-      state.trtcClient.localPublish();
+      state.trtcClient?.localPublish();
     });
   };
   let videPause = () => {
@@ -102,10 +97,13 @@ export function Hoster(Props: {
           });
    * 
    */
-  debug('tcic info', info);
+  // debug('tcic info', info);
   return (
     <div className={styles['stream-wrap']}>
-      <div className={styles['stream-view']} id={`${info.userId}`}></div>
+      <div
+        className={styles['stream-view']}
+        id={`${state.tcic?.myInfo().id}`}
+      ></div>
       {Props.children}
     </div>
   );

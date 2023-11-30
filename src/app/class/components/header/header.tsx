@@ -8,6 +8,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Loading } from '../loading/loading';
 import { BootContext } from '../../../../../contexts/boot.context';
 import { debugFatory } from '@/app/lib';
+import { create, createTimClient, createTrtcClient } from '@tcic/watch_sdk';
 let debug = debugFatory('Header');
 
 /**
@@ -27,9 +28,7 @@ export function AppHeader(Props: {
   let { state, dispatch } = useContext(BootContext);
   let [ready, setReady] = useState(false);
   useEffect(() => {
-    let global = window as any;
-    debug('header mounted', Props.uid, ready, global.TCIC_SPY);
-    if (Props.uid && !ready && global.TCIC_SPY) {
+    if (Props.uid && !ready) {
       initBoot('effected ');
     }
     return () => {
@@ -48,19 +47,16 @@ export function AppHeader(Props: {
   let initBoot = async (reson: string) => {
     debug('reson:', reson, Props);
     setReady(true);
-    let global = window as any;
-    state.sdk = global.TCIC_SPY;
     let tcic: any = await initTcic({
-      sdk: state.sdk,
       userId: Props.uid,
       classId: parseInt(Props.cid, 10),
       token: Props.token,
     });
-    let trtcClient = new state.sdk.createTrtcClient(tcic);
+    let trtcClient = createTrtcClient(tcic);
     debug('inited');
     state.trtcClient = trtcClient;
     state.tcic = tcic;
-    state.tim = state.sdk.createTimClient(state.tcic);
+    state.tim = createTimClient(state.tcic!);
     /**
      * dispatch的时序非常重要
      * 保证SDK 初始化完后才更新，否则容易出现数据无法获取的情况
@@ -70,15 +66,7 @@ export function AppHeader(Props: {
       arg: state,
     });
 
-    Props.whenReady && Props.whenReady(tcic, state.sdk);
-  };
-  /**
-   *
-   */
-  let tcicScriptLoaded = async () => {
-    if (!ready) {
-      initBoot('scriptLoaded');
-    }
+    Props.whenReady && Props.whenReady(tcic);
   };
 
   /**
@@ -87,13 +75,12 @@ export function AppHeader(Props: {
    * @returns
    */
   let initTcic = (param: {
-    sdk: any;
     userId: string;
     token: string;
     classId: number;
   }) => {
     debug('inite TCIC---->>>>', param);
-    let tcic = param.sdk.create(param);
+    let tcic = create(param);
     return new Promise((resolve, reject) => {
       tcic
         .init({
@@ -108,13 +95,5 @@ export function AppHeader(Props: {
     });
   };
 
-  return (
-    <header>
-      <Script
-        src={process.env.NEXT_PUBLIC_SDK_URL}
-        onLoad={tcicScriptLoaded}
-      ></Script>
-      {Props.children}
-    </header>
-  );
+  return <header>{Props.children}</header>;
 }

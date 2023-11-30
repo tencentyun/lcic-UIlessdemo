@@ -1,5 +1,6 @@
 import { MyInfo, debugFatory } from '@/app/lib';
 import { contextFactory } from './context-util';
+import { TCIC_IM_TYPE, TCIC_TRTC_TYPE, TCIC_TYPE } from '@tcic/watch_sdk';
 let debug = debugFatory('boot_Context');
 
 /**
@@ -33,20 +34,16 @@ let contextObj = contextFactory(
       /**
        * 已登陆的业务对象
        */
-      tcic: null as any,
-      /**
-       * TCIC_SPYSDK引用
-       */
-      sdk: null as any,
+      tcic: null as InstanceType<TCIC_TYPE> | null,
       /**
        * 消息通道
        * 获取系统消息，和群组互动信息
        */
-      tim: null as any,
+      tim: null as InstanceType<TCIC_IM_TYPE> | null,
       /**
        * trtc客户端
        */
-      trtcClient: null as any,
+      trtcClient: null as InstanceType<TCIC_TRTC_TYPE> | null,
     },
   },
 );
