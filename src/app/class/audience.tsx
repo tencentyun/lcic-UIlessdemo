@@ -22,15 +22,15 @@ export function Audience(Props: {
     /**
      * 互动课
      */
-    trtcClient.enterRoom().then(() => {
+    trtcClient?.enterRoom().then(() => {
       interactionUpdate({
         type: 'update',
         state: {
           hasEnterTrtcRoom: true,
         },
       });
-      streamType.forEach((type) => {
-        trtcClient.wantedView({
+      streamType.forEach((type: any) => {
+        trtcClient?.wantedView({
           view: `${roomInfo.teacher_id}`,
           type,
           userId: roomInfo.teacher_id,
