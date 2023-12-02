@@ -37,3 +37,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 
 npm link 'your/path/to/wach_sdk'
+
+cp -r ./out/* ~/MyWork/nginx-root/next 
