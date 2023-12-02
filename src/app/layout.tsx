@@ -39,7 +39,6 @@ export default function RootLayout({
         state={{
           boot: globalBoot,
           tcic: null,
-          sdk: null,
           tim: null,
           trtcClient: null,
         }}

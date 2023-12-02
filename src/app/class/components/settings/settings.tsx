@@ -37,8 +37,8 @@ export function Settings(Props: {
    * 主动下台
    */
   let downStage = () => {
-    state.tcic.memberAction({
-      classId: state.tcic.classId,
+    state.tcic?.memberAction({
+      classId: `${state.tcic.classId}`,
       userId: state.tcic?.myInfo().id,
       actionType: TMemberActionType.Stage_Down,
     });
@@ -49,7 +49,7 @@ export function Settings(Props: {
       };
     });
     if (published) {
-      state.trtcClient.unPublish();
+      state.trtcClient?.unPublish();
       setPublished(false);
     }
   };
@@ -61,8 +61,8 @@ export function Settings(Props: {
     setCallEnable((pre) => {
       return { ...pre, ready: true };
     });
-    state.tcic.memberAction({
-      classId: state.tcic.classId,
+    state.tcic?.memberAction({
+      classId: `${state.tcic.classId}`,
       userId: state.tcic?.myInfo().id,
       actionType: TMemberActionType.Hand_Up,
     });
@@ -206,7 +206,7 @@ export function Settings(Props: {
       setRemoteList(membersOnCalling);
       membersOnCalling.forEach((item) => {
         try {
-          state.trtcClient.wantedView({
+          state.trtcClient?.wantedView({
             view: item.id,
             userId: item.id,
           });
@@ -222,7 +222,7 @@ export function Settings(Props: {
     }
 
     let checkIfOnStage = () => {
-      let myInfo = state.tcic.myInfo();
+      let myInfo = state.tcic?.myInfo();
       return Interactions.onStageMembers.find((item) => item.id === myInfo.id);
     };
     let onStage = checkIfOnStage();
@@ -289,10 +289,10 @@ export function Settings(Props: {
         setPublished(true);
         state.trtcClient
           .localPreview({
-            view: `${state.tcic.myInfo()?.id}`,
+            view: `${state.tcic?.myInfo()?.id}`,
           })
           .then(() => {
-            state.trtcClient.localPublish();
+            state.trtcClient?.localPublish();
           });
       }
     }
@@ -318,7 +318,7 @@ export function Settings(Props: {
           callEnable.ready ? (
             <div className="row">
               <div className="col px-1">
-                <div id={state.tcic.myInfo()?.id}></div>
+                <div id={state.tcic?.myInfo()?.id}></div>
               </div>
             </div>
           ) : (

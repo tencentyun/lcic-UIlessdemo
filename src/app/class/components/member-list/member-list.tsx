@@ -144,31 +144,26 @@ export function MemberList(Props: {
       /**
        * 暂时先拉一页
        */
-      BootState.tcic
-        .getMembersDetail(RoomState.classId, {
-          page: state.page,
-          limit: state.pageSize,
-        })
-        .then((res: any) => {
-          debug('res.members:', res.members);
-          res.members = getValidMembers(res.members, [
-            state.hostInfo?.id || '',
-          ]);
+      BootState.tcic!.getMembersDetail(RoomState.classId, {
+        page: state.page,
+        limit: state.pageSize,
+      }).then((res: any) => {
+        debug('res.members:', res.members);
+        res.members = getValidMembers(res.members, [state.hostInfo?.id || '']);
 
-          /**
-           * 先直接减去host数量,host有可能不在线，
-           * todo 改为更严峻的逻辑计算
-           */
-          interationDispatch({
-            type: 'update',
-            arg: {
-              onlineAuienceNum:
-                res.member_number - res.member_offline_number - 1,
-            },
-          });
-
-          updateState(res);
+        /**
+         * 先直接减去host数量,host有可能不在线，
+         * todo 改为更严峻的逻辑计算
+         */
+        interationDispatch({
+          type: 'update',
+          arg: {
+            onlineAuienceNum: res.member_number - res.member_offline_number - 1,
+          },
         });
+
+        updateState(res);
+      });
     }
   }, [RoomState.classId]);
 
@@ -218,7 +213,7 @@ export function MemberList(Props: {
           type: 'update',
           arg: updateData,
         });
-        BootState.tcic.memberAction({
+        BootState.tcic!.memberAction({
           classId: RoomState.classId,
           userId: udata.id,
           actionType: 18,
@@ -277,24 +272,22 @@ export function MemberList(Props: {
         /**
          * 先让用户下台，再上台，保证有提示
          */
-        BootState.tcic
-          .memberAction({
-            classId: RoomState.classId,
-            userId: udata.id,
-            actionType: TMemberActionType.Stage_Down,
-          })
-          .finally((res: any) => {
-            if (!uninvate) {
-              /**
-               * todo: 将类型引入到项目
-               **/
-              BootState.tcic.memberAction({
-                classId: RoomState.classId,
-                userId: udata.id,
-                actionType: TMemberActionType.Stage_Up,
-              });
-            }
-          });
+        BootState.tcic!.memberAction({
+          classId: RoomState.classId,
+          userId: udata.id,
+          actionType: TMemberActionType.Stage_Down,
+        }).finally(() => {
+          if (!uninvate) {
+            /**
+             * todo: 将类型引入到项目
+             **/
+            BootState.tcic?.memberAction({
+              classId: RoomState.classId,
+              userId: udata.id,
+              actionType: TMemberActionType.Stage_Up,
+            });
+          }
+        });
       },
     });
   };

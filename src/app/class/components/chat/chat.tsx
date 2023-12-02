@@ -93,7 +93,7 @@ export function Chat(Props: { children?: any }) {
       ID: `faked_${++fake_counter}`,
       Operator_Account: myInfo.id,
       From_Account: myInfo.id,
-      GroupId: state.tcic?.classInfo.class_info.room_info.room_id,
+      GroupId: state.tcic?.classInfo?.class_info.room_info.chat_group!,
       CallbackCommand: 'Group.CallbackAfterSendMsg',
       NickName: myInfo.text,
       Type: 'AVChatRoom',
@@ -133,17 +133,19 @@ export function Chat(Props: { children?: any }) {
       let target = state.tim;
       target.whenReady(() => {
         setTimReady(true);
-        target.getHistoryList().then((data: MessageData[]) => {
-          data.reverse();
-          data.forEach((item, index) => {
-            item.ID = `${item.Operator_Account}_${index}}`;
-          });
-          setMsgList(data);
-          setInited(true);
+        target.getHistoryList().then((data) => {
+          if (data) {
+            data.reverse();
+            data.forEach((item: any, index) => {
+              item.ID = `${item.Operator_Account}_${index}}`;
+            });
+            setMsgList(data as any);
+            setInited(true);
+          }
         });
         target.on('groupMsgReceived', async (msg: any) => {
           debug('groupMsgReceived groupMsgReceived:', msg);
-          let userInfoArr = await state.tcic.getUserInfoByIds([msg.from]);
+          let userInfoArr = await state.tcic?.getUserInfoByIds([msg.from])!;
           let userInfo = userInfoArr[0];
           debug('groupMsgReceived userInfo:', userInfo);
           /**
@@ -248,7 +250,7 @@ export function Chat(Props: { children?: any }) {
         return [...newList];
       });
 
-      state.tim.sendRoomMsg(chatInput);
+      state.tim?.sendRoomMsg(chatInput);
       setChatInput('');
     }
   };

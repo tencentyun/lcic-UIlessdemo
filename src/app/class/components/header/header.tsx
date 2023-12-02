@@ -8,12 +8,14 @@ import { useContext, useEffect, useState } from 'react';
 import { Loading } from '../loading/loading';
 import { BootContext } from '../../../../../contexts/boot.context';
 import { debugFatory } from '@/app/lib';
-import {
-  create,
-  createTimClient,
-  createTrtcClient,
-} from '@tencent/tcic-watch-sdk';
+// import {
+//   create,
+//   createTimClient,
+//   createTrtcClient,
+// } from '@tencent/tcic-watch-sdk';
+type TCIC_SDK = typeof import('@tencent/tcic-watch-sdk');
 let debug = debugFatory('Header');
+let myLib: TCIC_SDK;
 
 /**
  *
@@ -31,36 +33,34 @@ export function AppHeader(Props: {
 }) {
   let { state, dispatch } = useContext(BootContext);
   let [ready, setReady] = useState(false);
+
   useEffect(() => {
-    if (Props.uid && !ready) {
-      initBoot('effected ');
+    if (!myLib && Props.uid && !ready) {
+      /**
+       * 基础不支持服务端渲染时，需要使用异步加载保证浏览器环境下才能加载
+       */
+      let libPromise = import('@tencent/tcic-watch-sdk');
+      libPromise.then((res) => {
+        debug('myLibrary:', res);
+        myLib = res;
+        initBoot(myLib);
+      });
     }
-    return () => {
-      setReady(false);
-      // // state.tcic.destroy();
-      // state.tcic = null;
-      // dispatch({
-      //   type: 'merge',
-      //   arg: {
-      //     ...state,
-      //   },
-      // });
-      debug('header unmounted');
-    };
   }, [Props.uid]);
-  let initBoot = async (reson: string) => {
-    debug('reson:', reson, Props);
+
+  let initBoot = async (sdk: TCIC_SDK) => {
+    // debug('reson:', sdk, Props);
     setReady(true);
-    let tcic: any = await initTcic({
+    let tcic: any = await initTcic(sdk, {
       userId: Props.uid,
       classId: parseInt(Props.cid, 10),
       token: Props.token,
     });
-    let trtcClient = createTrtcClient(tcic);
+    let trtcClient = sdk.createTrtcClient(tcic);
     debug('inited');
     state.trtcClient = trtcClient;
     state.tcic = tcic;
-    state.tim = createTimClient(state.tcic!);
+    state.tim = sdk.createTimClient(state.tcic!);
     /**
      * dispatch的时序非常重要
      * 保证SDK 初始化完后才更新，否则容易出现数据无法获取的情况
@@ -78,13 +78,16 @@ export function AppHeader(Props: {
    * @param param
    * @returns
    */
-  let initTcic = (param: {
-    userId: string;
-    token: string;
-    classId: number;
-  }) => {
+  let initTcic = (
+    sdk: TCIC_SDK,
+    param: {
+      userId: string;
+      token: string;
+      classId: number;
+    },
+  ) => {
     debug('inite TCIC---->>>>', param);
-    let tcic = create(param);
+    let tcic = sdk.create(param);
     return new Promise((resolve, reject) => {
       tcic
         .init({
