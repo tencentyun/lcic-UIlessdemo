@@ -8,7 +8,11 @@ import { useContext, useEffect, useState } from 'react';
 import { Loading } from '../loading/loading';
 import { BootContext } from '../../../../../contexts/boot.context';
 import { debugFatory } from '@/app/lib';
-import { create, createTimClient, createTrtcClient } from '@tcic/watch_sdk';
+import {
+  create,
+  createTimClient,
+  createTrtcClient,
+} from '@tencent/tcic-watch-sdk';
 let debug = debugFatory('Header');
 
 /**

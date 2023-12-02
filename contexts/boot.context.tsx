@@ -1,6 +1,10 @@
 import { MyInfo, debugFatory } from '@/app/lib';
 import { contextFactory } from './context-util';
-import { TCIC_IM_TYPE, TCIC_TRTC_TYPE, TCIC_TYPE } from '@tcic/watch_sdk';
+import {
+  TCIC_IM_TYPE,
+  TCIC_TRTC_TYPE,
+  TCIC_TYPE,
+} from '@tencent/tcic-watch-sdk';
 let debug = debugFatory('boot_Context');
 
 /**
