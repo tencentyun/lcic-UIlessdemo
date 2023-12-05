@@ -24,12 +24,9 @@ npm run dev
 # 项目架构简介
 
 熟悉项目架构前，需要了解nextjs框架预定义[路由结构](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts)和[文件](https://nextjs.org/docs/app/api-reference/file-conventions)。
-阅读完上述内容后，参考此图了解demo代码组织形式：
+阅读完上述内容后，参考此图以了解代码基座业务功能，基础业务功能由于contexts:
 
-
-
-
-
+<img src='docs/contexts.png' />
 
 
 # FAQ
