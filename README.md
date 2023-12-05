@@ -1,41 +1,27 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 无UI版SDK demo
+本demo从[实时互动-教育版](https://cloud.tencent.com/product/lcic)的业务功能SDK集成移动电商版本。
+支持连麦，弹幕，人数管理等功能。临时体验[地址](https://dev-class.qcloudclass.com/next/)。
 
-## Getting Started
 
-First, run the development server:
+# 框架和环境依赖
+- nextjs 14版本 ，支持较灵活的业务开展模式和性能优化方案，静态化部署，SSR渲染，相关[文档](https://nextjs.org/docs)
+- nodejs20，如果本地有多nodejs 环境，建议用`nvm`进行管理，相关[文档](https://github.com/nvm-sh/nvm) 
+- bootstrap，基础样式和响应式功能支持，相关[文档](https://getbootstrap.com/docs/5.3/getting-started/introduction/)
+
+# 开发指南
+> 同时开发watch_sdk，需要链接基础库 `npm link /your/path/watch_sdk`,不开发忽略此条
 
 ```bash
+npm i 
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
+默认启动 8100 端口，可以在`package.json`文件内修改。
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`.env`环境变量文件，目前主要包含以下变量：
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- NEXT_PUBLIC_BASE_PATH：项目访问的基础路径，默认为 `/next`,启动环境后从`http://localhost:8100/next` 路径访问首页
 
 
-npm link 'your/path/to/wach_sdk'
 
-cp -r ./out/* ~/MyWork/nginx-root/next 
+
+
