@@ -20,8 +20,19 @@ npm run dev
 `.env`环境变量文件，目前主要包含以下变量：
 
 - NEXT_PUBLIC_BASE_PATH：项目访问的基础路径，默认为 `/next`,启动环境后从`http://localhost:8100/next` 路径访问首页
+  
+# 项目架构简介
+
+熟悉项目架构前，需要了解nextjs框架预定义[路由结构](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts)和[文件](https://nextjs.org/docs/app/api-reference/file-conventions)。
+阅读完上述内容后，参考此图了解demo代码组织形式：
 
 
 
 
+
+
+
+# FAQ
+
+- 需要注意的是默认写在`app`目录下为服务端组件，代码支持node端渲染，纯浏览器端基础库引入方式参考`bootstrap.min.js`通过外链引入，`npm`包引入方式参考`watch_sdk`。
 
