@@ -1,9 +1,9 @@
 import { MyInfo, debugFatory } from '@/app/lib';
 import { contextFactory } from './context-util';
 import {
-  TCIC_IM_TYPE,
-  TCIC_TRTC_TYPE,
-  TCIC_TYPE,
+  createTrtcClient,
+  create,
+  createTimClient,
 } from '@tencent/tcic-watch-sdk';
 let debug = debugFatory('boot_Context');
 
@@ -38,16 +38,16 @@ let contextObj = contextFactory(
       /**
        * 已登陆的业务对象
        */
-      tcic: null as InstanceType<TCIC_TYPE> | null,
+      tcic: null as Awaited<ReturnType<typeof create>> | null,
       /**
        * 消息通道
        * 获取系统消息，和群组互动信息
        */
-      tim: null as InstanceType<TCIC_IM_TYPE> | null,
+      tim: null as Awaited<ReturnType<typeof createTimClient>> | null,
       /**
        * trtc客户端
        */
-      trtcClient: null as InstanceType<TCIC_TRTC_TYPE> | null,
+      trtcClient: null as Awaited<ReturnType<typeof createTrtcClient>> | null,
     },
   },
 );
