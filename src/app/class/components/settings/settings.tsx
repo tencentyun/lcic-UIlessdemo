@@ -206,9 +206,10 @@ export function Settings(Props: {
       setRemoteList(membersOnCalling);
       membersOnCalling.forEach((item) => {
         try {
-          state.trtcClient?.wantedView({
+          state.trtcClient?.startRemote({
             view: item.id,
             userId: item.id,
+            streamType: 'main',
           });
         } catch (err) {
           /**
@@ -287,13 +288,12 @@ export function Settings(Props: {
       debug('callEnable: will set Call Enable', callEnable);
       if (callEnable.able && callEnable.ready) {
         setPublished(true);
-        state.trtcClient
-          .localPreview({
-            view: `${state.tcic?.myInfo()?.id}`,
-          })
-          .then(() => {
-            state.trtcClient?.localPublish();
-          });
+        state.trtcClient.localPreview({
+          view: `${state.tcic?.myInfo()?.id}`,
+        });
+        // .then(() => {
+        //   state.trtcClient?.localPublish();
+        // });
       }
     }
   }, [callEnable, Interactions.hasEnterTrtcRoom]);

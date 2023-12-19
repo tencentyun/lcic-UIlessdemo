@@ -8,14 +8,11 @@ import { useContext, useEffect, useState } from 'react';
 import { Loading } from '../loading/loading';
 import { BootContext } from '../../../../../contexts/boot.context';
 import { debugFatory } from '@/app/lib';
-// import {
-//   create,
-//   createTimClient,
-//   createTrtcClient,
-// } from '@tencent/tcic-watch-sdk';
+// import * as tcic from '@tencent/tcic-watch-sdk';
 type TCIC_SDK = typeof import('@tencent/tcic-watch-sdk');
+// type TCIC_SDK = any;
 let debug = debugFatory('Header');
-let myLib: TCIC_SDK;
+let myLib: any;
 
 /**
  *
@@ -41,6 +38,7 @@ export function AppHeader(Props: {
        */
       let libPromise = import('@tencent/tcic-watch-sdk');
       libPromise.then((res) => {
+        // const res = tcic;
         debug('myLibrary:', res);
         myLib = res;
         initBoot(myLib);
