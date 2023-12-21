@@ -10,14 +10,11 @@ import { BootContext } from '../../../../../contexts/boot.context';
 import { debugFatory } from '@/app/lib';
 // import * as tcic from '@tencent/tcic-watch-sdk';
 
-import VConsole from 'vconsole';
-
 type TCIC_SDK = typeof import('@tencent/tcic-watch-sdk');
 // type TCIC_SDK = any;
 let debug = debugFatory('Header');
 let myLib: any;
 let libPromise: any;
-let vconsole: any;
 /**
  *
  * @param Props uid 用户ID
@@ -62,9 +59,12 @@ export function AppHeader(Props: {
         }
         if (/(\?|&)vc=1/.test(location.search)) {
           dom.style.display = 'block';
-          vconsole = new VConsole({
-            target: dom,
-          });
+          (async () => {
+            const VConsole: any = await import('vconsole');
+            (window as any).vconsole = new VConsole({
+              target: dom,
+            });
+          })();
         }
       } catch (e) {
         console.error(e);
