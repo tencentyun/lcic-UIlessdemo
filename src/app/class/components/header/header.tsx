@@ -60,7 +60,16 @@ export function AppHeader(Props: {
         if (/(\?|&)vc=1/.test(location.search)) {
           dom.style.display = 'block';
           (async () => {
-            const VConsole: any = await import('vconsole');
+            console.log(
+              '%c [ vconsole import ]-64',
+              'font-size:13px; background:pink; color:#bf2c9f;',
+            );
+            const VConsole: any = (await import('vconsole')).default;
+            console.log(
+              '%c [ vconsole done ]-64',
+              'font-size:13px; background:pink; color:#bf2c9f;',
+              VConsole,
+            );
             (window as any).vconsole = new VConsole({
               target: dom,
             });
