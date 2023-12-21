@@ -10,7 +10,7 @@
     "ssl": "local-ssl-proxy --source 8101 --target 8100"
   },
   "dependencies": {
-    "@tencent/tcic-watch-sdk": "1.0.2",
+    "@tencent/tcic-watch-sdk": "latest",
     "debug": "^4.3.4",
     "local-ssl-proxy": "^2.0.5",
     "next": "14.0.1",
