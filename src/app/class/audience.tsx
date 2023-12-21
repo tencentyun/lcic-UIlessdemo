@@ -29,7 +29,7 @@ export function Audience(Props: {
           hasEnterTrtcRoom: true,
         },
       });
-      streamType.forEach((streamType: string) => {
+      streamType.forEach((streamType: any) => {
         trtcClient?.startRemote({
           view: `${roomInfo.teacher_id}`,
           streamType,
