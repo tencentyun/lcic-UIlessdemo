@@ -9,12 +9,15 @@ import { Loading } from '../loading/loading';
 import { BootContext } from '../../../../../contexts/boot.context';
 import { debugFatory } from '@/app/lib';
 // import * as tcic from '@tencent/tcic-watch-sdk';
+
+import VConsole from 'vconsole';
+
 type TCIC_SDK = typeof import('@tencent/tcic-watch-sdk');
 // type TCIC_SDK = any;
 let debug = debugFatory('Header');
 let myLib: any;
 let libPromise: any;
-
+let vconsole: any;
 /**
  *
  * @param Props uid 用户ID
@@ -33,6 +36,7 @@ export function AppHeader(Props: {
   let [ready, setReady] = useState(false);
 
   useEffect(() => {
+    // 保证只执行一次.
     if (libPromise || myLib) {
       return;
     }
@@ -47,6 +51,24 @@ export function AppHeader(Props: {
         myLib = res;
         initBoot(myLib);
       });
+      const domId = 'qc_vconsole';
+      try {
+        let dom = document.getElementById(domId);
+        if (!dom) {
+          dom = document.createElement('div');
+          dom.setAttribute('id', domId);
+          document.body.appendChild(dom);
+          dom.style.display = 'none';
+        }
+        if (/(\?|&)vc=1/.test(location.search)) {
+          dom.style.display = 'block';
+          vconsole = new VConsole({
+            target: dom,
+          });
+        }
+      } catch (e) {
+        console.error(e);
+      }
     }
   }, [Props.uid, ready]);
 
