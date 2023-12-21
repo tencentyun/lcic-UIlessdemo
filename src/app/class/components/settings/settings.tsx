@@ -204,21 +204,24 @@ export function Settings(Props: {
       });
       debug('willSHow this', membersOnCalling);
       setRemoteList(membersOnCalling);
-      membersOnCalling.forEach((item) => {
-        try {
-          state.trtcClient?.startRemote({
-            view: item.id,
-            userId: item.id,
-            streamType: 'main' as any,
-            tcic: state.tcic,
-          });
-        } catch (err) {
-          /**
-           * 切换用户时会出现 dom 时序问题，暂时忽略，不会影响主业务流程
-           */
-          debug('err:', err);
-        }
-      });
+
+      setTimeout(() => {
+        membersOnCalling.forEach((item) => {
+          try {
+            state.trtcClient?.startRemote({
+              view: item.id,
+              userId: item.id,
+              streamType: 'main' as any,
+              tcic: state.tcic,
+            });
+          } catch (err) {
+            /**
+             * 切换用户时会出现 dom 时序问题，暂时忽略，不会影响主业务流程
+             */
+            debug('err:', err);
+          }
+        });
+      }, 100);
 
       return;
     }
