@@ -13,6 +13,7 @@ type TCIC_SDK = typeof import('@tencent/tcic-watch-sdk');
 // type TCIC_SDK = any;
 let debug = debugFatory('Header');
 let myLib: any;
+let libPromise: any;
 
 /**
  *
@@ -32,19 +33,22 @@ export function AppHeader(Props: {
   let [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!myLib && Props.uid && !ready) {
+    if (libPromise || myLib) {
+      return;
+    }
+    if (Props.uid && !ready) {
       /**
        * 基础不支持服务端渲染时，需要使用异步加载保证浏览器环境下才能加载
        */
-      let libPromise = import('@tencent/tcic-watch-sdk');
-      libPromise.then((res) => {
+      libPromise = import('@tencent/tcic-watch-sdk');
+      libPromise.then((res: any) => {
         // const res = tcic;
         debug('myLibrary:', res);
         myLib = res;
         initBoot(myLib);
       });
     }
-  }, [Props.uid]);
+  }, [Props.uid, ready]);
 
   let initBoot = async (sdk: TCIC_SDK) => {
     // debug('reson:', sdk, Props);
