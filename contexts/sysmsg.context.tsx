@@ -102,6 +102,13 @@ export function SysMsgProvider(Props: { children: any }) {
                 //     return [...pre, ...result];
                 //   });
               },
+              change_member_stream: () => {
+                debug('change_member_stream', payload);
+                state.tcic?.setStreamConfigs(
+                  payload.data.data,
+                  payload.data.stream_list_seq,
+                );
+              },
             };
             eventActionMap[payload.data.action] &&
               eventActionMap[payload.data.action]();
@@ -138,10 +145,9 @@ export function SysMsgProvider(Props: { children: any }) {
         },
         "online_number": 0
     }
-                     * 
+                     *
                      */
               },
-              change_member_stream: () => {},
               class_end: () => {
                 showModal({
                   content: '已结束',

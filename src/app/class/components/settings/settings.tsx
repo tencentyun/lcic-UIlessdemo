@@ -210,6 +210,7 @@ export function Settings(Props: {
             view: item.id,
             userId: item.id,
             streamType: 'main',
+            tcic: state.tcic,
           });
         } catch (err) {
           /**

@@ -34,6 +34,7 @@ export function Audience(Props: {
           view: `${roomInfo.teacher_id}`,
           streamType,
           userId: roomInfo.teacher_id,
+          tcic: state.tcic,
         });
       });
     });
