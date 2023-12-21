@@ -209,7 +209,7 @@ export function Settings(Props: {
           state.trtcClient?.startRemote({
             view: item.id,
             userId: item.id,
-            streamType: 'main',
+            streamType: 'main' as any,
             tcic: state.tcic,
           });
         } catch (err) {
