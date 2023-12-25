@@ -8,9 +8,9 @@ import { useContext, useEffect, useState } from 'react';
 import { Loading } from '../loading/loading';
 import { BootContext } from '../../../../../contexts/boot.context';
 import { debugFatory } from '@/app/lib';
-// import * as tcic from '@tencent/tcic-watch-sdk';
+// import * as tcic from 'tric-sdk-v1';
 
-type TCIC_SDK = typeof import('@tencent/tcic-watch-sdk');
+type TCIC_SDK = typeof import('tric-sdk-v1');
 // type TCIC_SDK = any;
 let debug = debugFatory('Header');
 let myLib: any;
@@ -41,7 +41,7 @@ export function AppHeader(Props: {
       /**
        * 基础不支持服务端渲染时，需要使用异步加载保证浏览器环境下才能加载
        */
-      libPromise = import('@tencent/tcic-watch-sdk');
+      libPromise = import('tric-sdk-v1');
       libPromise.then((res: any) => {
         // const res = tcic;
         debug('myLibrary:', res);
