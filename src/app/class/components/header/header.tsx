@@ -8,15 +8,13 @@ import { useContext, useEffect, useState } from 'react';
 import { Loading } from '../loading/loading';
 import { BootContext } from '../../../../../contexts/boot.context';
 import { debugFatory } from '@/app/lib';
-// import {
-//   create,
-//   createTimClient,
-//   createTrtcClient,
-// } from '@tencent/tcic-watch-sdk';
-type TCIC_SDK = typeof import('@tencent/tcic-watch-sdk');
-let debug = debugFatory('Header');
-let myLib: TCIC_SDK;
+// import * as tcic from '@tencent/tcic-watch-sdk';
 
+type TCIC_SDK = typeof import('@tencent/tcic-watch-sdk');
+// type TCIC_SDK = any;
+let debug = debugFatory('Header');
+let myLib: any;
+let libPromise: any;
 /**
  *
  * @param Props uid 用户ID
@@ -35,18 +33,53 @@ export function AppHeader(Props: {
   let [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!myLib && Props.uid && !ready) {
+    // 保证只执行一次.
+    if (libPromise || myLib) {
+      return;
+    }
+    if (Props.uid && !ready) {
       /**
        * 基础不支持服务端渲染时，需要使用异步加载保证浏览器环境下才能加载
        */
-      let libPromise = import('@tencent/tcic-watch-sdk');
-      libPromise.then((res) => {
+      libPromise = import('@tencent/tcic-watch-sdk');
+      libPromise.then((res: any) => {
+        // const res = tcic;
         debug('myLibrary:', res);
         myLib = res;
         initBoot(myLib);
       });
+      const domId = 'qc_vconsole';
+      try {
+        let dom = document.getElementById(domId);
+        if (!dom) {
+          dom = document.createElement('div');
+          dom.setAttribute('id', domId);
+          document.body.appendChild(dom);
+          dom.style.display = 'none';
+        }
+        if (/(\?|&)vc=1/.test(location.search)) {
+          dom.style.display = 'block';
+          (async () => {
+            console.log(
+              '%c [ vconsole import ]-64',
+              'font-size:13px; background:pink; color:#bf2c9f;',
+            );
+            const VConsole: any = (await import('vconsole')).default;
+            console.log(
+              '%c [ vconsole done ]-64',
+              'font-size:13px; background:pink; color:#bf2c9f;',
+              VConsole,
+            );
+            (window as any).vconsole = new VConsole({
+              target: dom,
+            });
+          })();
+        }
+      } catch (e) {
+        console.error(e);
+      }
     }
-  }, [Props.uid]);
+  }, [Props.uid, ready]);
 
   let initBoot = async (sdk: TCIC_SDK) => {
     // debug('reson:', sdk, Props);

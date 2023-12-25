@@ -204,19 +204,23 @@ export function Settings(Props: {
       });
       debug('willSHow this', membersOnCalling);
       setRemoteList(membersOnCalling);
-      membersOnCalling.forEach((item) => {
-        try {
-          state.trtcClient?.wantedView({
-            view: item.id,
-            userId: item.id,
-          });
-        } catch (err) {
-          /**
-           * 切换用户时会出现 dom 时序问题，暂时忽略，不会影响主业务流程
-           */
-          debug('err:', err);
-        }
-      });
+
+      setTimeout(() => {
+        membersOnCalling.forEach((item) => {
+          try {
+            state.trtcClient?.startRemote({
+              view: item.id,
+              userId: item.id,
+              streamType: 'main' as any,
+            });
+          } catch (err) {
+            /**
+             * 切换用户时会出现 dom 时序问题，暂时忽略，不会影响主业务流程
+             */
+            debug('err:', err);
+          }
+        });
+      }, 100);
 
       return;
     }
@@ -287,13 +291,12 @@ export function Settings(Props: {
       debug('callEnable: will set Call Enable', callEnable);
       if (callEnable.able && callEnable.ready) {
         setPublished(true);
-        state.trtcClient
-          .localPreview({
-            view: `${state.tcic?.myInfo()?.id}`,
-          })
-          .then(() => {
-            state.trtcClient?.localPublish();
-          });
+        state.trtcClient.localPreview({
+          view: `${state.tcic?.myInfo()?.id}`,
+        });
+        // .then(() => {
+        //   state.trtcClient?.localPublish();
+        // });
       }
     }
   }, [callEnable, Interactions.hasEnterTrtcRoom]);

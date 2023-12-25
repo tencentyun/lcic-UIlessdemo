@@ -59,7 +59,7 @@ export function Hoster(Props: {
           hasEnterTrtcRoom: true,
         },
       });
-      state.trtcClient?.localPublish();
+      // state.trtcClient?.localPublish();
     });
   };
   let videPause = () => {
@@ -95,7 +95,7 @@ export function Hoster(Props: {
    *     trtcClient.resumePublish({
             target: opts.multimedia,
           });
-   * 
+   *
    */
   // debug('tcic info', info);
   return (
