@@ -1,6 +1,6 @@
 import { MyInfo, debugFatory } from '@/app/lib';
 import { contextFactory } from './context-util';
-import { createTrtcClient, create, createTimClient } from 'tcic-watch-sdk';
+import { createTrtcClient, create, createTimClient } from 'tric-sdk-v1';
 let debug = debugFatory('boot_Context');
 
 /**
