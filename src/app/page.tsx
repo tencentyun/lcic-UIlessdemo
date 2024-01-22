@@ -151,7 +151,7 @@ export default function Home() {
                     className={`btn btn-primary `}
                     onClick={enterRoomHandler}
                   >
-                    加入
+                    Join
                   </button>
                 </>
               ) : (
