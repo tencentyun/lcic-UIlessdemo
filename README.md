@@ -25,8 +25,9 @@ The ` .env ` environment variable file currently mainly includes the following v
   
 # Project Architecture
 
-熟悉项目架构前，需要了解nextjs框架预定义[路由结构](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts)和[文件](https://nextjs.org/docs/app/api-reference/file-conventions)。
-阅读完上述内容后，参考此图以了解代码基座业务功能，基础业务功能由于contexts:
+Before becoming familiar with the project architecture, it is necessary to understand the predefined routing structure of the nextjs framework（ https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts ）And [document]（ https://nextjs.org/docs/app/api-reference/file-conventions ）.
+
+After reading the above content, refer to this figure to understand the business functions of the code base. The basic business functions are due to context:
 
 <img src='docs/contexts.png' />
 
@@ -34,6 +35,18 @@ The ` .env ` environment variable file currently mainly includes the following v
 # FAQ
 
 - It should be noted that by default, it is written in the `app` directory as a server-side component. The code supports node-side rendering. For the pure browser-side basic library introduction method, refer to `bootstrap.min.js` through external links and `npm` package introduction method. See `watch_sdk`.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
