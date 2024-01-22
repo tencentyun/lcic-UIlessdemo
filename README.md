@@ -1,3 +1,46 @@
+# UI-less SDK demo
+
+本demo从[实时互动-教育版](https://cloud.tencent.com/product/lcic)的业务功能SDK集成移动电商版本。
+This demo starts from [Real time Interaction - Education Edition]（ https://www.tencentcloud.com/document/product/1168/53651 ) Integrated mobile e-commerce version of the business function SDK.
+Supports functions such as microphone connection, barrage, and number management. Temporary experience [link](https://dev-class.qcloudclass.com/next/)。
+
+
+# Framework and environmental dependencies
+- nextjs 14+ ，Supporting flexible business development modes and performance optimization solutions, static deployment, SSR rendering, reference [documents](https://nextjs.org/docs)
+- nodejs 20，If there are multiple nodejs environments locally, it is recommended to use 'nvm' for management, reference [documents](https://github.com/nvm-sh/nvm) 
+- bootstrap，Basic style and responsive feature support, reference [documents](https://getbootstrap.com/docs/5.3/getting-started/introduction/)
+
+# Development Guide
+
+```bash
+npm i 
+npm run dev
+```
+By default, port 8100 is started and can be modified in the 'package. json' file.
+
+
+The ` .env ` environment variable file currently mainly includes the following variables:
+
+- NEXT_PUBLIC_BASE_PATH：The base path for project access, which defaults to `/next`, `http://localhost:8100/next` 
+  
+# Project Architecture
+
+熟悉项目架构前，需要了解nextjs框架预定义[路由结构](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts)和[文件](https://nextjs.org/docs/app/api-reference/file-conventions)。
+阅读完上述内容后，参考此图以了解代码基座业务功能，基础业务功能由于contexts:
+
+<img src='docs/contexts.png' />
+
+
+# FAQ
+
+- It should be noted that by default, it is written in the `app` directory as a server-side component. The code supports node-side rendering. For the pure browser-side basic library introduction method, refer to `bootstrap.min.js` through external links and `npm` package introduction method. See `watch_sdk`.
+
+
+
+
+# 中文版
+
+
 # 无UI版SDK demo
 本demo从[实时互动-教育版](https://cloud.tencent.com/product/lcic)的业务功能SDK集成移动电商版本。
 支持连麦，弹幕，人数管理等功能。临时体验[地址](https://dev-class.qcloudclass.com/next/)。
