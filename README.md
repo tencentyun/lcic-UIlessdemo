@@ -1,6 +1,6 @@
 # UI-less SDK demo
 
-本demo从[实时互动-教育版](https://cloud.tencent.com/product/lcic)的业务功能SDK集成移动电商版本。
+
 This demo starts from [Real time Interaction - Education Edition]（ https://www.tencentcloud.com/document/product/1168/53651 ) Integrated mobile e-commerce version of the business function SDK.
 Supports functions such as microphone connection, barrage, and number management. Temporary experience [link](https://dev-class.qcloudclass.com/next/)。
 
