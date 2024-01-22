@@ -73,16 +73,16 @@ export default function Home() {
   }>[] = [
     {
       id: RoleName.AUDIENCE,
-      text: '观众',
+      text: 'Audience',
       val: {
-        placeHolder: '输入房间号',
+        placeHolder: 'Input your room number',
       },
     },
     {
       id: RoleName.HOSTER,
-      text: '房主',
+      text: 'Hoster',
       val: {
-        placeHolder: '输入昵称',
+        placeHolder: 'Input your nick name',
       },
     },
   ];
@@ -187,7 +187,7 @@ export default function Home() {
                     className={`btn btn-primary`}
                     onClick={createRoomHandler}
                   >
-                    {creatingRoom ? '创建中...' : '创建'}
+                    {creatingRoom ? 'Creating...' : 'Create'}
                   </button>
                 </>
               )}
