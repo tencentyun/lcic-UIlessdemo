@@ -27,7 +27,9 @@ The ` .env ` environment variable file currently mainly includes the following v
 
 Before becoming familiar with the project architecture, it is necessary to understand the predefined routing structure of the nextjs framework（ https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts ）And [document]（ https://nextjs.org/docs/app/api-reference/file-conventions ）.
 
-After reading the above content, refer to this figure to understand the business functions of the code base. The basic business functions are due to context
+After reading the above content, refer to this figure to understand the business functions of the code base. The basic business functions are due to context:
+
+<img src='docs/contexts-en.png' />
 
 
 # FAQ
