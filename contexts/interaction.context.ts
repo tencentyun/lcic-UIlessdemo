@@ -3,7 +3,7 @@
  */
 import { TClassStatus, debugFatory } from '@/app/lib';
 import { contextFactory } from './context-util';
-let debug = debugFatory('Permission_Context');
+let debug = debugFatory('Interaction_Context');
 // type RoomContextType = {};
 let contextObj = contextFactory(
   {
@@ -19,7 +19,7 @@ let contextObj = contextFactory(
        * 合并所有初始值
        */
       result = { ...result, ...newObj };
-      debug('update: result', result);
+      debug('InteractionContext: result', result);
       return result;
     },
   },

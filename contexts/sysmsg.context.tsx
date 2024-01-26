@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect } from 'react';
 import { BootContext } from './boot.context';
-import { RoleName, debugFatory } from '@/app/lib';
+import { RoleName, TMemberActionType, debugFatory } from '@/app/lib';
 import { ModalContext } from './modal.context';
 import { RoomContext } from './room.context';
 import { InteractionContext } from './interaction.context';
@@ -57,6 +57,28 @@ export function SysMsgProvider(Props: { children: any }) {
             let eventActionMap: any = {
               member_quit: () => {
                 debug('member_quit:', payload);
+                // 取消连麦
+                let result = payload.data.data.map(
+                  (
+                    item: {
+                      avatar: string;
+                      nickname: string;
+                      user_id: string;
+                    },
+                    index: any,
+                  ) => {
+                    console.log(
+                      '%c [ item ]-73',
+                      'font-size:13px; background:pink; color:#bf2c9f;',
+                      item,
+                    );
+                    state.tcic!.memberAction({
+                      classId: String(state.tcic!.classId),
+                      userId: item.user_id,
+                      actionType: TMemberActionType.Stage_Down,
+                    });
+                  },
+                );
               },
               member_join: () => {
                 debug('member_join:', payload);
@@ -101,6 +123,26 @@ export function SysMsgProvider(Props: { children: any }) {
                 //     let pre = preList.concat();
                 //     return [...pre, ...result];
                 //   });
+              },
+              member_offline: () => {
+                debug('member_offline', payload);
+                // 取消连麦
+                let result = payload.data.data.map(
+                  (
+                    item: {
+                      avatar: string;
+                      nickname: string;
+                      user_id: string;
+                    },
+                    index: any,
+                  ) => {
+                    state.tcic!.memberAction({
+                      classId: String(state.tcic!.classId),
+                      userId: item.user_id,
+                      actionType: TMemberActionType.Stage_Down,
+                    });
+                  },
+                );
               },
               change_member_stream: () => {
                 debug('change_member_stream', payload);

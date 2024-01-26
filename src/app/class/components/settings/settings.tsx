@@ -20,18 +20,21 @@ export function Settings(Props: {
   start: boolean; // 是否开始
   onCancel?: any;
 }) {
-  let { state } = useContext(BootContext);
-  let [settingVisible, settingListShow, settingListHide] = useVisible();
-  let [shareVisible, shareShow, shareHide] = useVisible();
-  let [published, setPublished] = useState(false);
-  let [remoteList, setRemoteList] = useState([] as RemoteItem[]);
-  let [settingList, setSettingList] = useState<SettingItem[]>([]);
-  let { showModal, hideModal, showCounterDown } = useContext(ModalContext);
-  let [callEnable, setCallEnable] = useState({
+  const { state } = useContext(BootContext);
+  const [settingVisible, settingListShow, settingListHide] = useVisible();
+  const [shareVisible, shareShow, shareHide] = useVisible();
+  const [published, setPublished] = useState(false);
+  const [remoteList, setRemoteList] = useState([] as RemoteItem[]);
+  const [settingList, setSettingList] = useState<SettingItem[]>([]);
+  const { showModal, hideModal, showCounterDown } = useContext(ModalContext);
+  const [callEnable, setCallEnable] = useState({
     able: false, //远端是否允许上麦
     ready: false, //本地上麦意愿
   });
-  let { state: Interactions } = useContext(InteractionContext);
+  const { state: Interactions } = useContext(InteractionContext);
+
+  const [audioStatus, setAudioStatus] = useState<boolean>(false);
+  const [videoStatus, setVideoStatus] = useState<boolean>(false);
 
   /**
    * 主动下台
@@ -49,7 +52,8 @@ export function Settings(Props: {
       };
     });
     if (published) {
-      state.trtcClient?.unPublish();
+      // state.trtcClient?.unPublish();
+      state.trtcClient?.stopLocalPreview();
       setPublished(false);
     }
   };
@@ -67,8 +71,8 @@ export function Settings(Props: {
       actionType: TMemberActionType.Hand_Up,
     });
   };
-  let clickHandler = (item: SettingItem) => {
-    let settingHandlerMap: any = {
+  const clickHandler = (item: SettingItem) => {
+    const settingHandlerMap: any = {
       call: () => {
         if (!callEnable.ready) {
           if (state.trtcClient) {
@@ -90,6 +94,26 @@ export function Settings(Props: {
               },
             });
           }
+        }
+      },
+      video: () => {
+        if (!state.trtcClient) {
+          return;
+        }
+        if (videoStatus) {
+          state.trtcClient.mute({ target: ['video'] });
+        } else {
+          state.trtcClient.unmute({ target: ['video'] });
+        }
+      },
+      audio: () => {
+        if (!state.trtcClient) {
+          return;
+        }
+        if (audioStatus) {
+          state.trtcClient.mute({ target: ['audio'] });
+        } else {
+          state.trtcClient.unmute({ target: ['audio'] });
         }
       },
     };
@@ -127,6 +151,20 @@ export function Settings(Props: {
     //   },
     // },
     {
+      id: 'video',
+      text: '视频',
+      val: {
+        icon: `${style['s-video-icon']}`,
+      },
+    },
+    {
+      id: 'audio',
+      text: '音频',
+      val: {
+        icon: `${style['s-audio-icon']}`,
+      },
+    },
+    {
       id: 'awesome',
       text: '点赞',
       val: {
@@ -134,8 +172,8 @@ export function Settings(Props: {
       },
     },
   ];
-  let hosterList = ['setting', 'share'];
-  let audienceList = ['share', 'gift', 'call', 'awesome'];
+  let hosterList = ['setting', 'share', 'video', 'audio'];
+  let audienceList = ['share', 'gift', 'call', 'awesome', 'video', 'audio'];
 
   useEffect(() => {
     if (!state.tcic) {
@@ -317,25 +355,27 @@ export function Settings(Props: {
         ) : (
           <></>
         )}
-        {callEnable.able ? (
-          callEnable.ready ? (
-            <div className="row">
-              <div className="col px-1">
-                <div id={state.tcic?.myInfo()?.id}></div>
+        {(() => {
+          if (callEnable.able && callEnable.ready) {
+            return (
+              <div className="row">
+                <div className="col px-1">
+                  <div id={state.tcic?.myInfo()?.id}></div>
+                </div>
               </div>
-            </div>
-          ) : (
-            <></>
-          )
-        ) : callEnable.ready ? (
-          <div className="row">
-            <div className="col px-1">
-              <div className={`${style['waiting']}`}>连麦申请中..</div>
-            </div>
-          </div>
-        ) : (
-          <></>
-        )}
+            );
+          }
+          if (callEnable.ready) {
+            return (
+              <div className="row">
+                <div className="col px-1">
+                  <div className={`${style['waiting']}`}>连麦申请中..</div>
+                </div>
+              </div>
+            );
+          }
+          return null;
+        })()}
 
         <div className="row">
           {settingList.map((item) => {
@@ -348,6 +388,8 @@ export function Settings(Props: {
                         ? style['call-waiting']
                         : ''
                       : undefined
+                  } ${item.id === 'audio' && audioStatus ? 'av-on' : null} ${
+                    item.id === 'video' && videoStatus ? 'av-on' : null
                   }`}
                   onClick={() => clickHandler(item)}
                 ></i>

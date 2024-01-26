@@ -11,7 +11,7 @@ import { InteractionContext } from '../../../../../contexts/interaction.context'
 
 export type Member = TCIC.Common.Item<any>;
 
-let debug = debugFatory('MemberList');
+const debug = debugFatory('MemberList');
 type MemberViewProps = {
   page: number;
   pageSize: number;
@@ -83,27 +83,25 @@ export function MemberList(Props: {
   /**
    * 暂时先不做分页，一次性拉50条数据
    */
-  let [state, dispatch]: [MemberViewProps, Dispatch<ActionParam>] = useReducer(
-    memberReducer,
-    {
+  const [state, dispatch]: [MemberViewProps, Dispatch<ActionParam>] =
+    useReducer(memberReducer, {
       page: 0,
       pageSize: 50,
       members: [],
       total: -1,
       myInfo: null,
       hostInfo: null,
-    } as MemberViewProps,
-  );
+    } as MemberViewProps);
 
-  let { state: BootState } = useContext(BootContext);
+  const { state: BootState } = useContext(BootContext);
 
-  let { state: RoomState } = useContext(RoomContext);
-  let { state: InterationState, dispatch: interationDispatch } =
+  const { state: RoomState } = useContext(RoomContext);
+  const { state: InterationState, dispatch: interationDispatch } =
     useContext(InteractionContext);
 
-  let { showModal, hideModal } = useContext(ModalContext);
+  const { showModal, hideModal } = useContext(ModalContext);
 
-  let [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   /**
    * 初始化用户信息
@@ -122,8 +120,8 @@ export function MemberList(Props: {
   }, [BootState.tcic]);
 
   function updateState(res: any) {
-    let onlineMember = res.total - res.member_offline_number;
-    let updateData = {
+    const onlineMember = res.total - res.member_offline_number;
+    const updateData = {
       members: getValidMembers(res.members, [state.hostInfo?.id]),
       onlineNumber: state.hostInfo ? onlineMember - 1 : onlineMember, //减去host自己
       total: res.total,
@@ -192,7 +190,7 @@ export function MemberList(Props: {
     }
   }, [Props.visible, RoomState]);
 
-  let kickoutUser = (udata: Member) => {
+  const kickoutUser = (udata: Member) => {
     debug('userId', udata);
     showModal({
       content: `确定踢出用户${udata.text}？`,
@@ -201,7 +199,7 @@ export function MemberList(Props: {
       },
       onConfirm() {
         hideModal();
-        let updateData = {
+        const updateData = {
           members: getValidMembers(state.members, [
             state.hostInfo?.id || '',
             udata.id,
@@ -226,28 +224,28 @@ export function MemberList(Props: {
     });
   };
 
-  let callUser = (udata: Member, uninvate: boolean = false) => {
+  const callUser = (udata: Member, uninvite: boolean = false) => {
     debug('userId', udata);
     /**
      * 一次最多邀请一个用户上台
      */
-    if (!uninvate) {
-      if (InterationState.onStageMembers.length > 1) {
-        showModal({
-          content: `最多只能邀请一个用户连麦,请先将其它用户取消连麦`,
-          onCancel: () => {
-            hideModal();
-          },
-          onConfirm() {
-            hideModal();
-          },
-        });
-        return;
-      }
-    }
+    // if (!uninvite) {
+    //   if (InterationState.onStageMembers.length > 1) {
+    //     showModal({
+    //       content: `最多只能邀请一个用户连麦,请先将其它用户取消连麦`,
+    //       onCancel: () => {
+    //         hideModal();
+    //       },
+    //       onConfirm() {
+    //         hideModal();
+    //       },
+    //     });
+    //     return;
+    //   }
+    // }
 
     showModal({
-      content: uninvate
+      content: uninvite
         ? `是否取消与${udata.text}连麦？`
         : `是否邀请${udata.text}连麦？`,
       onCancel: () => {
@@ -255,7 +253,7 @@ export function MemberList(Props: {
       },
       onConfirm() {
         hideModal();
-        // let updateData = {
+        // const updateData = {
         //   members: getValidMembers(state.members, [
         //     roomInfo.teacher_id || '',
         //     udata.id,
@@ -277,7 +275,7 @@ export function MemberList(Props: {
           userId: udata.id,
           actionType: TMemberActionType.Stage_Down,
         }).finally(() => {
-          if (!uninvate) {
+          if (!uninvite) {
             /**
              * todo: 将类型引入到项目
              **/
@@ -292,37 +290,37 @@ export function MemberList(Props: {
     });
   };
 
-  let hasKickPermission = state.myInfo
+  const hasKickPermission = state.myInfo
     ? checkUserPermission(state.myInfo, 'kickOut')
     : false;
-  let memberItem = function (data: Member) {
-    debug('dataL Member', data, Props);
-    if (data.id === state.hostInfo?.id) {
+  const memberItem = function (member: Member) {
+    debug('dataL Member', member, Props);
+    if (member.id === state.hostInfo?.id) {
       return;
     }
-    let text = data.text;
-    if (state.myInfo?.id === data.id) {
-      text = `${data.text}(我)`;
+    let text = member.text;
+    if (state.myInfo?.id === member.id) {
+      text = `${member.text}(我)`;
     }
-    let isHandsUp = InterationState.handsUpMembers.find(
-      (item) => item.id === data.id,
+    const isHandsUp = InterationState.handsUpMembers.find(
+      (item) => item.id === member.id,
     );
     text = `${isHandsUp ? `${text} [申请连麦]` : `${text}`}`;
     let isOnStage = false;
 
-    let isInvated = InterationState.onStageMembers.find(
-      (item) => item.id === data.id,
+    const isInvated = InterationState.onStageMembers.find(
+      (item) => item.id === member.id,
     );
     isOnStage = !!isInvated;
     return (
-      <div className={`${styles['member']}`} key={data.id}>
+      <div className={`${styles['member']}`} key={member.id}>
         {text}
         {hasKickPermission ? (
           <>
             <i
               className={`${styles['kickout-icon']} float-end`}
               onClick={() => {
-                kickoutUser(data);
+                kickoutUser(member);
               }}
             ></i>
 
@@ -331,7 +329,7 @@ export function MemberList(Props: {
                 isOnStage ? styles['red-icon'] : ''
               } float-end`}
               onClick={() => {
-                callUser(data, isOnStage);
+                callUser(member, isOnStage);
               }}
             ></i>
           </>

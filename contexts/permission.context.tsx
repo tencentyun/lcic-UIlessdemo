@@ -20,7 +20,7 @@ let contextObj = contextFactory(
        * 合并所有初始值
        */
       result = { ...result, ...newObj };
-      debug('update: result', result);
+      debug('permission_context: result', result);
       return result;
     },
   },

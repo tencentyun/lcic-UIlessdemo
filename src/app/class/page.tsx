@@ -201,8 +201,8 @@ export default function Home(Props: { params: any }) {
   };
 
   let whenError = (err: any) => {
-    debug('trtcClient:err', err.data);
-    if (err.data.error_code != 0) {
+    debug('trtcClient:err', err?.data);
+    if (err?.data?.error_code) {
       // alert(err.data.error_msg);
       showModal({
         title: `错误码：${err.data.error_code}`,

@@ -119,7 +119,7 @@ export function AppHeader(Props: {
       classId: number;
     },
   ) => {
-    debug('inite TCIC---->>>>', param);
+    debug('init TCIC---->>>>', param);
     let tcic = sdk.create(param);
     return new Promise((resolve, reject) => {
       tcic
