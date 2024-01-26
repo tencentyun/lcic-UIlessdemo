@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useCallback } from 'react';
 import style from './style.module.css';
 import { BootContext } from '../../../../../contexts/boot.context';
 import { SettingList } from '../setting-list/setting-list';
@@ -11,6 +11,62 @@ type SettingItem = TCIC.Common.Item<{
   icon: string;
 }>;
 type RemoteItem = TCIC.Common.Item<any>;
+
+const totalSettings: SettingItem[] = [
+  // {
+  //   id: 'share',
+  //   text: '分享',
+  //   val: {
+  //     icon: `${style['s-share-icon']}`,
+  //   },
+  // },
+  // {
+  //   id: 'setting',
+  //   text: '设置',
+  //   val: {
+  //     icon: `${style['s-setting-icon']}`,
+  //   },
+  // },
+  {
+    id: 'call',
+    text: '连麦',
+    val: {
+      icon: `${style['s-call-icon']}`,
+    },
+  },
+
+  // {
+  //   id: 'gift',
+  //   text: '赠送礼物',
+  //   val: {
+  //     icon: `${style['s-gift-icon']}`,
+  //   },
+  // },
+  {
+    id: 'video',
+    text: '视频',
+    val: {
+      icon: `${style['s-video-icon']}`,
+    },
+  },
+  {
+    id: 'audio',
+    text: '音频',
+    val: {
+      icon: `${style['s-audio-icon']}`,
+    },
+  },
+  {
+    id: 'awesome',
+    text: '点赞',
+    val: {
+      icon: `${style['s-awesome-icon']}`,
+    },
+  },
+];
+const hosterList = ['setting', 'share', 'video', 'audio'];
+const audienceList = ['share', 'gift', 'call', 'awesome', 'video', 'audio'];
+
 /**
  *
  * @param Props
@@ -33,13 +89,14 @@ export function Settings(Props: {
   });
   const { state: Interactions } = useContext(InteractionContext);
 
-  const [audioStatus, setAudioStatus] = useState<boolean>(false);
-  const [videoStatus, setVideoStatus] = useState<boolean>(false);
+  // 默认打开
+  const [audioStatus, setAudioStatus] = useState<boolean>(true);
+  const [videoStatus, setVideoStatus] = useState<boolean>(true);
 
   /**
    * 主动下台
    */
-  let downStage = () => {
+  const downStage = () => {
     state.tcic?.memberAction({
       classId: `${state.tcic.classId}`,
       userId: state.tcic?.myInfo().id,
@@ -61,7 +118,7 @@ export function Settings(Props: {
   /**
    * 申请上台
    */
-  let upStage = () => {
+  const upStage = () => {
     setCallEnable((pre) => {
       return { ...pre, ready: true };
     });
@@ -100,80 +157,33 @@ export function Settings(Props: {
         if (!state.trtcClient) {
           return;
         }
+        let p = Promise.resolve();
         if (videoStatus) {
-          state.trtcClient.mute({ target: ['video'] });
+          p = state.trtcClient.mute({ target: ['video'] });
         } else {
-          state.trtcClient.unmute({ target: ['video'] });
+          p = state.trtcClient.unmute({ target: ['video'] });
         }
+        p.then(() => {
+          setVideoStatus((status) => !status);
+        });
       },
       audio: () => {
         if (!state.trtcClient) {
           return;
         }
+        let p = Promise.resolve();
         if (audioStatus) {
-          state.trtcClient.mute({ target: ['audio'] });
+          p = state.trtcClient.mute({ target: ['audio'] });
         } else {
-          state.trtcClient.unmute({ target: ['audio'] });
+          p = state.trtcClient.unmute({ target: ['audio'] });
         }
+        p.then(() => {
+          setAudioStatus((status) => !status);
+        });
       },
     };
     settingHandlerMap[item.id] && settingHandlerMap[item.id]();
   };
-
-  let totalSettings: SettingItem[] = [
-    // {
-    //   id: 'share',
-    //   text: '分享',
-    //   val: {
-    //     icon: `${style['s-share-icon']}`,
-    //   },
-    // },
-    // {
-    //   id: 'setting',
-    //   text: '设置',
-    //   val: {
-    //     icon: `${style['s-setting-icon']}`,
-    //   },
-    // },
-    {
-      id: 'call',
-      text: '连麦',
-      val: {
-        icon: `${style['s-call-icon']}`,
-      },
-    },
-
-    // {
-    //   id: 'gift',
-    //   text: '赠送礼物',
-    //   val: {
-    //     icon: `${style['s-gift-icon']}`,
-    //   },
-    // },
-    {
-      id: 'video',
-      text: '视频',
-      val: {
-        icon: `${style['s-video-icon']}`,
-      },
-    },
-    {
-      id: 'audio',
-      text: '音频',
-      val: {
-        icon: `${style['s-audio-icon']}`,
-      },
-    },
-    {
-      id: 'awesome',
-      text: '点赞',
-      val: {
-        icon: `${style['s-awesome-icon']}`,
-      },
-    },
-  ];
-  let hosterList = ['setting', 'share', 'video', 'audio'];
-  let audienceList = ['share', 'gift', 'call', 'awesome', 'video', 'audio'];
 
   useEffect(() => {
     if (!state.tcic) {
@@ -224,23 +234,23 @@ export function Settings(Props: {
 
   useEffect(() => {
     debug('onStageMembers .settingList:', settingList);
-    /**
-     * 仅仅当连麦设置项存在时，才需要处理
-     */
-    if (!settingList.find((item) => item.id === 'call')) {
+    {
       if (!state.tcic) {
         return;
       }
-      /**
-       * 这里是房主逻辑
-       */
-      let myInfo = state.tcic.myInfo();
-      let hostInfo = state.tcic.hostInfo();
-      let invalidIds = [myInfo.id, hostInfo.id];
-      let membersOnCalling = Interactions.onStageMembers.filter((item) => {
+
+      const myInfo = state.tcic.myInfo();
+      const hostInfo = state.tcic.hostInfo();
+      const invalidIds = [myInfo.id, hostInfo.id];
+      console.log(
+        '%c [ Interactions.onStageMembers ]-257',
+        'font-size:13px; background:pink; color:#bf2c9f;',
+        Interactions.onStageMembers,
+      );
+      const membersOnCalling = Interactions.onStageMembers.filter((item) => {
         return !invalidIds.includes(item.id);
       });
-      debug('willSHow this', membersOnCalling);
+      debug('membersOnCalling:', membersOnCalling);
       setRemoteList(membersOnCalling);
 
       setTimeout(() => {
@@ -259,19 +269,27 @@ export function Settings(Props: {
           }
         });
       }, 100);
-
+    }
+    /**
+     *  房主不处理后续
+     */
+    if (!settingList.find((item) => item.id === 'call')) {
+      console.log(
+        '%c [ host ]-290',
+        'font-size:13px; background:pink; color:#bf2c9f;',
+      );
       return;
     }
 
-    let checkIfOnStage = () => {
-      let myInfo = state.tcic?.myInfo();
+    const checkIfOnStage = () => {
+      const myInfo = state.tcic?.myInfo();
       return Interactions.onStageMembers.find((item) => item.id === myInfo.id);
     };
-    let onStage = checkIfOnStage();
+    const onStage = checkIfOnStage();
     /**
      * 没有发布流时，如果发现自己被邀请上台，开启连麦流程
      */
-    if (state.tcic && !published) {
+    if (!published) {
       debug(':::', onStage, Props);
       /**
        * 已经开始上课，并且本人在台上，则自动连麦
@@ -315,7 +333,13 @@ export function Settings(Props: {
       downStage();
       setCallEnable({ ready: false, able: false });
     }
-  }, [Interactions.onStageMembers, settingList]);
+  }, [
+    Interactions.onStageMembers,
+    // Interactions.onStageMembers?.length,
+    settingList,
+    // published,
+    // Props.start,
+  ]);
 
   useEffect(() => {
     debug('totalSettings:', settingList);
@@ -343,11 +367,20 @@ export function Settings(Props: {
     <>
       <div className="container">
         {remoteList.length > 0 ? (
-          <div className="row">
+          <div className="row remoteList">
             {remoteList.map((item) => {
               return (
                 <div key={item.id} className="col px-1">
-                  <div id={item.id}></div>
+                  <div
+                    id={item.id}
+                    style={{
+                      backgroundColor: 'black',
+                      backgroundImage: `url('${item.val?.avatar}')`,
+                      color: 'white',
+                    }}
+                  >
+                    {item.text}
+                  </div>
                 </div>
               );
             })}
@@ -358,7 +391,7 @@ export function Settings(Props: {
         {(() => {
           if (callEnable.able && callEnable.ready) {
             return (
-              <div className="row">
+              <div className="row local-preview">
                 <div className="col px-1">
                   <div id={state.tcic?.myInfo()?.id}></div>
                 </div>
@@ -367,7 +400,7 @@ export function Settings(Props: {
           }
           if (callEnable.ready) {
             return (
-              <div className="row">
+              <div className="row call-wating">
                 <div className="col px-1">
                   <div className={`${style['waiting']}`}>连麦申请中..</div>
                 </div>
@@ -379,6 +412,9 @@ export function Settings(Props: {
 
         <div className="row">
           {settingList.map((item) => {
+            const avOn =
+              (item.id === 'audio' && audioStatus) ||
+              (item.id === 'video' && videoStatus);
             return (
               <div key={item.id} className={`col ${style['icon-wrap']} px-1`}>
                 <i
@@ -387,11 +423,10 @@ export function Settings(Props: {
                       ? callEnable.ready
                         ? style['call-waiting']
                         : ''
-                      : undefined
-                  } ${item.id === 'audio' && audioStatus ? 'av-on' : null} ${
-                    item.id === 'video' && videoStatus ? 'av-on' : null
-                  }`}
+                      : ''
+                  } `}
                   onClick={() => clickHandler(item)}
+                  style={avOn ? { backgroundColor: 'red' } : {}}
                 ></i>
               </div>
             );
