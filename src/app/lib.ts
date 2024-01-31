@@ -149,8 +149,15 @@ export function checkUserPermission(
   userInfo: MyInfo,
   permissions: PermisionList,
 ) {
-  let rolePermissionMap: PermisionList[][] = [[], ['kickOut', 'endClass']];
-  if (rolePermissionMap[userInfo.val.role].includes(permissions)) {
+  const rolePermissionMap: PermisionList[][] = [[], ['kickOut', 'endClass']];
+  console.log(
+    '%c [ userInfo.val.role ]-154',
+    'font-size:13px; background:pink; color:#bf2c9f;',
+    userInfo.val,
+  );
+  const arr = rolePermissionMap[userInfo.val.role];
+  if (arr.length && arr.includes(permissions)) {
     return true;
   }
+  return false;
 }
