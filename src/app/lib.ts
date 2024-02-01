@@ -155,8 +155,11 @@ export function checkUserPermission(
     'font-size:13px; background:pink; color:#bf2c9f;',
     userInfo.val,
   );
-  const arr = rolePermissionMap[userInfo.val.role];
-  if (arr.length && arr.includes(permissions)) {
+  if (typeof userInfo.val.role !== 'number') {
+    return false;
+  }
+  const arr = rolePermissionMap[userInfo.val.role || 0];
+  if (Array.isArray(arr) && arr.length && arr.includes(permissions)) {
     return true;
   }
   return false;
