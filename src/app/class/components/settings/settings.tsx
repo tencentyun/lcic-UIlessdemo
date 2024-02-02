@@ -102,6 +102,11 @@ export function Settings(Props: {
       userId: state.tcic?.myInfo().id,
       actionType: TMemberActionType.Stage_Down,
     });
+    state.tcic?.memberAction({
+      classId: `${state.tcic.classId}`,
+      userId: state.tcic?.myInfo().id,
+      actionType: TMemberActionType.Hand_Up_Cancel,
+    });
     setCallEnable((pre) => {
       return {
         ...pre,
@@ -355,10 +360,8 @@ export function Settings(Props: {
         setPublished(true);
         state.trtcClient.localPreview({
           view: `${state.tcic?.myInfo()?.id}`,
+          publish: true,
         });
-        // .then(() => {
-        //   state.trtcClient?.localPublish();
-        // });
       }
     }
   }, [callEnable, Interactions.hasEnterTrtcRoom]);

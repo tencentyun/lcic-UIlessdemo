@@ -284,6 +284,11 @@ export function MemberList(Props: {
               userId: udata.id,
               actionType: TMemberActionType.Stage_Up,
             });
+            BootState.tcic?.memberAction({
+              classId: RoomState.classId,
+              userId: udata.id,
+              actionType: TMemberActionType.Hand_Up_Cancel,
+            });
           }
         });
       },
@@ -302,16 +307,20 @@ export function MemberList(Props: {
     if (state.myInfo?.id === member.id) {
       text = `${member.text}(我)`;
     }
-    const isHandsUp = InterationState.handsUpMembers.find(
-      (item) => item.id === member.id,
-    );
-    text = `${isHandsUp ? `${text} [申请连麦]` : `${text}`}`;
+
     let isOnStage = false;
 
     const isInvated = InterationState.onStageMembers.find(
       (item) => item.id === member.id,
     );
     isOnStage = !!isInvated;
+
+    const isHandsUp =
+      !isOnStage &&
+      InterationState.handsUpMembers.find((item) => item.id === member.id);
+
+    text = `${isHandsUp ? `${text} [申请连麦]` : `${text}`}`;
+
     return (
       <div className={`${styles['member']}`} key={member.id}>
         {text}

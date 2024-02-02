@@ -150,11 +150,6 @@ export function checkUserPermission(
   permissions: PermisionList,
 ) {
   const rolePermissionMap: PermisionList[][] = [[], ['kickOut', 'endClass']];
-  console.log(
-    '%c [ userInfo.val.role ]-154',
-    'font-size:13px; background:pink; color:#bf2c9f;',
-    userInfo.val,
-  );
   if (typeof userInfo.val.role !== 'number') {
     return false;
   }

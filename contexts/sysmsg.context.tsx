@@ -77,6 +77,11 @@ export function SysMsgProvider(Props: { children: any }) {
                       userId: item.user_id,
                       actionType: TMemberActionType.Stage_Down,
                     });
+                    state.tcic!.memberAction({
+                      classId: String(state.tcic!.classId),
+                      userId: item.user_id,
+                      actionType: TMemberActionType.Hand_Up_Cancel,
+                    });
                   },
                 );
               },
@@ -141,6 +146,11 @@ export function SysMsgProvider(Props: { children: any }) {
                       userId: item.user_id,
                       actionType: TMemberActionType.Stage_Down,
                     });
+                    state.tcic!.memberAction({
+                      classId: String(state.tcic!.classId),
+                      userId: item.user_id,
+                      actionType: TMemberActionType.Hand_Up_Cancel,
+                    });
                   },
                 );
               },
@@ -203,23 +213,47 @@ export function SysMsgProvider(Props: { children: any }) {
               eventActionMap[payload.data.action]();
           },
 
+          // 'v1/hand_up': () => {
+          //   //   let resutMembers: MemberHandsUp[] = payload.data.hand_ups;
+          //   debug('v1/hand_up:', payload);
+
+          //   interationUpdate({
+          //     type: 'update',
+          //     state: {
+          //       handsUpMembers: payload.data.hand_ups.map((item: any) => {
+          //         return {
+          //           id: item.user_id,
+          //           text: item.user_name,
+          //           val: item,
+          //         };
+          //       }),
+          //     },
+          //   });
+          // },
+
           /**
            *  用户举手，申请连麦功能
            */
           'v1/hand_up': () => {
             //   let resutMembers: MemberHandsUp[] = payload.data.hand_ups;
             debug('v1/hand_up:', payload);
-
+            const handsUpMembers =
+              payload.data.hand_ups?.map((item: any) => {
+                return {
+                  id: item.user_id,
+                  text: item.user_name,
+                  val: item,
+                };
+              }) || [];
+            console.log(
+              '%c [ handsUpMembers ]-241',
+              'font-size:13px; background:pink; color:#bf2c9f;',
+              handsUpMembers,
+            );
             interationUpdate({
               type: 'update',
               state: {
-                handsUpMembers: payload.data.hand_ups.map((item: any) => {
-                  return {
-                    id: item.user_id,
-                    text: item.user_name,
-                    val: item,
-                  };
-                }),
+                handsUpMembers,
               },
             });
             //   /**
