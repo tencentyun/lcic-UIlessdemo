@@ -72,16 +72,29 @@ export function SysMsgProvider(Props: { children: any }) {
                       'font-size:13px; background:pink; color:#bf2c9f;',
                       item,
                     );
-                    state.tcic!.memberAction({
-                      classId: String(state.tcic!.classId),
-                      userId: item.user_id,
-                      actionType: TMemberActionType.Stage_Down,
-                    });
-                    state.tcic!.memberAction({
-                      classId: String(state.tcic!.classId),
-                      userId: item.user_id,
-                      actionType: TMemberActionType.Hand_Up_Cancel,
-                    });
+
+                    // 只有退出用户是自己时.
+                    if (item.user_id == (state?.tcic?.userId ?? '')) {
+                      state.tcic!.memberAction({
+                        classId: String(state.tcic!.classId),
+                        userId: item.user_id,
+                        actionType: TMemberActionType.Stage_Down,
+                      });
+                      state.tcic!.memberAction({
+                        classId: String(state.tcic!.classId),
+                        userId: item.user_id,
+                        actionType: TMemberActionType.Hand_Up_Cancel,
+                      });
+                      showModal({
+                        content: '您已退出',
+                        onConfirm: () => {
+                          window.close();
+                        },
+                        onCancel: () => {
+                          window.close();
+                        },
+                      });
+                    }
                   },
                 );
               },
