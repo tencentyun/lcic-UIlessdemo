@@ -361,6 +361,7 @@ export function Settings(Props: {
         state.trtcClient.localPreview({
           view: `${state.tcic?.myInfo()?.id}`,
           publish: true,
+          frameRate: 40,
         });
       }
     }
