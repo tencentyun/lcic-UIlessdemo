@@ -28,7 +28,7 @@ export function Hoster(Props: {
         state.trtcClient.localPreview({
           view: `${info.id}`,
           publish: true,
-          frameRate: 30,
+          frameRate: 60,
           // options: {
           //   objectFit: "",
           // },
