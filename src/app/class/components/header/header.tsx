@@ -89,8 +89,10 @@ export function AppHeader(Props: {
       classId: parseInt(Props.cid, 10),
       token: Props.token,
     });
-    let trtcClient = sdk.createTrtcClient(tcic);
+    const useMobileNative = /(\?|&)m=1/.test(location.search);
+    let trtcClient = sdk.createTrtcClient(tcic, useMobileNative);
     debug('inited');
+    await trtcClient.init();
     state.trtcClient = trtcClient;
     state.tcic = tcic;
     state.tim = sdk.createTimClient(state.tcic!);
