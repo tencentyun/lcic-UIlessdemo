@@ -19,6 +19,7 @@ import {
   TClassStatus,
   checkUserPermission,
   debugFatory,
+  RoomType,
 } from '../lib';
 import { InfoNav } from './components/nav/info-nav';
 import { Tips } from './components/chat/tips';
@@ -103,6 +104,7 @@ export default function Home(Props: { params: any }) {
           className: roomInfo.name,
           classState: roomInfo.status,
           classId: `${state.tcic.classInfo?.class_info.class_id}`,
+          roomType: roomInfo.room_type,
           endTime: 0,
         },
       });
@@ -111,12 +113,12 @@ export default function Home(Props: { params: any }) {
         (item: any) => item.user_id === hostInfo.id,
       );
       let hostNum = isHostOnline ? 1 : 0;
-      debug(
-        'state.tcic.memberInfo.online_number:',
-        state.tcic.memberInfo.online_number,
-        hostNum,
-        hostInfo,
-      );
+      // debug(
+      //   'state.tcic.memberInfo.online_number:',
+      //   state.tcic.memberInfo.online_number,
+      //   hostNum,
+      //   hostInfo,
+      // );
       /**
        * 设置用户互动信息
        */
@@ -257,10 +259,23 @@ export default function Home(Props: { params: any }) {
     debug('state.tcic:', state.tcic);
     myRole = state.tcic.myInfo().val.role;
   }
+  let autoStart = false; // 直播课默认自动播放
+  if (roomState.roomType === RoomType.LIVE) {
+    autoStart = true;
+    setTimeout(() => {
+      if (!start) {
+        console.log('auto start....');
+        setStart(true);
+      }
+    }, 1000);
+  }
+  // webrtc://29734.liveplay.myqcloud.com/live/1400313729_302619594_2bQk2owyTzbBGwx0GQfSXnCa2N3_main?txSecret=ca1027057746663e7c96e8bbc731a89c&txTime=66B38D1E
+  // webrtc://29734.liveplay.myqcloud.com/live/1400313729_302619594_2bQk2owyTzbBGwx0GQfSXnCa2N3_main?txSecret=f689870d8f55174fe77164152734ffa8&txTime=66B38CED
   let isHost = myRole === RoleName.HOSTER;
+  const showJoinBtn = start || autoStart;
   let startRover =
     roomState.classState === TClassStatus.Already_Start ? (
-      start ? (
+      showJoinBtn ? (
         <></>
       ) : (
         btnVisible && (

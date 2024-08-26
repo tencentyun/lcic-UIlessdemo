@@ -40,6 +40,7 @@
 .s-awesome-icon,
 .s-video-icon,
 .s-audio-icon,
+.s-speaker-icon,
 .s-share-icon {
   background-image: url('../info-panel/img/share.svg');
   background-size: contain;
@@ -77,6 +78,9 @@
 .s-awesome-icon{
   background-image: url("img/awesome.svg");
   background-position: 9px 9px;
+}
+.s-speaker-icon{
+  background-image: url("img/speaker.png");
 }
 
 

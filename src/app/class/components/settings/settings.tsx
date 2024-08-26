@@ -1,11 +1,12 @@
-import { useContext, useEffect, useState, useCallback } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import style from './style.module.css';
 import { BootContext } from '../../../../../contexts/boot.context';
 import { SettingList } from '../setting-list/setting-list';
 import { useVisible } from '../../../../../hooks/visible';
-import { RoleName, TMemberActionType, debugFatory } from '@/app/lib';
+import { CallState, debugFatory, RoomType, TMemberActionType } from '@/app/lib';
 import { ModalContext } from '../../../../../contexts/modal.context';
 import { InteractionContext } from '../../../../../contexts/interaction.context';
+
 let debug = debugFatory('Settings');
 type SettingItem = TCIC.Common.Item<{
   icon: string;
@@ -56,16 +57,31 @@ const totalSettings: SettingItem[] = [
       icon: `${style['s-audio-icon']}`,
     },
   },
+  // {
+  //   id: 'awesome',
+  //   text: '点赞',
+  //   val: {
+  //     icon: `${style['s-awesome-icon']}`,
+  //   },
+  // },
   {
-    id: 'awesome',
-    text: '点赞',
+    id: 'speaker',
+    text: '静音',
     val: {
-      icon: `${style['s-awesome-icon']}`,
+      icon: `${style['s-speaker-icon']}`,
     },
   },
 ];
 const hosterList = ['setting', 'share', 'video', 'audio'];
-const audienceList = ['share', 'gift', 'call', 'awesome', 'video', 'audio'];
+const audienceList = [
+  'share',
+  'gift',
+  'call',
+  'awesome',
+  'video',
+  'audio',
+  'speaker',
+];
 
 /**
  *
@@ -88,6 +104,7 @@ export function Settings(Props: {
     ready: false, //本地上麦意愿
   });
   const { state: Interactions } = useContext(InteractionContext);
+  let { dispatch: interactionUpdate } = useContext(InteractionContext);
 
   // 默认打开
   const [audioStatus, setAudioStatus] = useState<boolean>(true);
@@ -125,7 +142,7 @@ export function Settings(Props: {
    */
   const upStage = () => {
     setCallEnable((pre) => {
-      return { ...pre, ready: true };
+      return { ...pre, ready: false };
     });
     state.tcic?.memberAction({
       classId: `${state.tcic.classId}`,
@@ -153,6 +170,12 @@ export function Settings(Props: {
               onConfirm: () => {
                 hideModal();
                 downStage();
+                interactionUpdate({
+                  type: 'update',
+                  state: {
+                    callState: CallState.Unready,
+                  },
+                });
               },
             });
           }
@@ -186,16 +209,36 @@ export function Settings(Props: {
           setAudioStatus((status) => !status);
         });
       },
+      speaker: () => {
+        if (!state.tcic || !state.trtcClient) {
+          return;
+        }
+        const hostInfo = state.tcic.hostInfo();
+        const player = state.trtcClient.getTcPlayerInstance({
+          userId: hostInfo.id,
+          streamType: 'main' as any,
+        });
+        if (player) {
+          const isMuted = player.muted();
+          if (isMuted) {
+            player.muted(false);
+          } else {
+            player.muted(true);
+          }
+        }
+      },
     };
     settingHandlerMap[item.id] && settingHandlerMap[item.id]();
   };
 
   useEffect(() => {
-    if (!state.tcic) {
+    if (!state.tcic || !state.tcic.classInfo) {
       return;
     }
     let hostInfo = state.tcic.hostInfo();
     let isHost = state.tcic.userId === hostInfo.id;
+    const isLiveClass =
+      state.tcic.classInfo.class_info?.room_info?.room_type === RoomType.LIVE;
     if (!Props.start) {
       /**
        * 没开始的不展示设置项
@@ -207,9 +250,17 @@ export function Settings(Props: {
         totalSettings.filter((item) => hosterList.includes(item.id)),
       );
     } else {
-      setSettingList(
-        totalSettings.filter((item) => audienceList.includes(item.id)),
-      );
+      if (!isLiveClass) {
+        setSettingList(
+          totalSettings.filter(
+            (item) => audienceList.includes(item.id) && item.id !== 'speaker',
+          ),
+        );
+      } else {
+        setSettingList(
+          totalSettings.filter((item) => audienceList.includes(item.id)),
+        );
+      }
     }
 
     if (isHost) {
@@ -300,6 +351,16 @@ export function Settings(Props: {
        * 已经开始上课，并且本人在台上，则自动连麦
        */
       if (onStage && Props.start) {
+        // 未加入trtc房间， 则先加入
+        // if (!Interactions.hasEnterTrtcRoom) {
+        //   console.log('not in trtc room, join...');
+        //   interactionUpdate({
+        //     type: 'update',
+        //     state: {
+        //       hasEnterTrtcRoom: true,
+        //     },
+        //   });
+        // }
         showModal({
           content: '你被邀请连麦，是否同意',
           onConfirm: () => {
@@ -307,6 +368,12 @@ export function Settings(Props: {
             setCallEnable({
               able: true,
               ready: true,
+            });
+            interactionUpdate({
+              type: 'update',
+              state: {
+                callState: CallState.Ready,
+              },
             });
           },
           onCancel: () => {
@@ -362,6 +429,7 @@ export function Settings(Props: {
           view: `${state.tcic?.myInfo()?.id}`,
           publish: true,
           frameRate: 60,
+          portrait: true,
         });
       }
     }

@@ -88,9 +88,13 @@ export function AppHeader(Props: {
       userId: Props.uid,
       classId: parseInt(Props.cid, 10),
       token: Props.token,
+      playerConf: {
+        autoplay: true, // 自动播放必须静音, 否则会被浏览器阻断
+        muted: true,
+      },
     });
     const useMobileNative = /(\?|&)m=1/.test(location.search);
-    let trtcClient = sdk.createTrtcClient(tcic, useMobileNative);
+    let trtcClient = sdk.createTrtcClient(tcic);
     debug('inited');
     await trtcClient.init();
     state.trtcClient = trtcClient;
@@ -119,6 +123,7 @@ export function AppHeader(Props: {
       userId: string;
       token: string;
       classId: number;
+      playerConf?: any;
     },
   ) => {
     debug('init TCIC---->>>>', param);

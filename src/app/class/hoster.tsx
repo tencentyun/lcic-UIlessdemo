@@ -29,6 +29,7 @@ export function Hoster(Props: {
           view: `${info.id}`,
           publish: true,
           frameRate: 60,
+          portrait: true,
           // options: {
           //   objectFit: "",
           // },

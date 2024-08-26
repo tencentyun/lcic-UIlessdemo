@@ -30,6 +30,7 @@ let contextObj = contextFactory(
       className: '',
       startTime: 0,
       endTime: 0,
+      roomType: 0,
       classState: TClassStatus.Not_Start,
     },
   },

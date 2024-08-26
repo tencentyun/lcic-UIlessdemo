@@ -24,6 +24,16 @@ export const enum RoleName {
   HOSTER,
 }
 
+export const enum CallState {
+  Ready = 'ready',
+  Unready = 'unready',
+}
+
+export const enum RoomType {
+  RTC,
+  LIVE,
+}
+
 /**
  * 课堂状态
  * @enum {number}

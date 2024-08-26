@@ -1,7 +1,7 @@
 /**
  * 当前用户权限上下文
  */
-import { TClassStatus, debugFatory } from '@/app/lib';
+import { debugFatory, CallState} from '@/app/lib';
 import { contextFactory } from './context-util';
 let debug = debugFatory('Interaction_Context');
 // type RoomContextType = {};
@@ -32,6 +32,7 @@ let contextObj = contextFactory(
       onStageMembers: [] as TCIC.Common.Item<any>[], //台上成员列表
       hasEnterTrtcRoom: false, //是否已经进入Trtc房间
       newEnterRoomMembers: [] as TCIC.Common.Item<any>[], //新进入房间的成员
+      callState: CallState.Unready, // 是否连麦就绪 unready ready
     },
   },
 );
