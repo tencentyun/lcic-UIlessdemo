@@ -3,6 +3,7 @@ import styles from './page.module.css';
 import { CallState, debugFatory, RoomType } from '../lib';
 import { BootContext } from '../../../contexts/boot.context';
 import { InteractionContext } from '../../../contexts/interaction.context';
+import { ModalContext } from '../../../contexts/modal.context';
 
 let debug = debugFatory('Audience');
 
@@ -20,6 +21,7 @@ export function Audience(Props: {
   let [callState, setCallState] = useState(CallState.Unready);
   let { dispatch: interactionUpdate } = useContext(InteractionContext);
   const { state: Interactions } = useContext(InteractionContext);
+  const { showModal, hideModal } = useContext(ModalContext);
   let trtcClient = state.trtcClient;
   let roomInfo = Props.tcic?.classInfo.class_info.room_info || {};
   const roomType = roomInfo.room_type; // 0 互动课 1 直播课
@@ -112,11 +114,27 @@ export function Audience(Props: {
             // 第一次播放自动静音， 后面的话可以代码调节不静音
             if (_firstLivePlay) {
               _firstLivePlay = false;
-            } else {
-              if (isMuted) {
-                tcPlayerIns.muted(true);
-              }
             }
+          });
+
+          // tcPlayerIns.on('error', (e: any) => {
+          //   console.error('tc-player is error...', e);
+          // });
+
+          tcPlayerIns.on('blocked', (e: any) => {
+            console.error('tc-player is blocked...', e);
+            // 如果播放被阻止就在这里弹窗处理
+            showModal({
+              content: '直播中断，是否重新播放？',
+              onConfirm: () => {
+                hideModal();
+                tcPlayerIns.pause();
+                tcPlayerIns.play();
+              },
+              onCancel: () => {
+                hideModal();
+              },
+            });
           });
         }
       });

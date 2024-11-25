@@ -47,6 +47,7 @@ export default function RootLayout({
           src={`${process.env.NEXT_PUBLIC_BASE_PATH}/boot/bootstrap.bundle.min.js`}
           onLoad={bootOnload}
         ></Script>
+        <Script src={`https://res.wx.qq.com/open/js/jweixin-1.6.0.js`}></Script>
         <body className={'d-flex flex-column h-100'}>
           <ModalProvider>
             <RoomProvider>

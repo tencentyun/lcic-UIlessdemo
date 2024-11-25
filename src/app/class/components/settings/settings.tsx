@@ -109,6 +109,8 @@ export function Settings(Props: {
   // 默认打开
   const [audioStatus, setAudioStatus] = useState<boolean>(true);
   const [videoStatus, setVideoStatus] = useState<boolean>(true);
+  // 直播声音
+  const [speakerStatus, setSpeakerStatus] = useState<boolean>(false);
 
   /**
    * 主动下台
@@ -193,6 +195,8 @@ export function Settings(Props: {
         }
         p.then(() => {
           setVideoStatus((status) => !status);
+        }).catch((e) => {
+          console.error('trtc video error:', e.message);
         });
       },
       audio: () => {
@@ -207,6 +211,8 @@ export function Settings(Props: {
         }
         p.then(() => {
           setAudioStatus((status) => !status);
+        }).catch((e) => {
+          console.error('trtc audio error:', e.message);
         });
       },
       speaker: () => {
@@ -225,6 +231,7 @@ export function Settings(Props: {
           } else {
             player.muted(true);
           }
+          setSpeakerStatus((status) => !status);
         }
       },
     };
@@ -403,6 +410,12 @@ export function Settings(Props: {
         },
       });
       downStage();
+      interactionUpdate({
+        type: 'update',
+        state: {
+          callState: CallState.Unready,
+        },
+      });
       setCallEnable({ ready: false, able: false });
     }
   }, [
@@ -486,7 +499,8 @@ export function Settings(Props: {
           {settingList.map((item) => {
             const avOn =
               (item.id === 'audio' && audioStatus) ||
-              (item.id === 'video' && videoStatus);
+              (item.id === 'video' && videoStatus) ||
+              (item.id === 'speaker' && speakerStatus);
             return (
               <div key={item.id} className={`col ${style['icon-wrap']} px-1`}>
                 <i
